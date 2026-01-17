@@ -10,9 +10,9 @@
 // Import from core - the ONLY way views should access business logic
 import { api, state, utils, init } from '../../core/index.js';
 
-// Import content
-import commonContent from '../../content/en/common.json' with { type: 'json' };
-import errorsContent from '../../content/en/errors.json' with { type: 'json' };
+// Content will be loaded asynchronously
+let commonContent = null;
+let errorsContent = null;
 
 // =============================================================================
 // DOM References
@@ -26,6 +26,19 @@ const elements = {
   aiSubmit: document.getElementById('ai-submit'),
   aiResponse: document.getElementById('ai-response'),
 };
+
+// =============================================================================
+// Content Loading
+// =============================================================================
+
+async function loadContent() {
+  const [common, errors] = await Promise.all([
+    fetch('../../content/en/common.json').then(r => r.json()),
+    fetch('../../content/en/errors.json').then(r => r.json()),
+  ]);
+  commonContent = common;
+  errorsContent = errors;
+}
 
 // =============================================================================
 // Render Functions
@@ -174,6 +187,10 @@ async function handleAISubmit() {
 
 async function bootstrap() {
   console.log('[App] Bootstrapping...');
+
+  // Load content first
+  await loadContent();
+  console.log('[App] Content loaded');
 
   // Initialize core
   await init();
