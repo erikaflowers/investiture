@@ -85,6 +85,16 @@ function renderHeroActions(user) {
         View Documentation
       </button>
     `;
+
+    // Wire up documentation button
+    document.getElementById('view-docs-btn')?.addEventListener('click', () => {
+      window.location.href = 'docs.html';
+    });
+
+    // Get Started scrolls to demo section
+    document.getElementById('get-started-btn')?.addEventListener('click', () => {
+      document.querySelector('.demo')?.scrollIntoView({ behavior: 'smooth' });
+    });
   } else {
     elements.heroActions.innerHTML = `
       <button class="button button--primary" id="hero-sign-in-btn">
@@ -96,6 +106,11 @@ function renderHeroActions(user) {
     `;
 
     document.getElementById('hero-sign-in-btn')?.addEventListener('click', handleSignIn);
+
+    // Learn More scrolls to features section
+    document.getElementById('learn-more-btn')?.addEventListener('click', () => {
+      document.querySelector('.features')?.scrollIntoView({ behavior: 'smooth' });
+    });
   }
 }
 
