@@ -1,0 +1,372 @@
+// =============================================================================
+// Investiture - Vanilla View Styles
+// =============================================================================
+
+// Import shared utilities
+@import '../../shared/scss/reset';
+@import '../../shared/scss/variables';
+@import '../../shared/scss/mixins';
+@import '../../shared/scss/breakpoints';
+
+// =============================================================================
+// Layout
+// =============================================================================
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: $container-lg;
+  margin: 0 auto;
+  padding: $spacing-lg $spacing-md;
+
+  @include tablet {
+    padding: $spacing-xl $spacing-lg;
+  }
+}
+
+// =============================================================================
+// Skip Link (Accessibility)
+// =============================================================================
+
+.skip-link {
+  @include sr-only-focusable;
+
+  &:focus {
+    position: fixed;
+    top: $spacing-md;
+    left: $spacing-md;
+    z-index: $z-index-tooltip;
+    padding: $spacing-sm $spacing-md;
+    background: $color-accent-primary;
+    color: $color-background-primary;
+    border-radius: $radius-sm;
+  }
+}
+
+// =============================================================================
+// Header
+// =============================================================================
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md $spacing-lg;
+  background: $color-background-secondary;
+  border-bottom: 1px solid $color-border-default;
+
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    @include tablet {
+      flex-direction: row;
+      align-items: baseline;
+      gap: $spacing-md;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-accent-primary;
+    margin: 0;
+  }
+
+  &__tagline {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+  }
+}
+
+// =============================================================================
+// Auth Status
+// =============================================================================
+
+.auth-status {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+
+  &__user {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+
+    @include below-tablet {
+      display: none;
+    }
+  }
+}
+
+// =============================================================================
+// Hero Section
+// =============================================================================
+
+.hero {
+  text-align: center;
+  padding: $spacing-xxl 0;
+
+  &__title {
+    @include heading('xxl');
+    margin-bottom: $spacing-md;
+
+    @include below-tablet {
+      font-size: $font-size-xl;
+    }
+  }
+
+  &__description {
+    @include body-text('lg');
+    color: $color-text-secondary;
+    max-width: 600px;
+    margin: 0 auto $spacing-xl;
+
+    @include below-tablet {
+      font-size: $font-size-md;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: center;
+    gap: $spacing-md;
+    flex-wrap: wrap;
+  }
+}
+
+// =============================================================================
+// Section Title
+// =============================================================================
+
+.section-title {
+  @include heading('xl');
+  text-align: center;
+  margin-bottom: $spacing-xl;
+}
+
+// =============================================================================
+// Features Grid
+// =============================================================================
+
+.features {
+  padding: $spacing-xxl 0;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+
+    @include tablet {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include desktop {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+}
+
+.feature-card {
+  @include card;
+  text-align: center;
+  transition: transform $transition-fast, box-shadow $transition-fast;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg;
+  }
+
+  &__icon {
+    font-size: 2.5rem;
+    margin-bottom: $spacing-md;
+  }
+
+  &__title {
+    @include heading('md');
+    margin-bottom: $spacing-sm;
+  }
+
+  &__description {
+    @include body-text('sm');
+    color: $color-text-secondary;
+  }
+}
+
+// =============================================================================
+// Demo Section
+// =============================================================================
+
+.demo {
+  padding: $spacing-xxl 0;
+
+  &__panels {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+
+    @include tablet {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+.demo-panel {
+  @include card;
+
+  &__title {
+    @include heading('md');
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $color-border-default;
+  }
+
+  &__content {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    background: $color-background-tertiary;
+    padding: $spacing-md;
+    border-radius: $radius-sm;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+// =============================================================================
+// AI Demo
+// =============================================================================
+
+.ai-demo {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.ai-response {
+  min-height: 100px;
+  background: $color-background-tertiary;
+  border-radius: $radius-sm;
+  padding: $spacing-md;
+
+  &__text {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    white-space: pre-wrap;
+
+    &--streaming {
+      &::after {
+        content: '▋';
+        animation: blink 1s infinite;
+      }
+    }
+  }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+// =============================================================================
+// Footer
+// =============================================================================
+
+.footer {
+  padding: $spacing-lg;
+  background: $color-background-secondary;
+  border-top: 1px solid $color-border-default;
+  text-align: center;
+
+  &__text {
+    @include body-text('sm');
+    color: $color-text-muted;
+    margin: 0;
+  }
+}
+
+// =============================================================================
+// Buttons
+// =============================================================================
+
+.button {
+  @include button-reset;
+  @include focus-ring;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-lg;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-md;
+  transition: all $transition-fast;
+
+  &--primary {
+    background: $color-accent-primary;
+    color: $color-background-primary;
+
+    &:hover:not(:disabled) {
+      background: lighten($color-accent-primary, 5%);
+    }
+  }
+
+  &--secondary {
+    background: transparent;
+    color: $color-text-primary;
+    border: 1px solid $color-border-default;
+
+    &:hover:not(:disabled) {
+      background: $color-background-secondary;
+      border-color: $color-text-muted;
+    }
+  }
+
+  &--small {
+    padding: $spacing-xs $spacing-md;
+    font-size: $font-size-sm;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// =============================================================================
+// Form Elements
+// =============================================================================
+
+.input {
+  flex: 1;
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  background: $color-background-tertiary;
+  border: 1px solid $color-border-default;
+  border-radius: $radius-md;
+  transition: border-color $transition-fast;
+
+  &::placeholder {
+    color: $color-text-muted;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $color-border-focus;
+  }
+}

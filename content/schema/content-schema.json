@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Investiture Content Schema",
+  "description": "Schema for validating content files in the Investiture framework",
+  "definitions": {
+    "interpolatedString": {
+      "type": "string",
+      "description": "A string that may contain {{variable}} placeholders for interpolation"
+    },
+    "commonContent": {
+      "type": "object",
+      "required": ["actions", "states", "auth"],
+      "properties": {
+        "actions": {
+          "type": "object",
+          "required": ["submit", "cancel", "save", "delete", "edit", "close", "confirm", "back", "next", "loading", "retry"],
+          "properties": {
+            "submit": { "$ref": "#/definitions/interpolatedString" },
+            "cancel": { "$ref": "#/definitions/interpolatedString" },
+            "save": { "$ref": "#/definitions/interpolatedString" },
+            "delete": { "$ref": "#/definitions/interpolatedString" },
+            "edit": { "$ref": "#/definitions/interpolatedString" },
+            "close": { "$ref": "#/definitions/interpolatedString" },
+            "confirm": { "$ref": "#/definitions/interpolatedString" },
+            "back": { "$ref": "#/definitions/interpolatedString" },
+            "next": { "$ref": "#/definitions/interpolatedString" },
+            "loading": { "$ref": "#/definitions/interpolatedString" },
+            "retry": { "$ref": "#/definitions/interpolatedString" }
+          },
+          "additionalProperties": { "$ref": "#/definitions/interpolatedString" }
+        },
+        "states": {
+          "type": "object",
+          "required": ["empty", "error", "success", "offline"],
+          "properties": {
+            "empty": { "$ref": "#/definitions/interpolatedString" },
+            "error": { "$ref": "#/definitions/interpolatedString" },
+            "success": { "$ref": "#/definitions/interpolatedString" },
+            "offline": { "$ref": "#/definitions/interpolatedString" }
+          },
+          "additionalProperties": { "$ref": "#/definitions/interpolatedString" }
+        },
+        "auth": {
+          "type": "object",
+          "required": ["signIn", "signOut", "signInWith", "signingIn"],
+          "properties": {
+            "signIn": { "$ref": "#/definitions/interpolatedString" },
+            "signOut": { "$ref": "#/definitions/interpolatedString" },
+            "signInWith": { "$ref": "#/definitions/interpolatedString" },
+            "signingIn": { "$ref": "#/definitions/interpolatedString" }
+          },
+          "additionalProperties": { "$ref": "#/definitions/interpolatedString" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "errorsContent": {
+      "type": "object",
+      "required": ["network", "auth", "validation", "generic"],
+      "properties": {
+        "network": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/interpolatedString" }
+        },
+        "auth": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/interpolatedString" }
+        },
+        "validation": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/interpolatedString" }
+        },
+        "generic": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/interpolatedString" }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

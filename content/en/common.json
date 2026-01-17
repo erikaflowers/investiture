@@ -1,0 +1,27 @@
+{
+  "actions": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "retry": "Try again"
+  },
+  "states": {
+    "empty": "Nothing here yet",
+    "error": "Something went wrong",
+    "success": "Success!",
+    "offline": "You're offline"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signInWith": "Sign in with {{provider}}",
+    "signingIn": "Signing in..."
+  }
+}

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Investiture - A decoupled, enterprise-ready application scaffold">
+  <title>Investiture</title>
+
+  <!-- Design System Tokens (CSS Custom Properties) -->
+  <link rel="stylesheet" href="../../design-system/tokens/tokens.css">
+
+  <!-- Compiled Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- App Shell -->
+  <div id="app" class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header__brand">
+        <h1 class="header__title">Investiture</h1>
+        <span class="header__tagline">Core + Shell Architecture</span>
+      </div>
+      <nav class="header__nav">
+        <div class="auth-status" id="auth-status">
+          <!-- Auth status will be rendered by JS -->
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main">
+      <!-- Hero Section -->
+      <section class="hero">
+        <h2 class="hero__title">The Power Beneath Every App</h2>
+        <p class="hero__description">
+          A decoupled scaffold where every layer is hot-swappable.
+          The view doesn't know about the database.
+          The core doesn't know about React.
+        </p>
+        <div class="hero__actions" id="hero-actions">
+          <!-- Actions will be rendered by JS -->
+        </div>
+      </section>
+
+      <!-- Features Grid -->
+      <section class="features">
+        <h3 class="section-title">Architecture Layers</h3>
+        <div class="features__grid">
+          <article class="feature-card">
+            <div class="feature-card__icon">🎨</div>
+            <h4 class="feature-card__title">Design System</h4>
+            <p class="feature-card__description">
+              Tokens, themes, and component definitions.
+              Swap entire visual systems without touching code.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-card__icon">📝</div>
+            <h4 class="feature-card__title">Content Layer</h4>
+            <p class="feature-card__description">
+              All user-facing strings in one place.
+              i18n-ready. CMS-swappable.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-card__icon">⚙️</div>
+            <h4 class="feature-card__title">Core Logic</h4>
+            <p class="feature-card__description">
+              Pure functions and state management.
+              Framework-agnostic. Testable.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-card__icon">🔌</div>
+            <h4 class="feature-card__title">Services</h4>
+            <p class="feature-card__description">
+              Auth, database, AI - all wrapped.
+              Swap Supabase for Firebase in one file.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Demo Section -->
+      <section class="demo">
+        <h3 class="section-title">Live Demo</h3>
+        <div class="demo__panels">
+          <!-- State Panel -->
+          <div class="demo-panel">
+            <h4 class="demo-panel__title">Application State</h4>
+            <pre class="demo-panel__content" id="state-display">Loading...</pre>
+          </div>
+
+          <!-- AI Demo Panel -->
+          <div class="demo-panel">
+            <h4 class="demo-panel__title">AI Service Demo</h4>
+            <div class="ai-demo">
+              <input
+                type="text"
+                id="ai-input"
+                class="input"
+                placeholder="Type a prompt..."
+              >
+              <button id="ai-submit" class="button button--primary">
+                Send
+              </button>
+            </div>
+            <div class="ai-response" id="ai-response"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p class="footer__text">
+        <em>"The most important step a man can take is the next one."</em>
+        — Dalinar Kholin
+      </p>
+    </footer>
+  </div>
+
+  <!-- Load Application -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>

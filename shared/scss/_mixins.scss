@@ -1,0 +1,202 @@
+// =============================================================================
+// Mixins - Reusable SCSS patterns
+// =============================================================================
+
+@import 'variables';
+@import 'breakpoints';
+
+// -----------------------------------------------------------------------------
+// Layout Mixins
+// -----------------------------------------------------------------------------
+
+/// Flexbox centering
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/// Flexbox column
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/// Flexbox row with gap
+@mixin flex-row($gap: $spacing-md) {
+  display: flex;
+  flex-direction: row;
+  gap: $gap;
+}
+
+/// Absolute positioning to fill parent
+@mixin absolute-fill {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+/// Fixed positioning to fill viewport
+@mixin fixed-fill {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+// -----------------------------------------------------------------------------
+// Typography Mixins
+// -----------------------------------------------------------------------------
+
+/// Truncate text with ellipsis
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/// Multi-line truncate
+@mixin line-clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/// Heading styles
+@mixin heading($size: 'lg') {
+  font-family: $font-family-base;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  color: $color-text-primary;
+
+  @if $size == 'xxl' {
+    font-size: $font-size-xxl;
+  } @else if $size == 'xl' {
+    font-size: $font-size-xl;
+  } @else if $size == 'lg' {
+    font-size: $font-size-lg;
+  } @else if $size == 'md' {
+    font-size: $font-size-md;
+  }
+}
+
+/// Body text styles
+@mixin body-text($size: 'md') {
+  font-family: $font-family-base;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-base;
+  color: $color-text-primary;
+
+  @if $size == 'lg' {
+    font-size: $font-size-lg;
+  } @else if $size == 'md' {
+    font-size: $font-size-md;
+  } @else if $size == 'sm' {
+    font-size: $font-size-sm;
+  } @else if $size == 'xs' {
+    font-size: $font-size-xs;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Interactive Mixins
+// -----------------------------------------------------------------------------
+
+/// Focus ring for accessibility
+@mixin focus-ring($color: $color-border-focus) {
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px $color-background-primary, 0 0 0 4px $color;
+  }
+}
+
+/// Button reset
+@mixin button-reset {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+/// Interactive element (hover, active states)
+@mixin interactive {
+  transition: all $transition-fast;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Visual Mixins
+// -----------------------------------------------------------------------------
+
+/// Card style
+@mixin card($padding: $spacing-lg) {
+  background: $color-background-secondary;
+  border: 1px solid $color-border-default;
+  border-radius: $radius-md;
+  padding: $padding;
+}
+
+/// Elevated card
+@mixin card-elevated($padding: $spacing-lg) {
+  @include card($padding);
+  box-shadow: $shadow-md;
+}
+
+/// Overlay backdrop
+@mixin backdrop($opacity: 0.7) {
+  background: rgba(0, 0, 0, $opacity);
+  backdrop-filter: blur(4px);
+}
+
+// -----------------------------------------------------------------------------
+// Accessibility Mixins
+// -----------------------------------------------------------------------------
+
+/// Visually hidden but accessible to screen readers
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/// Show on focus (for skip links)
+@mixin sr-only-focusable {
+  @include sr-only;
+
+  &:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+}

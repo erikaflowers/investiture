@@ -1,0 +1,192 @@
+// =============================================================================
+// CSS Reset / Normalize
+// A modern CSS reset with sensible defaults
+// =============================================================================
+
+@import '../../design-system/tokens/tokens';
+
+// -----------------------------------------------------------------------------
+// Box Sizing
+// -----------------------------------------------------------------------------
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+// -----------------------------------------------------------------------------
+// Remove Default Margins
+// -----------------------------------------------------------------------------
+
+* {
+  margin: 0;
+}
+
+// -----------------------------------------------------------------------------
+// Body Defaults
+// -----------------------------------------------------------------------------
+
+html {
+  // Prevent font size inflation on mobile
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+body {
+  min-height: 100vh;
+  line-height: $line-height-base;
+  font-family: $font-family-base;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  background-color: $color-background-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// -----------------------------------------------------------------------------
+// Typography
+// -----------------------------------------------------------------------------
+
+h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+}
+
+p {
+  overflow-wrap: break-word;
+}
+
+// -----------------------------------------------------------------------------
+// Media
+// -----------------------------------------------------------------------------
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+// -----------------------------------------------------------------------------
+// Forms
+// -----------------------------------------------------------------------------
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+// Remove default button styles
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+// -----------------------------------------------------------------------------
+// Lists
+// -----------------------------------------------------------------------------
+
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+}
+
+// -----------------------------------------------------------------------------
+// Links
+// -----------------------------------------------------------------------------
+
+a {
+  color: $color-accent-primary;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Tables
+// -----------------------------------------------------------------------------
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+// -----------------------------------------------------------------------------
+// Focus Styles
+// -----------------------------------------------------------------------------
+
+:focus-visible {
+  outline: 2px solid $color-border-focus;
+  outline-offset: 2px;
+}
+
+// Remove outline for non-keyboard focus
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+// -----------------------------------------------------------------------------
+// Selection
+// -----------------------------------------------------------------------------
+
+::selection {
+  background-color: $color-accent-primary;
+  color: $color-background-primary;
+}
+
+// -----------------------------------------------------------------------------
+// Scrollbar (Webkit)
+// -----------------------------------------------------------------------------
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: $color-background-tertiary;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $color-border-default;
+  border-radius: $radius-full;
+
+  &:hover {
+    background: $color-text-muted;
+  }
+}
+
+// Firefox scrollbar
+* {
+  scrollbar-width: thin;
+  scrollbar-color: $color-border-default $color-background-tertiary;
+}
+
+// -----------------------------------------------------------------------------
+// Reduced Motion
+// -----------------------------------------------------------------------------
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

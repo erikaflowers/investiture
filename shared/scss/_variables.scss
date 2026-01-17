@@ -1,0 +1,68 @@
+// =============================================================================
+// Variables - SCSS-specific helpers built on design tokens
+// =============================================================================
+
+// Import design tokens
+@import '../../design-system/tokens/tokens';
+
+// -----------------------------------------------------------------------------
+// Derived Variables
+// These extend tokens with SCSS-specific calculations and utilities
+// -----------------------------------------------------------------------------
+
+// Z-index scale
+$z-index-dropdown: 100;
+$z-index-sticky: 200;
+$z-index-fixed: 300;
+$z-index-modal-backdrop: 400;
+$z-index-modal: 500;
+$z-index-popover: 600;
+$z-index-tooltip: 700;
+
+// Container widths
+$container-sm: 640px;
+$container-md: 768px;
+$container-lg: 1024px;
+$container-xl: 1280px;
+
+// Aspect ratios
+$aspect-ratio-square: 1;
+$aspect-ratio-video: calc(16 / 9);
+$aspect-ratio-photo: calc(4 / 3);
+
+// -----------------------------------------------------------------------------
+// Spacing Helpers
+// Generate spacing utilities from tokens
+// -----------------------------------------------------------------------------
+
+@function spacing($size) {
+  @if map-has-key($spacing, $size) {
+    @return map-get($spacing, $size);
+  }
+  @warn "Unknown spacing size: #{$size}";
+  @return null;
+}
+
+// -----------------------------------------------------------------------------
+// Color Helpers
+// -----------------------------------------------------------------------------
+
+@function color($name) {
+  @if map-has-key($colors, $name) {
+    @return map-get($colors, $name);
+  }
+  @warn "Unknown color: #{$name}";
+  @return null;
+}
+
+// -----------------------------------------------------------------------------
+// Typography Helpers
+// -----------------------------------------------------------------------------
+
+@function font-size($size) {
+  @if map-has-key($font-sizes, $size) {
+    @return map-get($font-sizes, $size);
+  }
+  @warn "Unknown font size: #{$size}";
+  @return null;
+}

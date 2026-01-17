@@ -1,0 +1,25 @@
+{
+  "network": {
+    "offline": "You appear to be offline. Please check your connection.",
+    "timeout": "The request timed out. Please try again.",
+    "serverError": "Something went wrong on our end. Please try again later."
+  },
+  "auth": {
+    "invalidCredentials": "Invalid email or password.",
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "unauthorized": "You don't have permission to access this.",
+    "accountLocked": "Your account has been locked. Please contact support."
+  },
+  "validation": {
+    "required": "This field is required.",
+    "email": "Please enter a valid email address.",
+    "minLength": "Must be at least {{min}} characters.",
+    "maxLength": "Must be no more than {{max}} characters.",
+    "passwordMismatch": "Passwords do not match."
+  },
+  "generic": {
+    "unknown": "An unexpected error occurred.",
+    "notFound": "The requested resource was not found.",
+    "conflict": "This action conflicts with existing data."
+  }
+}

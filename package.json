@@ -1,0 +1,27 @@
+{
+  "name": "investiture",
+  "version": "0.1.0",
+  "description": "A decoupled, enterprise-ready application scaffold for browser apps, SaaS products, and extensions",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run sass:watch",
+    "sass:build": "sass views/vanilla/styles.scss:views/vanilla/styles.css --style=compressed --load-path=.",
+    "sass:watch": "sass views/vanilla/styles.scss:views/vanilla/styles.css --watch --load-path=.",
+    "build:tokens": "node scripts/build-tokens.js",
+    "serve": "npx serve views/vanilla",
+    "start": "npm-run-all --parallel sass:watch serve"
+  },
+  "keywords": [
+    "scaffold",
+    "framework",
+    "decoupled",
+    "enterprise",
+    "design-system",
+    "saas"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "sass": "^1.77.0"
+  }
+}

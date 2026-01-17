@@ -1,0 +1,145 @@
+// =============================================================================
+// Breakpoints - Responsive design utilities
+// =============================================================================
+
+@import '../../design-system/tokens/tokens';
+
+// -----------------------------------------------------------------------------
+// Breakpoint Mixins
+// Mobile-first approach: use min-width for scaling up
+// -----------------------------------------------------------------------------
+
+/// Mobile and up (480px+)
+@mixin mobile {
+  @media (min-width: $breakpoint-mobile) {
+    @content;
+  }
+}
+
+/// Tablet and up (768px+)
+@mixin tablet {
+  @media (min-width: $breakpoint-tablet) {
+    @content;
+  }
+}
+
+/// Desktop and up (1024px+)
+@mixin desktop {
+  @media (min-width: $breakpoint-desktop) {
+    @content;
+  }
+}
+
+/// Wide screens (1280px+)
+@mixin wide {
+  @media (min-width: $breakpoint-wide) {
+    @content;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Max-width Breakpoints (for mobile-first exceptions)
+// -----------------------------------------------------------------------------
+
+/// Mobile only (below 480px)
+@mixin mobile-only {
+  @media (max-width: #{$breakpoint-mobile - 1px}) {
+    @content;
+  }
+}
+
+/// Below tablet (below 768px)
+@mixin below-tablet {
+  @media (max-width: #{$breakpoint-tablet - 1px}) {
+    @content;
+  }
+}
+
+/// Below desktop (below 1024px)
+@mixin below-desktop {
+  @media (max-width: #{$breakpoint-desktop - 1px}) {
+    @content;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Range Breakpoints
+// -----------------------------------------------------------------------------
+
+/// Tablet only (768px - 1023px)
+@mixin tablet-only {
+  @media (min-width: $breakpoint-tablet) and (max-width: #{$breakpoint-desktop - 1px}) {
+    @content;
+  }
+}
+
+/// Desktop only (1024px - 1279px)
+@mixin desktop-only {
+  @media (min-width: $breakpoint-desktop) and (max-width: #{$breakpoint-wide - 1px}) {
+    @content;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Custom Breakpoint
+// -----------------------------------------------------------------------------
+
+/// Custom min-width breakpoint
+@mixin breakpoint-up($width) {
+  @media (min-width: $width) {
+    @content;
+  }
+}
+
+/// Custom max-width breakpoint
+@mixin breakpoint-down($width) {
+  @media (max-width: $width) {
+    @content;
+  }
+}
+
+/// Custom range breakpoint
+@mixin breakpoint-between($min, $max) {
+  @media (min-width: $min) and (max-width: $max) {
+    @content;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Feature Queries
+// -----------------------------------------------------------------------------
+
+/// Hover-capable devices
+@mixin hover-capable {
+  @media (hover: hover) and (pointer: fine) {
+    @content;
+  }
+}
+
+/// Touch devices
+@mixin touch {
+  @media (hover: none) and (pointer: coarse) {
+    @content;
+  }
+}
+
+/// Reduced motion preference
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+/// Dark mode preference (if supporting system themes)
+@mixin prefers-dark {
+  @media (prefers-color-scheme: dark) {
+    @content;
+  }
+}
+
+/// Light mode preference
+@mixin prefers-light {
+  @media (prefers-color-scheme: light) {
+    @content;
+  }
+}
