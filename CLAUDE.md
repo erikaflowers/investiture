@@ -160,6 +160,17 @@ npx serve views/vanilla
 
 The scaffold handles the rest.
 
+## Briefing Other Claude Instances
+
+When asked, generate a concise summary of recent work for sharing with other Claude chats. Include:
+
+- **What was built** - Files created/modified, features implemented
+- **Key architecture decisions** - Why things were done a certain way
+- **Current state** - What works, what's stubbed, how to run it
+- **Next steps** - What's ready to be built next
+
+Format as markdown with clear sections. Be specific about file paths and technical details so the receiving Claude can pick up where you left off.
+
 ---
 
 *"The most important step a man can take is the next one."*
