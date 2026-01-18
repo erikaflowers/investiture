@@ -91,9 +91,9 @@ function renderHeroActions(user) {
       window.location.href = 'docs.html';
     });
 
-    // Get Started scrolls to demo section
+    // Get Started goes to getting started page
     document.getElementById('get-started-btn')?.addEventListener('click', () => {
-      document.querySelector('.demo')?.scrollIntoView({ behavior: 'smooth' });
+      window.location.href = 'getting-started.html';
     });
   } else {
     elements.heroActions.innerHTML = `
