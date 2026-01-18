@@ -40,6 +40,7 @@ The scaffold is fully functional with a vanilla (no-framework) view implementati
 | Documentation | `/docs/` | `views/vanilla/docs.njk` |
 | Starter (blank canvas) | `/starter/` | `views/vanilla/starter.njk` |
 | Cosmere Reference | `/cosmere/` | `views/vanilla/cosmere.njk` |
+| Changelog | `/history/` | `views/vanilla/history.njk` |
 
 ## Directory Structure
 ```
@@ -323,6 +324,27 @@ Run `npm run sass:build` or restart the dev server. The compiled `styles.css` is
 - Commit frequently with clear messages
 - Never commit hardcoded secrets
 - The `docs/` folder is gitignored and built by CI
+
+## Recurring Maintenance (For Claude)
+
+**Periodically update documentation** - not for every small change, but after significant work sessions or feature additions:
+
+1. **CLAUDE.md** - Keep current project state accurate:
+   - Update the Pages table if pages are added/removed
+   - Update directory structure if it changes
+   - Add new troubleshooting entries for issues encountered
+
+2. **HISTORY.md** - Add changelog entries:
+   - Date and time period (morning/afternoon/evening)
+   - Brief title for the work session
+   - Bullet points of what changed
+   - Relevant commit hashes
+
+3. **views/vanilla/history.njk** - Update the changelog page:
+   - Add new entry to match HISTORY.md (terse version)
+   - Keep entries brief - full details live in HISTORY.md
+
+**When to update**: After completing a feature, fixing a significant bug, adding new pages, changing architecture, or at the end of a work session. Use judgment - don't update for typo fixes or minor tweaks.
 
 ---
 
