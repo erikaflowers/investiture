@@ -3,6 +3,7 @@ node_modules/
 
 # Build outputs
 *.css.map
+docs/
 
 # Environment
 .env
