@@ -7,4 +7,217 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 <div id="stc-app" class="stc-placeholder">
   <p class="stc-placeholder__icon">🚧</p>
   <p class="stc-placeholder__text">Under Construction</p>
+  <p class="stc-placeholder__subtext">UX being designed in Mural</p>
+
+  <!-- Database Test Panel -->
+  <div class="stc-test-panel">
+    <h3>Supabase Connection Test</h3>
+
+    <div class="stc-test-panel__status" id="connection-status">
+      Checking connection...
+    </div>
+
+    <div class="stc-test-panel__actions">
+      <button class="button button--primary" id="btn-test-connection">
+        Test Connection
+      </button>
+      <button class="button button--secondary" id="btn-create-project">
+        Create Test Project
+      </button>
+    </div>
+
+    <div class="stc-test-panel__results" id="test-results">
+      <!-- Results will appear here -->
+    </div>
+  </div>
 </div>
+
+<script type="module">
+  // Import Supabase client from CDN (static site, no bundler)
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  // Supabase config (public credentials - RLS protects data)
+  const SUPABASE_URL = 'https://vfufedgmfcqwimvglvls.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_vi8VVrb56M0_TAp3vo2Gow_TXzQQqCV';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // DOM elements
+  const statusEl = document.getElementById('connection-status');
+  const resultsEl = document.getElementById('test-results');
+  const btnTestConnection = document.getElementById('btn-test-connection');
+  const btnCreateProject = document.getElementById('btn-create-project');
+
+  // Helper to show results
+  function showResult(message, isError = false) {
+    const div = document.createElement('div');
+    div.className = `stc-test-result ${isError ? 'stc-test-result--error' : 'stc-test-result--success'}`;
+    div.innerHTML = `<span class="stc-test-result__time">${new Date().toLocaleTimeString()}</span> ${message}`;
+    resultsEl.insertBefore(div, resultsEl.firstChild);
+  }
+
+  // Test connection
+  async function testConnection() {
+    statusEl.textContent = 'Testing connection...';
+    statusEl.className = 'stc-test-panel__status stc-test-panel__status--pending';
+
+    try {
+      const { error } = await supabase.from('projects').select('count', { count: 'exact', head: true });
+
+      if (error) {
+        statusEl.textContent = `Connection failed: ${error.message}`;
+        statusEl.className = 'stc-test-panel__status stc-test-panel__status--error';
+        showResult(`Connection failed: ${error.message}`, true);
+        return false;
+      }
+
+      statusEl.textContent = 'Connected to Supabase!';
+      statusEl.className = 'stc-test-panel__status stc-test-panel__status--success';
+      showResult('Successfully connected to Supabase');
+      return true;
+    } catch (e) {
+      statusEl.textContent = `Connection error: ${e.message}`;
+      statusEl.className = 'stc-test-panel__status stc-test-panel__status--error';
+      showResult(`Connection error: ${e.message}`, true);
+      return false;
+    }
+  }
+
+  // Create test project
+  async function createTestProject() {
+    showResult('Creating test project...');
+
+    try {
+      // Create project
+      const { data: project, error: projectError } = await supabase
+        .from('projects')
+        .insert({
+          title: `Test Project ${Date.now()}`,
+          status: 'braindump',
+          user_id: null, // No auth yet
+        })
+        .select()
+        .single();
+
+      if (projectError) {
+        showResult(`Failed to create project: ${projectError.message}`, true);
+        return;
+      }
+
+      showResult(`Created project: <strong>${project.title}</strong> (ID: ${project.id})`);
+
+      // Create a braindump for it
+      const { data: braindump, error: braindumpError } = await supabase
+        .from('braindumps')
+        .insert({
+          project_id: project.id,
+          raw_input: 'This is a test braindump created from the STC app to verify Supabase connectivity.',
+        })
+        .select()
+        .single();
+
+      if (braindumpError) {
+        showResult(`Failed to create braindump: ${braindumpError.message}`, true);
+        return;
+      }
+
+      showResult(`Created braindump for project (ID: ${braindump.id})`);
+      showResult('<strong>Success!</strong> Data is now in Supabase. Check your dashboard.');
+
+    } catch (e) {
+      showResult(`Error: ${e.message}`, true);
+    }
+  }
+
+  // Event listeners
+  btnTestConnection.addEventListener('click', testConnection);
+  btnCreateProject.addEventListener('click', createTestProject);
+
+  // Auto-test on load
+  testConnection();
+</script>
+
+<style>
+  .stc-placeholder__subtext {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted, #8B7D6B);
+    margin-top: var(--spacing-xs);
+  }
+
+  .stc-test-panel {
+    margin-top: var(--spacing-xxl);
+    padding: var(--spacing-lg);
+    background: var(--color-background-card, #FFFCF8);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    max-width: 600px;
+    text-align: left;
+  }
+
+  .stc-test-panel h3 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: var(--font-size-lg);
+    color: var(--color-text-primary, #2C2416);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-test-panel__status {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-md);
+    background: var(--color-background-tertiary, #EDE4D9);
+  }
+
+  .stc-test-panel__status--pending {
+    background: #FFF3CD;
+    color: #856404;
+  }
+
+  .stc-test-panel__status--success {
+    background: #D4EDDA;
+    color: #155724;
+  }
+
+  .stc-test-panel__status--error {
+    background: #F8D7DA;
+    color: #721C24;
+  }
+
+  .stc-test-panel__actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-test-panel__results {
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+  }
+
+  .stc-test-result {
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid;
+  }
+
+  .stc-test-result--success {
+    background: rgba(212, 237, 218, 0.5);
+    border-left-color: #28A745;
+  }
+
+  .stc-test-result--error {
+    background: rgba(248, 215, 218, 0.5);
+    border-left-color: #DC3545;
+  }
+
+  .stc-test-result__time {
+    color: var(--color-text-muted, #8B7D6B);
+    margin-right: var(--spacing-sm);
+  }
+</style>

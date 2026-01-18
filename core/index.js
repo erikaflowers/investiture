@@ -13,12 +13,13 @@
 import * as auth from './services/auth.js';
 import * as database from './services/database.js';
 import * as ai from './services/ai.js';
+import { supabase, testConnection } from './services/supabase.js';
 
 // =============================================================================
 // Application State
 // =============================================================================
 
-/** @type {import('./types/interfaces.js').AppState} */
+/** @type {object} */
 let appState = {
   user: null,
   isLoading: false,
@@ -27,12 +28,12 @@ let appState = {
   locale: 'en',
 };
 
-/** @type {Set<(state: import('./types/interfaces.js').AppState) => void>} */
+/** @type {Set<(state: object) => void>} */
 const stateListeners = new Set();
 
 /**
  * Get current application state
- * @returns {import('./types/interfaces.js').AppState}
+ * @returns {object}
  */
 function getState() {
   return { ...appState };
@@ -40,7 +41,7 @@ function getState() {
 
 /**
  * Get current user
- * @returns {import('./types/interfaces.js').User | null}
+ * @returns {object | null}
  */
 function getUser() {
   return appState.user;
@@ -56,7 +57,7 @@ function isAuthenticated() {
 
 /**
  * Update application state
- * @param {Partial<import('./types/interfaces.js').AppState>} updates
+ * @param {object} updates
  */
 function setState(updates) {
   appState = { ...appState, ...updates };
@@ -65,7 +66,7 @@ function setState(updates) {
 
 /**
  * Subscribe to state changes
- * @param {(state: import('./types/interfaces.js').AppState) => void} callback
+ * @param {(state: object) => void} callback
  * @returns {() => void} Unsubscribe function
  */
 function subscribe(callback) {
@@ -151,20 +152,75 @@ async function init() {
 export const api = {
   auth: {
     signIn: auth.signIn,
+    signInWithEmail: auth.signInWithEmail,
+    signUp: auth.signUp,
     signOut: auth.signOut,
     getCurrentUser: auth.getCurrentUser,
+    getCurrentUserId: auth.getCurrentUserId,
+    isAuthenticated: auth.isAuthenticated,
     onAuthChange: auth.onAuthChange,
   },
   database: {
+    // Generic operations
     query: database.query,
     insert: database.insert,
     update: database.update,
     delete: database.remove,
   },
+  // STC-specific database operations
+  stc: {
+    // Projects
+    createProject: database.createProject,
+    getProjectWithRelations: database.getProjectWithRelations,
+    getUserProjects: database.getUserProjects,
+    updateProjectStatus: database.updateProjectStatus,
+    // Braindumps
+    saveBraindump: database.saveBraindump,
+    getBraindumps: database.getBraindumps,
+    // Premise Spine
+    savePremiseSpine: database.savePremiseSpine,
+    getPremiseSpines: database.getPremiseSpines,
+    // Story Shells
+    saveStoryShell: database.saveStoryShell,
+    selectStoryShell: database.selectStoryShell,
+    getStoryShells: database.getStoryShells,
+    // Checkpoints
+    saveCheckpoint: database.saveCheckpoint,
+    confirmCheckpoint: database.confirmCheckpoint,
+    getCheckpoints: database.getCheckpoints,
+    // High Concepts
+    saveHighConcept: database.saveHighConcept,
+    confirmHighConcept: database.confirmHighConcept,
+    getHighConcepts: database.getHighConcepts,
+    // Characters (Phase 2)
+    createCharacter: database.createCharacter,
+    updateCharacter: database.updateCharacter,
+    deleteCharacter: database.deleteCharacter,
+    getCharacters: database.getCharacters,
+    getCharacter: database.getCharacter,
+    // Beat Entries (Phase 3)
+    saveBeatEntry: database.saveBeatEntry,
+    updateBeatEntry: database.updateBeatEntry,
+    deleteBeatEntry: database.deleteBeatEntry,
+    getBeatEntries: database.getBeatEntries,
+    getBeatEntry: database.getBeatEntry,
+    upsertBeatEntry: database.upsertBeatEntry,
+    // Parking Lot
+    addToParkingLot: database.addToParkingLot,
+    updateParkingLotEntry: database.updateParkingLotEntry,
+    resolveParkingLotEntry: database.resolveParkingLotEntry,
+    deleteParkingLotEntry: database.deleteParkingLotEntry,
+    getParkingLot: database.getParkingLot,
+  },
   ai: {
     complete: ai.complete,
     stream: ai.stream,
     isAvailable: ai.isAvailable,
+  },
+  // Supabase utilities
+  supabase: {
+    client: supabase,
+    testConnection,
   },
 };
 
