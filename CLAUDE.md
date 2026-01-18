@@ -22,14 +22,182 @@ VIEW LAYER (hot-swappable: vanilla, React, Svelte, extension, etc.)
          SERVICES LAYER (auth, db, ai - provider agnostic)
 ```
 
+## Current Project State
+
+The scaffold is fully functional with a vanilla (no-framework) view implementation:
+
+- **Live site**: https://erikaflowers.github.io/investiture/
+- **Auto-deploys**: GitHub Actions builds and deploys on every push to `main`
+- **Core services**: Stubbed (auth, database, AI wrappers exist but aren't connected to real backends)
+- **Design system**: Complete with tokens, SCSS variables, and CSS custom properties
+- **Content layer**: JSON-based, i18n-ready structure in place
+
+### Pages
+| Page | Path | Template |
+|------|------|----------|
+| Homepage | `/` | `views/vanilla/index.njk` |
+| Getting Started | `/getting-started/` | `views/vanilla/getting-started.njk` |
+| Documentation | `/docs/` | `views/vanilla/docs.njk` |
+| Starter (blank canvas) | `/starter/` | `views/vanilla/starter.njk` |
+| Cosmere Reference | `/cosmere/` | `views/vanilla/cosmere.njk` |
+
 ## Directory Structure
 ```
-/core           → Business logic, pure functions, state management
-/design-system  → Tokens, themes, component definitions
-/content        → All user-facing strings, i18n ready
-/views          → UI implementations (vanilla, react, etc.)
-/shared         → SCSS utilities that consume design tokens
-/config         → Configuration for swappable layers
+/
+├── .github/workflows/
+│   └── deploy.yml          ← GitHub Actions auto-deploy to Pages
+├── core/
+│   ├── index.js            ← Public API (currently stubs)
+│   ├── state/              ← State management
+│   └── services/           ← Service wrappers (auth, db, ai)
+├── design-system/
+│   └── tokens/
+│       ├── tokens.json     ← Single source of truth
+│       ├── tokens.css      ← CSS custom properties (generated)
+│       └── _tokens.scss    ← SCSS variables (generated)
+├── content/
+│   └── en/
+│       ├── common.json     ← UI strings, button labels
+│       └── errors.json     ← Error messages
+├── views/
+│   └── vanilla/
+│       ├── _includes/      ← Nunjucks partials
+│       │   ├── base.njk    ← Base layout (uses {{ content | safe }})
+│       │   ├── head.njk    ← <head> content
+│       │   ├── nav.njk     ← Header navigation
+│       │   └── footer.njk  ← Footer with Cosmere link
+│       ├── _data/
+│       │   ├── site.json   ← Site metadata (title, description)
+│       │   └── nav.json    ← Navigation items array
+│       ├── *.njk           ← Page templates
+│       ├── styles.scss     ← Main stylesheet (imports shared/)
+│       ├── styles.css      ← Compiled CSS (committed)
+│       ├── nav.js          ← Mobile nav toggle
+│       ├── docs.js         ← Documentation page loader
+│       └── favicon.svg     ← Site favicon
+├── shared/
+│   └── scss/               ← Shared SCSS (reset, variables, mixins)
+├── scripts/
+│   └── build-tokens.js     ← Token generator script
+├── eleventy.config.cjs     ← Eleventy configuration
+└── package.json
+```
+
+## Eleventy (11ty) Configuration
+
+The vanilla view uses Eleventy for static site generation. Key details:
+
+### Config File: `eleventy.config.cjs`
+- Uses `.cjs` extension because `package.json` has `"type": "module"`
+- Input: `views/vanilla/`
+- Output: `docs/` (for GitHub Pages)
+- Path prefix: `/investiture/` in production, `/` in development
+
+### Environment-Based Paths
+```bash
+# Development (paths start with /)
+npm run dev
+
+# Production (paths start with /investiture/)
+ELEVENTY_ENV=production npm run html:build
+```
+
+### Template Syntax
+Eleventy uses `{{ content | safe }}` NOT `{% block %}` syntax:
+
+```njk
+{# In base.njk #}
+<main>
+  {{ content | safe }}
+</main>
+
+{# In page.njk - content goes directly after front matter #}
+---
+layout: base.njk
+title: Page Title
+---
+<section>
+  Your content here...
+</section>
+```
+
+### Passthrough Copy
+Static assets are copied with explicit destinations (not glob patterns with `/`):
+```javascript
+eleventyConfig.addPassthroughCopy({ "views/vanilla/styles.css": "styles.css" });
+eleventyConfig.addPassthroughCopy({ "views/vanilla/favicon.svg": "favicon.svg" });
+```
+
+### Adding a New Page
+1. Create `views/vanilla/pagename.njk`:
+```njk
+---
+layout: base.njk
+title: Page Title
+description: Page description for meta tags
+headerTagline: Shows in header
+---
+<section>
+  Your content here
+</section>
+```
+
+2. Optionally add to `views/vanilla/_data/nav.json` for header navigation:
+```json
+{
+  "items": [
+    { "label": "New Page", "url": "/pagename/", "file": "pagename" }
+  ]
+}
+```
+
+3. For footer-only links, edit `views/vanilla/_includes/footer.njk`
+
+## GitHub Actions Deployment
+
+Auto-deploy is configured in `.github/workflows/deploy.yml`:
+
+1. Triggers on push to `main` or manual dispatch
+2. Installs dependencies with `npm ci`
+3. Builds SCSS: `npm run sass:build`
+4. Cleans output: `rm -rf docs`
+5. Builds Eleventy: `ELEVENTY_ENV=production npm run html:build`
+6. Uploads `docs/` folder as artifact
+7. Deploys to GitHub Pages
+
+**Important**: The `docs/` folder is in `.gitignore` - it's built fresh by GitHub Actions, not committed.
+
+## Common Commands
+```bash
+# Start local development (SCSS + Eleventy with live reload)
+npm run dev
+# Opens at http://localhost:8080
+
+# Build for production
+npm run build
+
+# Compile SCSS only
+npm run sass:build
+
+# Build HTML only (Eleventy)
+npm run html:build
+
+# Build tokens from JSON
+npm run build:tokens
+```
+
+## Design Token Flow
+```
+tokens.json (source of truth)
+     │
+     ├──→ _tokens.scss (for SCSS consumers)
+     ├──→ tokens.css (for CSS custom properties)
+     └──→ tokens.tailwind.js (for Tailwind config)
+```
+
+To regenerate from tokens.json:
+```bash
+npm run build:tokens
 ```
 
 ## Rules for Contributors
@@ -51,6 +219,7 @@ VIEW LAYER (hot-swappable: vanilla, React, Svelte, extension, etc.)
 - All state changes go through core
 - Services are wrapped - never import Supabase/Firebase directly
 - Export public API through `/core/index.js` only
+- **Current state**: All services are stubs returning mock data
 
 ### View Work (`/views`)
 - Import from `/core/index.js` for logic and state
@@ -58,39 +227,25 @@ VIEW LAYER (hot-swappable: vanilla, React, Svelte, extension, etc.)
 - Import from `/content/[locale]` for copy
 - Never hardcode strings or colors
 - Each view folder is self-contained and deletable
+- Use `{{ '/path/' | url }}` filter for all internal links (handles path prefix)
 
 ### Services Work (`/core/services`)
 - Wrap external services (Supabase, Firebase, OpenAI)
 - Expose consistent interface regardless of provider
 - Swapping providers should only require changing service internals
 
-## Design Token Flow
-```
-tokens.json (source of truth)
-     │
-     ├──→ _tokens.scss (for SCSS consumers)
-     ├──→ tokens.css (for CSS custom properties)
-     └──→ tokens.tailwind.js (for Tailwind config)
-```
+## What NOT to Do
 
-To regenerate from tokens.json:
-```bash
-npm run build:tokens
-```
-
-## Content Flow
-```
-/content/en/common.json
-     │
-     └──→ Imported by views
-          └──→ Rendered with interpolation
-```
-
-Example:
-```javascript
-import content from '@content/en/common.json';
-button.textContent = content.actions.submit; // "Submit"
-```
+- Hardcode colors in views → use tokens
+- Hardcode strings in views → use content
+- Import Supabase directly in views → use core services
+- Put business logic in views → belongs in core
+- Put DOM manipulation in core → belongs in views
+- Create framework-specific code in /core
+- Skip the interface layer
+- Use `{% block %}` in Eleventy → use `{{ content | safe }}`
+- Use glob patterns with `/` destination in passthrough copy → use explicit filenames
+- Commit the `docs/` folder → it's built by GitHub Actions
 
 ## Adding a New View Framework
 
@@ -108,7 +263,7 @@ button.textContent = content.actions.submit; // "Submit"
 2. Add to `/design-system/themes/[client].json`
 3. Update `/config/design-system.config.js`:
 ```javascript
-   export default { source: '[client]' }
+export default { source: '[client]' }
 ```
 4. Run `npm run build:tokens`
 
@@ -117,59 +272,13 @@ button.textContent = content.actions.submit; // "Submit"
 2. Content loader will fetch from CMS instead of local JSON
 3. Schema validation still applies
 
-## Git Workflow
+### Connecting Real Services
+The `/core/services/` directory has stubs ready to connect:
+- `auth.js` → Connect Supabase Auth, Firebase Auth, Auth0, etc.
+- `database.js` → Connect Supabase, Firebase, your own API
+- `ai.js` → Connect OpenAI, Anthropic, etc.
 
-- Work directly on `main` for solo development
-- Use feature branches for experimental view frameworks
-- Commit frequently with clear messages
-- Never commit hardcoded secrets
-
-## Common Commands
-```bash
-# Start local development (SCSS + Eleventy with live reload)
-npm run dev
-
-# Build for production
-npm run build
-
-# Compile SCSS only
-npm run sass:build
-
-# Build HTML only (Eleventy)
-npm run html:build
-
-# Build tokens from JSON
-npm run build:tokens
-```
-
-## Vanilla View Templating
-
-The vanilla view uses Eleventy (11ty) for static site generation:
-
-```
-/views/vanilla/
-├── _includes/          ← Shared partials (head, nav, footer, base)
-├── _data/              ← Site config and nav structure
-│   ├── site.json       ← Site metadata
-│   └── nav.json        ← Navigation items
-├── *.njk               ← Page templates (extend base.njk)
-└── /docs/              ← Built output (GitHub Pages serves this)
-```
-
-To add a new page:
-1. Create `pagename.njk` with front matter extending `base.njk`
-2. Add entry to `_data/nav.json` if it should appear in navigation
-3. Run `npm run build` or let dev server rebuild automatically
-
-## What NOT to Do
-
-- Hardcode colors in views - use tokens
-- Hardcode strings in views - use content
-- Import Supabase directly in views - use core services
-- Put business logic in views - belongs in core
-- Put DOM manipulation in core - belongs in views
-- Create framework-specific code in /core
-- Skip the interface layer
+Each service exposes a consistent interface. Swap implementations without changing consuming code.
 
 ## Starting a New App from Investiture
 
@@ -179,19 +288,41 @@ To add a new page:
 4. Build your core logic in `/core/state/`
 5. Connect services you need in `/core/services/`
 6. Implement your UI in `/views/[choice]/`
+7. Update `_data/site.json` with your site metadata
+8. Update `_data/nav.json` with your navigation structure
 
 The scaffold handles the rest.
 
-## Briefing Other Claude Instances
+## Troubleshooting
 
-When asked, generate a concise summary of recent work for sharing with other Claude chats. Include:
+### Local dev shows wrong paths
+Make sure you're running `npm run dev` not `npm run build`. Dev mode uses `/` prefix, production uses `/investiture/`.
 
-- **What was built** - Files created/modified, features implemented
-- **Key architecture decisions** - Why things were done a certain way
-- **Current state** - What works, what's stubbed, how to run it
-- **Next steps** - What's ready to be built next
+### GitHub Actions failing
+1. Check that `package-lock.json` is committed (required for `npm ci`)
+2. Verify the `docs/` folder is NOT committed (it's in `.gitignore`)
+3. Check GitHub repo Settings → Pages → Source is set to "GitHub Actions"
 
-Format as markdown with clear sections. Be specific about file paths and technical details so the receiving Claude can pick up where you left off.
+### Eleventy passthrough copy errors
+Use explicit filenames, not glob patterns with `/`:
+```javascript
+// Good
+{ "views/vanilla/file.js": "file.js" }
+
+// Bad - causes EISDIR errors
+{ "views/vanilla/*.js": "/" }
+```
+
+### SCSS not updating
+Run `npm run sass:build` or restart the dev server. The compiled `styles.css` is committed to git.
+
+## Git Workflow
+
+- Work directly on `main` for solo development
+- Use feature branches for experimental view frameworks
+- Commit frequently with clear messages
+- Never commit hardcoded secrets
+- The `docs/` folder is gitignored and built by CI
 
 ---
 

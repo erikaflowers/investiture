@@ -4,8 +4,9 @@
   "description": "A decoupled, enterprise-ready application scaffold for browser apps, SaaS products, and extensions",
   "type": "module",
   "scripts": {
-    "dev": "npm-run-all --parallel sass:watch html:watch",
-    "build": "npm-run-all sass:build html:build",
+    "dev": "npm-run-all clean --parallel sass:watch html:watch",
+    "build": "npm-run-all clean sass:build html:build",
+    "clean": "rm -rf docs",
     "sass:build": "sass views/vanilla/styles.scss:views/vanilla/styles.css --style=compressed --load-path=.",
     "sass:watch": "sass views/vanilla/styles.scss:views/vanilla/styles.css --watch --load-path=.",
     "html:build": "ELEVENTY_ENV=production eleventy --config=eleventy.config.cjs",
