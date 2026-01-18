@@ -13,7 +13,7 @@
 
     <!-- Main Content -->
     <main id="main-content" class="main">
-      {% block content %}{% endblock %}
+      {{ content | safe }}
     </main>
 
     {% include "footer.njk" %}
@@ -22,6 +22,6 @@
   <!-- Load Navigation (view-layer UI interaction) -->
   <script src="{{ '/nav.js' | url }}"></script>
 
-  {% block scripts %}{% endblock %}
+  {{ scripts | safe }}
 </body>
 </html>

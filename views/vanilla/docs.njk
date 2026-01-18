@@ -5,7 +5,6 @@ description: Investiture Documentation - Architecture and Usage Guide
 headerTagline: Documentation
 ---
 
-{% block head %}
 <style>
   /* Docs-specific styles */
   .docs-nav {
@@ -135,7 +134,6 @@ headerTagline: Documentation
     margin: var(--spacing-lg) 0;
   }
 </style>
-{% endblock %}
 
 <!-- Navigation -->
 <nav class="docs-nav" id="docs-nav">
@@ -147,7 +145,5 @@ headerTagline: Documentation
   <p style="color: var(--color-text-muted);">Loading documentation...</p>
 </div>
 
-{% block scripts %}
 <!-- Load Documentation -->
 <script type="module" src="{{ '/docs.js' | url }}"></script>
-{% endblock %}

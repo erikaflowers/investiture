@@ -8,7 +8,7 @@
     "build": "npm-run-all sass:build html:build",
     "sass:build": "sass views/vanilla/styles.scss:views/vanilla/styles.css --style=compressed --load-path=.",
     "sass:watch": "sass views/vanilla/styles.scss:views/vanilla/styles.css --watch --load-path=.",
-    "html:build": "eleventy --config=eleventy.config.cjs",
+    "html:build": "ELEVENTY_ENV=production eleventy --config=eleventy.config.cjs",
     "html:watch": "eleventy --serve --config=eleventy.config.cjs",
     "build:tokens": "node scripts/build-tokens.js",
     "serve": "eleventy --serve --config=eleventy.config.cjs",

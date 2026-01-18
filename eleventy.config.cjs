@@ -43,7 +43,7 @@ module.exports = function(eleventyConfig) {
       output: "docs"
     },
 
-    // Path prefix for GitHub Pages (repo name)
-    pathPrefix: "/investiture/"
+    // Path prefix - use ELEVENTY_ENV=production for GitHub Pages
+    pathPrefix: process.env.ELEVENTY_ENV === 'production' ? "/investiture/" : "/"
   };
 };
