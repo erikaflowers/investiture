@@ -1,11 +1,6 @@
 {
   "items": [
     {
-      "label": "Save the Cat",
-      "url": "/stc/",
-      "file": "stc"
-    },
-    {
       "label": "Starter Page",
       "url": "/starter/",
       "file": "starter"

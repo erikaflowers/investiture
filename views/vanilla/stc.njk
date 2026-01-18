@@ -5,8 +5,31 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 ---
 
 <div id="stc-app">
+  <!-- AUTH VIEW: Sign in prompt when logged out -->
+  <div id="auth-view" class="stc-view" style="display: none;">
+    <div class="stc-auth__container">
+      <h2 class="stc-auth__title">Welcome, Storyteller</h2>
+      <p class="stc-auth__subtitle">Sign in to save your ideas and build your beat sheet.</p>
+      <button id="btn-google-signin" class="button button--google">
+        <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Sign in with Google
+      </button>
+    </div>
+  </div>
+
+  <!-- USER BAR: Shows when logged in -->
+  <div id="user-bar" class="stc-user-bar" style="display: none;">
+    <span class="stc-user-bar__email" id="user-email"></span>
+    <button id="btn-signout" class="button button--secondary button--small">Sign Out</button>
+  </div>
+
   <!-- LIST VIEW: New braindump + table of existing -->
-  <div id="list-view" class="stc-view">
+  <div id="list-view" class="stc-view" style="display: none;">
     <div class="stc-test-flow__container">
       <h2 class="stc-test-flow__title">Okay, what's your big idea?</h2>
       <p class="stc-test-flow__subtitle">Pour it all out. Stream of consciousness. Don't hold back.</p>
@@ -96,8 +119,16 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // State
+  let currentUser = null;
   let currentBraindump = null;
   let currentProject = null;
+
+  // DOM elements - Auth
+  const authView = document.getElementById('auth-view');
+  const userBar = document.getElementById('user-bar');
+  const userEmail = document.getElementById('user-email');
+  const btnGoogleSignin = document.getElementById('btn-google-signin');
+  const btnSignout = document.getElementById('btn-signout');
 
   // DOM elements - List view
   const listView = document.getElementById('list-view');
@@ -118,6 +149,73 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   const btnEdit = document.getElementById('btn-edit');
   const btnCancelEdit = document.getElementById('btn-cancel-edit');
   const btnSaveEdit = document.getElementById('btn-save-edit');
+
+  // ========== AUTH FUNCTIONS ==========
+
+  function updateAuthUI(user) {
+    currentUser = user;
+
+    if (user) {
+      // Logged in
+      authView.style.display = 'none';
+      userBar.style.display = 'flex';
+      userEmail.textContent = user.email;
+      listView.style.display = 'block';
+      loadBraindumps();
+    } else {
+      // Logged out
+      authView.style.display = 'block';
+      userBar.style.display = 'none';
+      listView.style.display = 'none';
+      diveView.style.display = 'none';
+    }
+  }
+
+  async function signInWithGoogle() {
+    btnGoogleSignin.disabled = true;
+    btnGoogleSignin.textContent = 'Signing in...';
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + window.location.pathname
+        }
+      });
+
+      if (error) throw error;
+      // Browser will redirect to Google, then back
+    } catch (e) {
+      console.error('Sign in error:', e);
+      alert('Sign in failed: ' + e.message);
+      btnGoogleSignin.disabled = false;
+      btnGoogleSignin.innerHTML = `
+        <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Sign in with Google
+      `;
+    }
+  }
+
+  async function signOut() {
+    btnSignout.disabled = true;
+    btnSignout.textContent = 'Signing out...';
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (e) {
+      console.error('Sign out error:', e);
+      alert('Sign out failed: ' + e.message);
+    } finally {
+      btnSignout.disabled = false;
+      btnSignout.textContent = 'Sign Out';
+    }
+  }
 
   // View switching
   function showListView() {
@@ -156,13 +254,13 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     btnSave.textContent = 'Saving...';
 
     try {
-      // Create project
+      // Create project with user's ID
       const { data: project, error: projectError } = await supabase
         .from('projects')
         .insert({
           title: 'Braindump Session',
           status: 'braindump',
-          user_id: null,
+          user_id: currentUser.id,
         })
         .select()
         .single();
@@ -207,14 +305,21 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     document.getElementById('error-message').textContent = message;
   }
 
-  // Load existing braindumps
+  // Load existing braindumps for current user
   async function loadBraindumps() {
     const tbody = document.getElementById('braindumps-body');
 
+    if (!currentUser) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty">Sign in to see your braindumps</td></tr>';
+      return;
+    }
+
     try {
+      // Join with projects to filter by user_id
       const { data, error } = await supabase
         .from('braindumps')
-        .select('id, raw_input, created_at, project_id')
+        .select('id, raw_input, created_at, project_id, projects!inner(user_id)')
+        .eq('projects.user_id', currentUser.id)
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -320,7 +425,11 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     return text.length > len ? text.substring(0, len) + '...' : text;
   }
 
-  // Event listeners
+  // Event listeners - Auth
+  btnGoogleSignin.addEventListener('click', signInWithGoogle);
+  btnSignout.addEventListener('click', signOut);
+
+  // Event listeners - Braindumps
   btnSave.addEventListener('click', saveBraindump);
   btnBack.addEventListener('click', showListView);
   btnEdit.addEventListener('click', enterEditMode);
@@ -334,13 +443,95 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     }
   });
 
-  // Init
-  loadBraindumps();
+  // Auth state change listener
+  supabase.auth.onAuthStateChange((event, session) => {
+    console.log('[Auth] State changed:', event, session?.user?.email);
+    updateAuthUI(session?.user || null);
+  });
+
+  // Init - check for existing session
+  async function init() {
+    const { data: { session } } = await supabase.auth.getSession();
+    updateAuthUI(session?.user || null);
+  }
+
+  init();
 </script>
 
 <style>
   .stc-view {
     min-height: 60vh;
+  }
+
+  /* ========== AUTH VIEW ========== */
+  .stc-auth__container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: var(--spacing-xxl) var(--spacing-md);
+    text-align: center;
+  }
+
+  .stc-auth__title {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 2.25rem;
+    color: var(--color-text-primary, #2C2416);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-auth__subtitle {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary, #5C4D3C);
+    margin-bottom: var(--spacing-xl);
+    line-height: 1.6;
+  }
+
+  .button--google {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    color: #333;
+    background: #fff;
+    border: 2px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .button--google:hover:not(:disabled) {
+    background: #f8f8f8;
+    border-color: #aaa;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .button--google:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .google-icon {
+    flex-shrink: 0;
+  }
+
+  /* ========== USER BAR ========== */
+  .stc-user-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--color-background-tertiary, #EDE4D9);
+    border-bottom: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-user-bar__email {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary, #5C4D3C);
   }
 
   /* ========== LIST VIEW ========== */

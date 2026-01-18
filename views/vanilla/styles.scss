@@ -353,6 +353,68 @@
 }
 
 // =============================================================================
+// Proof of Concept Section
+// =============================================================================
+
+.poc {
+  padding: $spacing-xxl 0;
+  border-top: 1px solid $color-border-default;
+
+  &__intro {
+    @include body-text('lg');
+    color: $color-text-secondary;
+    text-align: center;
+    max-width: 500px;
+    margin: 0 auto $spacing-xl;
+  }
+
+  &__link {
+    @include card;
+    display: block;
+    max-width: 500px;
+    margin: 0 auto;
+    text-decoration: none;
+    text-align: center;
+    transition: transform $transition-fast, box-shadow $transition-fast, border-color $transition-fast;
+    border: 2px dashed $color-border-default;
+    background: $color-background-secondary;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: $shadow-lg;
+      border-color: $color-accent-primary;
+      text-decoration: none;
+    }
+  }
+
+  &__label {
+    display: inline-block;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: $color-text-muted;
+    background: $color-background-tertiary;
+    padding: $spacing-xs $spacing-sm;
+    border-radius: $radius-sm;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__title {
+    @include heading('md');
+    display: block;
+    color: $color-accent-primary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__description {
+    @include body-text('sm');
+    display: block;
+    color: $color-text-secondary;
+  }
+}
+
+// =============================================================================
 // Footer
 // =============================================================================
 
