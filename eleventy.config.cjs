@@ -10,6 +10,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "views/vanilla/*.js": "/" });
   eleventyConfig.addPassthroughCopy({ "views/vanilla/*.css": "/" });
   eleventyConfig.addPassthroughCopy({ "views/vanilla/*.css.map": "/" });
+  eleventyConfig.addPassthroughCopy({ "views/vanilla/favicon.svg": "/" });
 
   // Pass through design system tokens
   eleventyConfig.addPassthroughCopy("design-system");
