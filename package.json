@@ -11,6 +11,8 @@
     "sass:watch": "sass views/vanilla/styles.scss:views/vanilla/styles.css --watch --load-path=.",
     "html:build": "ELEVENTY_ENV=production eleventy --config=eleventy.config.cjs",
     "html:watch": "eleventy --serve --config=eleventy.config.cjs",
+    "build:netlify": "npm-run-all clean sass:build html:netlify",
+    "html:netlify": "eleventy --config=eleventy.config.cjs",
     "build:tokens": "node scripts/build-tokens.js",
     "serve": "eleventy --serve --config=eleventy.config.cjs",
     "start": "npm run dev"
