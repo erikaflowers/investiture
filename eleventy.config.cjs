@@ -9,7 +9,6 @@ module.exports = function(eleventyConfig) {
   // Pass through static assets from views/vanilla to output root
   eleventyConfig.addPassthroughCopy({ "views/vanilla/*.js": "/" });
   eleventyConfig.addPassthroughCopy({ "views/vanilla/*.css": "/" });
-  eleventyConfig.addPassthroughCopy({ "views/vanilla/*.css.map": "/" });
   eleventyConfig.addPassthroughCopy({ "views/vanilla/favicon.svg": "/" });
 
   // Pass through design system tokens
