@@ -4,12 +4,15 @@
   "description": "A decoupled, enterprise-ready application scaffold for browser apps, SaaS products, and extensions",
   "type": "module",
   "scripts": {
-    "dev": "npm run sass:watch",
+    "dev": "npm-run-all --parallel sass:watch html:watch",
+    "build": "npm-run-all sass:build html:build",
     "sass:build": "sass views/vanilla/styles.scss:views/vanilla/styles.css --style=compressed --load-path=.",
     "sass:watch": "sass views/vanilla/styles.scss:views/vanilla/styles.css --watch --load-path=.",
+    "html:build": "eleventy --config=eleventy.config.cjs",
+    "html:watch": "eleventy --serve --config=eleventy.config.cjs",
     "build:tokens": "node scripts/build-tokens.js",
-    "serve": "npx serve views/vanilla",
-    "start": "npm-run-all --parallel sass:watch serve"
+    "serve": "eleventy --serve --config=eleventy.config.cjs",
+    "start": "npm run dev"
   },
   "keywords": [
     "scaffold",
@@ -22,6 +25,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@11ty/eleventy": "^3.1.2",
+    "npm-run-all": "^4.1.5",
     "sass": "^1.77.0"
   }
 }

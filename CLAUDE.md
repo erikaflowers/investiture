@@ -126,18 +126,40 @@ button.textContent = content.actions.submit; // "Submit"
 
 ## Common Commands
 ```bash
-# Start local development
+# Start local development (SCSS + Eleventy with live reload)
 npm run dev
 
-# Compile SCSS
-npm run sass:watch
+# Build for production
+npm run build
+
+# Compile SCSS only
+npm run sass:build
+
+# Build HTML only (Eleventy)
+npm run html:build
 
 # Build tokens from JSON
 npm run build:tokens
-
-# Run on localhost
-npx serve views/vanilla
 ```
+
+## Vanilla View Templating
+
+The vanilla view uses Eleventy (11ty) for static site generation:
+
+```
+/views/vanilla/
+├── _includes/          ← Shared partials (head, nav, footer, base)
+├── _data/              ← Site config and nav structure
+│   ├── site.json       ← Site metadata
+│   └── nav.json        ← Navigation items
+├── *.njk               ← Page templates (extend base.njk)
+└── /docs/              ← Built output (GitHub Pages serves this)
+```
+
+To add a new page:
+1. Create `pagename.njk` with front matter extending `base.njk`
+2. Add entry to `_data/nav.json` if it should appear in navigation
+3. Run `npm run build` or let dev server rebuild automatically
 
 ## What NOT to Do
 

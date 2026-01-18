@@ -1,0 +1,24 @@
+{
+  "items": [
+    {
+      "label": "Starter Page",
+      "url": "/starter/",
+      "file": "starter"
+    },
+    {
+      "label": "Get Started",
+      "url": "/getting-started/",
+      "file": "getting-started"
+    },
+    {
+      "label": "Docs",
+      "url": "/docs/",
+      "file": "docs"
+    },
+    {
+      "label": "GitHub",
+      "url": "https://github.com/erikaflowers/investiture",
+      "external": true
+    }
+  ]
+}

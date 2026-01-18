@@ -1,0 +1,7 @@
+{
+  "name": "Investiture Default",
+  "description": "Default dark theme for Investiture framework",
+  "version": "1.0.0",
+  "extends": null,
+  "overrides": {}
+}

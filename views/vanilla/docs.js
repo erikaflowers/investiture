@@ -8,7 +8,8 @@
 // Configuration
 // =============================================================================
 
-const CLAUDE_MD_PATH = '../../CLAUDE.md';
+// Path relative to docs/ directory in built output
+const CLAUDE_MD_PATH = '../CLAUDE.md';
 
 // Sections to display as FAQ items (maps heading to FAQ question)
 const FAQ_MAPPING = {

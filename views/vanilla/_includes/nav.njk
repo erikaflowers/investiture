@@ -1,0 +1,26 @@
+<header class="header">
+  <div class="header__brand">
+    {% if page.url == "/" or page.url == "/investiture/" %}
+    <h1 class="header__title">{{ site.title }}</h1>
+    {% else %}
+    <a href="{{ '/' | url }}" style="text-decoration: none;">
+      <h1 class="header__title">{{ site.title }}</h1>
+    </a>
+    {% endif %}
+    <span class="header__tagline">{{ headerTagline or site.tagline }}</span>
+  </div>
+  <button class="header__menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <nav class="header__nav">
+    {% for item in nav.items %}
+    {% if item.external %}
+    <a href="{{ item.url }}" class="button button--secondary button--small" target="_blank" rel="noopener">{{ item.label }}</a>
+    {% else %}
+    <a href="{{ item.url | url }}" class="button button--secondary button--small">{{ item.label }}</a>
+    {% endif %}
+    {% endfor %}
+  </nav>
+</header>
