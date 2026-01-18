@@ -231,6 +231,22 @@ async function init() {
     renderNav(CATEGORIES);
     renderDocs(sections, CATEGORIES);
 
+    // Handle hash navigation after content is rendered
+    if (window.location.hash) {
+      const targetId = window.location.hash.slice(1);
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        // Small delay to ensure layout is complete
+        setTimeout(() => {
+          targetElement.scrollIntoView({ behavior: 'smooth' });
+          // Update nav active state
+          docsNav.querySelectorAll('.docs-nav__link').forEach(link => {
+            link.classList.toggle('docs-nav__link--active', link.getAttribute('href') === window.location.hash);
+          });
+        }, 100);
+      }
+    }
+
     console.log('[Docs] Loaded and rendered');
   } catch (error) {
     console.error('[Docs] Error:', error);
