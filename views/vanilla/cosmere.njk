@@ -1,0 +1,188 @@
+---
+layout: base.njk
+title: Cosmere Magic Systems
+description: A reference guide to Investiture and magic systems in Brandon Sanderson's Cosmere
+headerTagline: Cosmere Reference
+---
+
+<style>
+  .cosmere-intro {
+    text-align: center;
+    margin-bottom: var(--spacing-xxl);
+    padding-bottom: var(--spacing-xl);
+    border-bottom: 1px solid var(--color-border-default);
+  }
+
+  .cosmere-intro__title {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .cosmere-intro__description {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: var(--line-height-relaxed);
+  }
+
+  .magic-systems {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  @media (min-width: 768px) {
+    .magic-systems {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .magic-card {
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    border-left: 3px solid var(--color-accent-primary);
+  }
+
+  .magic-card__world {
+    font-size: var(--font-size-xs);
+    color: var(--color-accent-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .magic-card__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .magic-card__description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-relaxed);
+  }
+
+  .cosmere-note {
+    max-width: 700px;
+    margin: var(--spacing-xxl) auto 0;
+    padding: var(--spacing-lg);
+    background: var(--color-background-tertiary);
+    border-radius: var(--radius-md);
+    text-align: center;
+  }
+
+  .cosmere-note__text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    line-height: var(--line-height-relaxed);
+  }
+
+  .cosmere-note__text a {
+    color: var(--color-accent-secondary);
+  }
+</style>
+
+<div class="cosmere-intro">
+  <h2 class="cosmere-intro__title">What is Investiture?</h2>
+  <p class="cosmere-intro__description">
+    In Brandon Sanderson's Cosmere universe, Investiture is the fundamental magical energy that permeates all worlds. Each planet manifests this power differently, creating distinct magic systems with their own rules and limitations. This scaffold borrows the name because, like Investiture itself, it's a foundation that can manifest as many different things.
+  </p>
+</div>
+
+<div class="magic-systems">
+  <article class="magic-card">
+    <p class="magic-card__world">Scadrial</p>
+    <h3 class="magic-card__title">Allomancy</h3>
+    <p class="magic-card__description">
+      Users ingest and "burn" metals to gain specific powers. Each of the sixteen Allomantic metals grants a different ability, from enhanced strength to emotional manipulation to seeing the future.
+    </p>
+  </article>
+
+  <article class="magic-card">
+    <p class="magic-card__world">Scadrial</p>
+    <h3 class="magic-card__title">Feruchemy</h3>
+    <p class="magic-card__description">
+      A magic of balance. Feruchemists store attributes (strength, speed, memory, warmth) in metal "metalminds" for later use. What you store, you can withdraw—nothing is created or destroyed.
+    </p>
+  </article>
+
+  <article class="magic-card">
+    <p class="magic-card__world">Scadrial</p>
+    <h3 class="magic-card__title">Hemalurgy</h3>
+    <p class="magic-card__description">
+      The dark art of stealing abilities through metal spikes driven through living beings. It transfers powers between people but always at a cost—something is lost in the transfer.
+    </p>
+  </article>
+
+  <article class="magic-card">
+    <p class="magic-card__world">Roshar</p>
+    <h3 class="magic-card__title">Surgebinding</h3>
+    <p class="magic-card__description">
+      Knights Radiant bond with spren (cognitive entities) to access Surges—fundamental forces like gravity, friction, and transformation. Each order commands two of the ten Surges.
+    </p>
+  </article>
+
+  <article class="magic-card">
+    <p class="magic-card__world">Roshar</p>
+    <h3 class="magic-card__title">Voidbinding</h3>
+    <p class="magic-card__description">
+      The corrupted counterpart to Surgebinding, associated with Odium. Less understood, it grants powers to the singers and Fused through different means than the Radiant bonds.
+    </p>
+  </article>
+
+  <article class="magic-card">
+    <p class="magic-card__world">Sel</p>
+    <h3 class="magic-card__title">AonDor</h3>
+    <p class="magic-card__description">
+      The magic of the Elantrians. Practitioners draw Aons—symbolic characters—in the air to produce magical effects. The power is tied to the land itself and the city of Elantris.
+    </p>
+  </article>
+
+  <article class="magic-card">
+    <p class="magic-card__world">Nalthis</p>
+    <h3 class="magic-card__title">Awakening</h3>
+    <p class="magic-card__description">
+      Uses BioChromatic Breath to animate objects with Commands. Everyone is born with one Breath; accumulating more grants heightened senses and abilities. Color is consumed in the process.
+    </p>
+  </article>
+
+  <article class="magic-card">
+    <p class="magic-card__world">Taldain</p>
+    <h3 class="magic-card__title">Sand Mastery</h3>
+    <p class="magic-card__description">
+      Controls the white sand of the Dayside, which holds Investiture from the sun. Sand masters can command the sand to move and shape itself, though it drains their hydration.
+    </p>
+  </article>
+
+  <article class="magic-card">
+    <p class="magic-card__world">Threnody</p>
+    <h3 class="magic-card__title">Threnodite Magic</h3>
+    <p class="magic-card__description">
+      A world haunted by shades—cognitive shadows of the dead. The magic here involves silver's protective properties and the dangerous Simple Rules that keep the living safe from spirits.
+    </p>
+  </article>
+
+  <article class="magic-card">
+    <p class="magic-card__world">First of the Sun</p>
+    <h3 class="magic-card__title">Aviar Bonds</h3>
+    <p class="magic-card__description">
+      Birds called Aviar develop magical talents by eating fruit from trees on the islands. When bonded to humans, they share abilities like hiding one's mind from predators.
+    </p>
+  </article>
+</div>
+
+<div class="cosmere-note">
+  <p class="cosmere-note__text">
+    The Cosmere is the shared universe of Brandon Sanderson's adult fantasy novels.
+    Learn more at <a href="https://www.brandonsanderson.com/" target="_blank" rel="noopener">brandonsanderson.com</a>
+  </p>
+</div>

@@ -378,6 +378,13 @@
       color: $color-accent-secondary;
     }
   }
+
+  &__cosmere-link {
+    display: inline-block;
+    margin-left: $spacing-sm;
+    padding-left: $spacing-sm;
+    border-left: 1px solid $color-border-default;
+  }
 }
 
 // =============================================================================
