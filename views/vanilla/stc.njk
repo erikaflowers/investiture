@@ -4,220 +4,614 @@ title: Beat Sheet
 description: Beat sheet builder for novelists using Blake Snyder's Save the Cat method
 ---
 
-<div id="stc-app" class="stc-placeholder">
-  <p class="stc-placeholder__icon">🚧</p>
-  <p class="stc-placeholder__text">Under Construction</p>
-  <p class="stc-placeholder__subtext">UX being designed in Mural</p>
+<div id="stc-app">
+  <!-- LIST VIEW: New braindump + table of existing -->
+  <div id="list-view" class="stc-view">
+    <div class="stc-test-flow__container">
+      <h2 class="stc-test-flow__title">Okay, what's your big idea?</h2>
+      <p class="stc-test-flow__subtitle">Pour it all out. Stream of consciousness. Don't hold back.</p>
 
-  <!-- Database Test Panel -->
-  <div class="stc-test-panel">
-    <h3>Supabase Connection Test</h3>
+      <textarea
+        id="braindump-input"
+        class="stc-test-flow__textarea"
+        placeholder="A detective who can taste lies... A world where dreams are currency... What if the moon was actually..."
+      ></textarea>
 
-    <div class="stc-test-panel__status" id="connection-status">
-      Checking connection...
-    </div>
-
-    <div class="stc-test-panel__actions">
-      <button class="button button--primary" id="btn-test-connection">
-        Test Connection
+      <button id="btn-save" class="button button--primary stc-test-flow__button">
+        Save My Braindump
       </button>
-      <button class="button button--secondary" id="btn-create-project">
-        Create Test Project
-      </button>
-    </div>
 
-    <div class="stc-test-panel__results" id="test-results">
-      <!-- Results will appear here -->
+      <div id="result-panel" class="stc-test-flow__result" style="display: none;">
+        <h3>Saved to Supabase!</h3>
+        <p>Your idea is safe. <a href="#" id="dive-into-new">Dive into it now →</a></p>
+      </div>
+
+      <div id="error-panel" class="stc-test-flow__error" style="display: none;">
+        <h3>Error</h3>
+        <p id="error-message"></p>
+      </div>
+
+      <!-- Existing braindumps -->
+      <div id="existing-panel" class="stc-test-flow__existing">
+        <h3>Recent Braindumps</h3>
+        <table id="braindumps-table">
+          <thead>
+            <tr>
+              <th>Created</th>
+              <th>Idea</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="braindumps-body">
+            <tr><td colspan="3" class="loading">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIVE VIEW: Working with a specific braindump -->
+  <div id="dive-view" class="stc-view" style="display: none;">
+    <div class="stc-dive__container">
+      <button id="btn-back" class="button button--secondary stc-dive__back">
+        ← Back to all ideas
+      </button>
+
+      <div class="stc-dive__header">
+        <h2 class="stc-dive__title">Your Braindump</h2>
+        <span class="stc-dive__timestamp" id="dive-timestamp"></span>
+      </div>
+
+      <!-- Display mode -->
+      <div id="dive-display" class="stc-dive__content">
+        <div id="dive-content" class="stc-dive__text"></div>
+        <button id="btn-edit" class="button button--secondary stc-dive__edit">
+          Edit Braindump
+        </button>
+      </div>
+
+      <!-- Edit mode -->
+      <div id="dive-edit" class="stc-dive__content" style="display: none;">
+        <textarea id="dive-textarea" class="stc-dive__textarea"></textarea>
+        <div class="stc-dive__actions">
+          <button id="btn-cancel-edit" class="button button--secondary">Cancel</button>
+          <button id="btn-save-edit" class="button button--primary">Save Changes</button>
+        </div>
+      </div>
+
+      <!-- Future: This is where we'd add the next phase UI -->
+      <div class="stc-dive__next">
+        <p>Next up: Extract the premise spine from this braindump...</p>
+      </div>
     </div>
   </div>
 </div>
 
 <script type="module">
-  // Import Supabase client from CDN (static site, no bundler)
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-  // Supabase config (public credentials - RLS protects data)
+  // Supabase config
   const SUPABASE_URL = 'https://vfufedgmfcqwimvglvls.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_vi8VVrb56M0_TAp3vo2Gow_TXzQQqCV';
-
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // DOM elements
-  const statusEl = document.getElementById('connection-status');
-  const resultsEl = document.getElementById('test-results');
-  const btnTestConnection = document.getElementById('btn-test-connection');
-  const btnCreateProject = document.getElementById('btn-create-project');
+  // State
+  let currentBraindump = null;
+  let currentProject = null;
 
-  // Helper to show results
-  function showResult(message, isError = false) {
-    const div = document.createElement('div');
-    div.className = `stc-test-result ${isError ? 'stc-test-result--error' : 'stc-test-result--success'}`;
-    div.innerHTML = `<span class="stc-test-result__time">${new Date().toLocaleTimeString()}</span> ${message}`;
-    resultsEl.insertBefore(div, resultsEl.firstChild);
+  // DOM elements - List view
+  const listView = document.getElementById('list-view');
+  const textarea = document.getElementById('braindump-input');
+  const btnSave = document.getElementById('btn-save');
+  const resultPanel = document.getElementById('result-panel');
+  const errorPanel = document.getElementById('error-panel');
+  const diveIntoNew = document.getElementById('dive-into-new');
+
+  // DOM elements - Dive view
+  const diveView = document.getElementById('dive-view');
+  const btnBack = document.getElementById('btn-back');
+  const diveTimestamp = document.getElementById('dive-timestamp');
+  const diveContent = document.getElementById('dive-content');
+  const diveDisplay = document.getElementById('dive-display');
+  const diveEdit = document.getElementById('dive-edit');
+  const diveTextarea = document.getElementById('dive-textarea');
+  const btnEdit = document.getElementById('btn-edit');
+  const btnCancelEdit = document.getElementById('btn-cancel-edit');
+  const btnSaveEdit = document.getElementById('btn-save-edit');
+
+  // View switching
+  function showListView() {
+    listView.style.display = 'block';
+    diveView.style.display = 'none';
+    currentBraindump = null;
+    currentProject = null;
   }
 
-  // Test connection
-  async function testConnection() {
-    statusEl.textContent = 'Testing connection...';
-    statusEl.className = 'stc-test-panel__status stc-test-panel__status--pending';
+  function showDiveView(braindump, project) {
+    currentBraindump = braindump;
+    currentProject = project;
 
-    try {
-      const { error } = await supabase.from('projects').select('count', { count: 'exact', head: true });
+    listView.style.display = 'none';
+    diveView.style.display = 'block';
 
-      if (error) {
-        statusEl.textContent = `Connection failed: ${error.message}`;
-        statusEl.className = 'stc-test-panel__status stc-test-panel__status--error';
-        showResult(`Connection failed: ${error.message}`, true);
-        return false;
-      }
+    diveTimestamp.textContent = new Date(braindump.created_at).toLocaleString();
+    diveContent.textContent = braindump.raw_input;
+    diveTextarea.value = braindump.raw_input;
 
-      statusEl.textContent = 'Connected to Supabase!';
-      statusEl.className = 'stc-test-panel__status stc-test-panel__status--success';
-      showResult('Successfully connected to Supabase');
-      return true;
-    } catch (e) {
-      statusEl.textContent = `Connection error: ${e.message}`;
-      statusEl.className = 'stc-test-panel__status stc-test-panel__status--error';
-      showResult(`Connection error: ${e.message}`, true);
-      return false;
+    // Reset to display mode
+    diveDisplay.style.display = 'block';
+    diveEdit.style.display = 'none';
+  }
+
+  // Save new braindump
+  async function saveBraindump() {
+    const content = textarea.value.trim();
+
+    if (!content) {
+      showError('Please enter your idea first!');
+      return;
     }
-  }
 
-  // Create test project
-  async function createTestProject() {
-    showResult('Creating test project...');
+    btnSave.disabled = true;
+    btnSave.textContent = 'Saving...';
 
     try {
       // Create project
       const { data: project, error: projectError } = await supabase
         .from('projects')
         .insert({
-          title: `Test Project ${Date.now()}`,
+          title: 'Braindump Session',
           status: 'braindump',
-          user_id: null, // No auth yet
+          user_id: null,
         })
         .select()
         .single();
 
-      if (projectError) {
-        showResult(`Failed to create project: ${projectError.message}`, true);
-        return;
-      }
+      if (projectError) throw new Error(`Project creation failed: ${projectError.message}`);
 
-      showResult(`Created project: <strong>${project.title}</strong> (ID: ${project.id})`);
-
-      // Create a braindump for it
+      // Save braindump
       const { data: braindump, error: braindumpError } = await supabase
         .from('braindumps')
         .insert({
           project_id: project.id,
-          raw_input: 'This is a test braindump created from the STC app to verify Supabase connectivity.',
+          raw_input: content,
         })
         .select()
         .single();
 
-      if (braindumpError) {
-        showResult(`Failed to create braindump: ${braindumpError.message}`, true);
-        return;
-      }
+      if (braindumpError) throw new Error(`Braindump save failed: ${braindumpError.message}`);
 
-      showResult(`Created braindump for project (ID: ${braindump.id})`);
-      showResult('<strong>Success!</strong> Data is now in Supabase. Check your dashboard.');
+      // Store for "dive into new" link
+      currentBraindump = braindump;
+      currentProject = project;
+
+      // Show success
+      errorPanel.style.display = 'none';
+      resultPanel.style.display = 'block';
+      textarea.value = '';
+
+      // Refresh table
+      await loadBraindumps();
 
     } catch (e) {
-      showResult(`Error: ${e.message}`, true);
+      showError(e.message);
+    } finally {
+      btnSave.disabled = false;
+      btnSave.textContent = 'Save My Braindump';
     }
   }
 
-  // Event listeners
-  btnTestConnection.addEventListener('click', testConnection);
-  btnCreateProject.addEventListener('click', createTestProject);
+  function showError(message) {
+    resultPanel.style.display = 'none';
+    errorPanel.style.display = 'block';
+    document.getElementById('error-message').textContent = message;
+  }
 
-  // Auto-test on load
-  testConnection();
+  // Load existing braindumps
+  async function loadBraindumps() {
+    const tbody = document.getElementById('braindumps-body');
+
+    try {
+      const { data, error } = await supabase
+        .from('braindumps')
+        .select('id, raw_input, created_at, project_id')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="3" class="error">Error: ${error.message}</td></tr>`;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="empty">No braindumps yet. Add your first idea above!</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map(row => `
+        <tr>
+          <td class="timestamp">${new Date(row.created_at).toLocaleString()}</td>
+          <td class="content">${escapeHtml(truncate(row.raw_input, 80))}</td>
+          <td class="action">
+            <button class="button button--small button--primary dive-btn" data-id="${row.id}" data-project="${row.project_id}">
+              Dive in →
+            </button>
+          </td>
+        </tr>
+      `).join('');
+
+      // Attach click handlers
+      tbody.querySelectorAll('.dive-btn').forEach(btn => {
+        btn.addEventListener('click', () => diveIntoBraindump(btn.dataset.id));
+      });
+
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="3" class="error">Error: ${e.message}</td></tr>`;
+    }
+  }
+
+  // Dive into a braindump
+  async function diveIntoBraindump(braindumpId) {
+    try {
+      const { data: braindump, error } = await supabase
+        .from('braindumps')
+        .select('*, projects(*)')
+        .eq('id', braindumpId)
+        .single();
+
+      if (error) throw error;
+
+      showDiveView(braindump, braindump.projects);
+    } catch (e) {
+      showError(`Failed to load braindump: ${e.message}`);
+    }
+  }
+
+  // Edit mode
+  function enterEditMode() {
+    diveDisplay.style.display = 'none';
+    diveEdit.style.display = 'block';
+    diveTextarea.focus();
+  }
+
+  function exitEditMode() {
+    diveDisplay.style.display = 'block';
+    diveEdit.style.display = 'none';
+    diveTextarea.value = currentBraindump.raw_input; // Reset
+  }
+
+  async function saveEdit() {
+    const newContent = diveTextarea.value.trim();
+    if (!newContent) return;
+
+    btnSaveEdit.disabled = true;
+    btnSaveEdit.textContent = 'Saving...';
+
+    try {
+      const { data, error } = await supabase
+        .from('braindumps')
+        .update({ raw_input: newContent })
+        .eq('id', currentBraindump.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      currentBraindump = data;
+      diveContent.textContent = data.raw_input;
+      exitEditMode();
+
+    } catch (e) {
+      alert(`Failed to save: ${e.message}`);
+    } finally {
+      btnSaveEdit.disabled = false;
+      btnSaveEdit.textContent = 'Save Changes';
+    }
+  }
+
+  // Helpers
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function truncate(text, len) {
+    return text.length > len ? text.substring(0, len) + '...' : text;
+  }
+
+  // Event listeners
+  btnSave.addEventListener('click', saveBraindump);
+  btnBack.addEventListener('click', showListView);
+  btnEdit.addEventListener('click', enterEditMode);
+  btnCancelEdit.addEventListener('click', exitEditMode);
+  btnSaveEdit.addEventListener('click', saveEdit);
+
+  diveIntoNew.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (currentBraindump) {
+      showDiveView(currentBraindump, currentProject);
+    }
+  });
+
+  // Init
+  loadBraindumps();
 </script>
 
 <style>
-  .stc-placeholder__subtext {
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted, #8B7D6B);
-    margin-top: var(--spacing-xs);
+  .stc-view {
+    min-height: 60vh;
   }
 
-  .stc-test-panel {
-    margin-top: var(--spacing-xxl);
+  /* ========== LIST VIEW ========== */
+  .stc-test-flow__container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: var(--spacing-xl) var(--spacing-md);
+    text-align: center;
+  }
+
+  .stc-test-flow__title {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 2rem;
+    color: var(--color-text-primary, #2C2416);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-test-flow__subtitle {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    color: var(--color-text-muted, #8B7D6B);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .stc-test-flow__textarea {
+    width: 100%;
+    min-height: 200px;
     padding: var(--spacing-lg);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-lg);
+    line-height: 1.7;
+    color: var(--color-text-primary, #2C2416);
     background: var(--color-background-card, #FFFCF8);
-    border: 1px solid var(--color-border-default, #D9CFC2);
+    border: 2px solid var(--color-border-default, #D9CFC2);
     border-radius: var(--radius-md);
-    max-width: 600px;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .stc-test-flow__textarea:focus {
+    outline: none;
+    border-color: var(--color-accent-primary, #B85C38);
+    box-shadow: 0 0 0 4px rgba(184, 92, 56, 0.1);
+  }
+
+  .stc-test-flow__textarea::placeholder {
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
+  }
+
+  .stc-test-flow__button {
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: var(--font-size-lg);
+  }
+
+  .stc-test-flow__button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .stc-test-flow__result,
+  .stc-test-flow__error {
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
     text-align: left;
   }
 
-  .stc-test-panel h3 {
-    font-family: 'Lora', Georgia, serif;
-    font-size: var(--font-size-lg);
-    color: var(--color-text-primary, #2C2416);
-    margin-bottom: var(--spacing-md);
-  }
-
-  .stc-test-panel__status {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--radius-sm);
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: var(--font-size-sm);
-    margin-bottom: var(--spacing-md);
-    background: var(--color-background-tertiary, #EDE4D9);
-  }
-
-  .stc-test-panel__status--pending {
-    background: #FFF3CD;
-    color: #856404;
-  }
-
-  .stc-test-panel__status--success {
+  .stc-test-flow__result {
     background: #D4EDDA;
+    border: 1px solid #28A745;
+  }
+
+  .stc-test-flow__result h3 {
+    font-family: 'Lora', Georgia, serif;
+    color: #155724;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-test-flow__result p {
     color: #155724;
   }
 
-  .stc-test-panel__status--error {
+  .stc-test-flow__result a {
+    color: #155724;
+    font-weight: 600;
+  }
+
+  .stc-test-flow__error {
     background: #F8D7DA;
+    border: 1px solid #DC3545;
+  }
+
+  .stc-test-flow__error h3 {
+    font-family: 'Lora', Georgia, serif;
+    color: #721C24;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-test-flow__error p {
+    font-family: 'Source Sans 3', sans-serif;
     color: #721C24;
   }
 
-  .stc-test-panel__actions {
-    display: flex;
-    gap: var(--spacing-sm);
+  /* Table */
+  .stc-test-flow__existing {
+    margin-top: var(--spacing-xxl);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+    text-align: left;
+  }
+
+  .stc-test-flow__existing h3 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary, #5C4D3C);
     margin-bottom: var(--spacing-md);
   }
 
-  .stc-test-panel__results {
-    max-height: 300px;
-    overflow-y: auto;
+  #braindumps-table {
+    width: 100%;
+    border-collapse: collapse;
     font-family: 'Source Sans 3', sans-serif;
     font-size: var(--font-size-sm);
   }
 
-  .stc-test-result {
-    padding: var(--spacing-sm);
-    margin-bottom: var(--spacing-xs);
-    border-radius: var(--radius-sm);
-    border-left: 3px solid;
+  #braindumps-table th {
+    text-align: left;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-background-tertiary, #EDE4D9);
+    color: var(--color-text-secondary, #5C4D3C);
+    font-weight: 600;
+    border-bottom: 2px solid var(--color-border-default, #D9CFC2);
   }
 
-  .stc-test-result--success {
-    background: rgba(212, 237, 218, 0.5);
-    border-left-color: #28A745;
+  #braindumps-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--color-border-default, #D9CFC2);
+    vertical-align: middle;
   }
 
-  .stc-test-result--error {
-    background: rgba(248, 215, 218, 0.5);
-    border-left-color: #DC3545;
-  }
-
-  .stc-test-result__time {
+  #braindumps-table .timestamp {
+    white-space: nowrap;
     color: var(--color-text-muted, #8B7D6B);
-    margin-right: var(--spacing-sm);
+    width: 140px;
+  }
+
+  #braindumps-table .content {
+    color: var(--color-text-primary, #2C2416);
+  }
+
+  #braindumps-table .action {
+    width: 100px;
+    text-align: right;
+  }
+
+  #braindumps-table .loading,
+  #braindumps-table .empty {
+    text-align: center;
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
+    padding: var(--spacing-lg);
+  }
+
+  #braindumps-table .error {
+    text-align: center;
+    color: #DC3545;
+    padding: var(--spacing-lg);
+  }
+
+  #braindumps-table tr:hover td {
+    background: var(--color-background-secondary, #F5EEE6);
+  }
+
+  .button--small {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  /* ========== DIVE VIEW ========== */
+  .stc-dive__container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  .stc-dive__back {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .stc-dive__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--color-accent-primary, #B85C38);
+  }
+
+  .stc-dive__title {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.75rem;
+    color: var(--color-text-primary, #2C2416);
+    margin: 0;
+  }
+
+  .stc-dive__timestamp {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted, #8B7D6B);
+  }
+
+  .stc-dive__content {
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .stc-dive__text {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-lg);
+    line-height: 1.8;
+    color: var(--color-text-primary, #2C2416);
+    background: var(--color-background-card, #FFFCF8);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    white-space: pre-wrap;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-dive__edit {
+    display: inline-block;
+  }
+
+  .stc-dive__textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: var(--spacing-lg);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-lg);
+    line-height: 1.8;
+    color: var(--color-text-primary, #2C2416);
+    background: var(--color-background-card, #FFFCF8);
+    border: 2px solid var(--color-accent-primary, #B85C38);
+    border-radius: var(--radius-md);
+    resize: vertical;
+  }
+
+  .stc-dive__textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(184, 92, 56, 0.1);
+  }
+
+  .stc-dive__actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+  }
+
+  .stc-dive__next {
+    margin-top: var(--spacing-xxl);
+    padding: var(--spacing-lg);
+    background: var(--color-background-tertiary, #EDE4D9);
+    border-radius: var(--radius-md);
+    text-align: center;
+  }
+
+  .stc-dive__next p {
+    font-family: 'Lora', Georgia, serif;
+    font-style: italic;
+    color: var(--color-text-muted, #8B7D6B);
+    margin: 0;
   }
 </style>
