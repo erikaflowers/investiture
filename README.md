@@ -1,35 +1,90 @@
 # Investiture
 
-> *"Investiture is the underlying power that manifests differently on each world."*
+**A learning scaffold for designers who want to build real things with AI.**
 
-A decoupled, enterprise-ready application scaffold designed for building browser apps, SaaS products, and extensions.
+> *"The most important step a man can take is the next one."* — Dalinar Kholin
 
-## Philosophy
+## What This Is
 
-**Core + Shell Architecture** — Every layer is hot-swappable.
+Investiture is a starter kit for UX designers, design technologists, and creative folks who want to use Claude Code (or similar AI coding tools) to build actual applications—not just prototypes that dead-end.
 
-- The view layer doesn't know about the database
-- The core doesn't know about React
-- They communicate through clean interfaces
+This isn't a framework for startups to ship products. It's a flight simulator. A place to build the muscles you need before you're building for real.
 
-A backend dev, a designer, and a content writer can all work on different layers without stepping on each other.
+## The Problem It Solves
+
+You're a designer. You've got ideas. You've seen what Claude Code can do. You want in.
+
+But when you start prompting an AI to build something, you hit walls:
+
+- The code it generates works... until it doesn't, and you can't debug it
+- You build something cool in Lovable or Bolt, then realize you can't take it anywhere
+- You don't know what questions to ask because you don't know what you don't know
+- Terms like "services layer" and "state management" feel like a foreign language
+
+Meanwhile, engineers have spent years learning the fundamentals. Separation of concerns. How data flows. Why you don't hardcode strings. What happens when an API call fails. They learned it the hard way, over time, by breaking things.
+
+**Investiture is that knowledge, pre-loaded into a scaffold your AI can read.**
+
+## How It Works
+
+The repo includes a `CLAUDE.md` file. When your AI assistant reads it, it understands:
+
+- Where business logic goes (and where it doesn't)
+- How to keep your UI code separate from your data code
+- Why design tokens exist and how to use them
+- How to structure things so you can swap pieces later
+
+You don't have to become an engineer. You just have to work inside a system that already has the guardrails built in.
+
+## What You'll Learn By Using It
+
+Not from a tutorial. From doing.
+
+- **Separation of concerns** — Why your button shouldn't know about your database
+- **Service abstraction** — How to swap Supabase for Firebase without rewriting your app
+- **Design tokens** — One source of truth for colors, spacing, type
+- **Content separation** — Why hardcoded strings will haunt you later
+- **The shape of real codebases** — Folders that make sense, files that have one job
+
+This is the stuff senior engineers know intuitively. Investiture makes it concrete.
+
+## What This Is NOT
+
+- A production-ready framework (use it to learn, not to ship to millions)
+- A replacement for understanding code (you'll still need to read what your AI writes)
+- Magic (you still have to think—this just gives you better defaults)
+
+## Who It's For
+
+- UX designers who want to build, not just wireframe
+- Design technologists leveling up their AI-assisted workflow
+- Anyone who's been "vibe-coding" and wants to understand why things work
+- Creative folks who are tired of hitting walls they can't see
+
+---
 
 ## Quick Start
 
 ```bash
+# Clone it
+git clone git@github.com:erikaflowers/investiture.git my-app
+cd my-app
+
 # Install dependencies
 npm install
 
 # Compile SCSS and watch for changes
 npm run sass:watch
 
-# In another terminal, serve the vanilla view
-npx serve views/vanilla
+# In another terminal, serve the app
+npx serve -p 3000
 
-# Open http://localhost:3000
+# Open http://localhost:3000/views/vanilla/
 ```
 
 ## Architecture
+
+**Core + Shell** — Every layer is hot-swappable.
 
 ```
 VIEW LAYER (vanilla, React, Svelte, extension, etc.)
@@ -42,6 +97,10 @@ VIEW LAYER (vanilla, React, Svelte, extension, etc.)
               │
          SERVICES LAYER (auth, db, ai)
 ```
+
+- The view layer doesn't know about the database
+- The core doesn't know about React
+- They communicate through clean interfaces
 
 ## Project Structure
 
@@ -90,8 +149,6 @@ All user-facing strings live in `/content/[locale]/`. This enables:
 - CMS integration (point to an API instead of local JSON)
 - Content validation via JSON schema
 
-Use `{{variable}}` syntax for interpolation.
-
 ### Services
 
 Services in `/core/services/` wrap external providers:
@@ -102,53 +159,26 @@ Services in `/core/services/` wrap external providers:
 
 To swap providers (e.g., Supabase → Firebase), only change the service internals.
 
-### Views
-
-Each view implementation is self-contained in `/views/[framework]/`. The vanilla implementation shows the pattern:
-
-1. Import from `/core/index.js` for all logic
-2. Import from `/content/` for all copy
-3. Style with design tokens
-
 ## Commands
 
 ```bash
-# Development
-npm run dev              # Start dev server
-npm run sass:watch       # Watch SCSS changes
-
-# Build
+npm run dev              # Watch SCSS changes
 npm run build:tokens     # Regenerate tokens from JSON
 npm run sass:build       # Compile SCSS once
-
-# Serve
-npx serve views/vanilla  # Serve vanilla view
+npx serve -p 3000        # Serve the app
 ```
 
-## Adding a New View Framework
+## The Name
 
-1. Create `/views/[framework]/`
-2. Import core: `import { api, state } from '../../core/index.js'`
-3. Import content: `import content from '../../content/en/common.json'`
-4. Consume design tokens via CSS or SCSS
-5. Add a README with framework-specific setup
+In Brandon Sanderson's Cosmere, Investiture is the underlying magical energy that manifests differently on each world. Same power source, different expressions.
 
-## Enterprise Integration
+That's this scaffold. The architecture stays constant. What you build with it is up to you.
 
-### Custom Design System
-
-1. Create `/design-system/themes/[client].json`
-2. Update `/config/design-system.config.js`
-3. Run `npm run build:tokens`
-
-### CMS for Content
-
-1. Update `/config/content.config.js` with CMS endpoint
-2. Content loader fetches from CMS instead of local JSON
+---
 
 ## Contributing
 
-See [CLAUDE.md](./CLAUDE.md) for detailed contribution guidelines.
+See [CLAUDE.md](./CLAUDE.md) for detailed contribution guidelines and AI assistant instructions.
 
 ## License
 
@@ -156,4 +186,4 @@ MIT
 
 ---
 
-*"The most important step a man can take is the next one."* — Dalinar Kholin
+*"Investiture" borrowed with gratitude from [Brandon Sanderson's](https://www.brandonsanderson.com/) Cosmere universe.*

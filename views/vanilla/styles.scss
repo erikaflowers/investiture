@@ -158,6 +158,44 @@
 }
 
 // =============================================================================
+// Ethos Section
+// =============================================================================
+
+.ethos {
+  padding: $spacing-xxl 0;
+  border-bottom: 1px solid $color-border-default;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+
+    @include tablet {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &__block {
+    padding: $spacing-lg;
+    background: $color-background-secondary;
+    border-radius: $radius-md;
+    border-left: 3px solid $color-accent-primary;
+  }
+
+  &__title {
+    @include heading('md');
+    color: $color-accent-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__text {
+    @include body-text('sm');
+    color: $color-text-secondary;
+    line-height: $line-height-relaxed;
+  }
+}
+
+// =============================================================================
 // Features Grid
 // =============================================================================
 
