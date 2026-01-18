@@ -1,0 +1,33 @@
+{
+  "appTitle": "Save the Cat Beat Sheet Builder",
+  "appSubtitle": "Structure your novel with Blake Snyder's proven story beats",
+  "progress": {
+    "label": "Progress",
+    "format": "{{completed}} of {{total}} beats completed"
+  },
+  "actions": {
+    "save": "Save Progress",
+    "export": "Export Beat Sheet",
+    "clear": "Start Over",
+    "clearConfirm": "Are you sure? This will erase all your work."
+  },
+  "project": {
+    "titleLabel": "Project Title",
+    "titlePlaceholder": "Your novel's working title",
+    "genreLabel": "Genre",
+    "genrePlaceholder": "e.g., Thriller, Romance, Fantasy"
+  },
+  "beat": {
+    "placeholder": "Write your beat here...",
+    "expand": "Expand",
+    "collapse": "Collapse"
+  },
+  "sections": {
+    "actOne": "Act One: Setup",
+    "actTwo": "Act Two: Confrontation",
+    "actThree": "Act Three: Resolution"
+  },
+  "footer": {
+    "attribution": "Based on Save the Cat! by Blake Snyder, adapted for novelists"
+  }
+}

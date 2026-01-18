@@ -1,0 +1,57 @@
+{
+  "name": "Novelist's Hovel",
+  "description": "Warm, writerly theme for Save the Cat - like a cozy novelist's workspace",
+
+  "color": {
+    "background": {
+      "primary": "#FAF6F1",
+      "secondary": "#F5EEE6",
+      "tertiary": "#EDE4D9",
+      "card": "#FFFCF8"
+    },
+    "text": {
+      "primary": "#2C2416",
+      "secondary": "#5C4D3C",
+      "muted": "#8B7D6B",
+      "inverse": "#FAF6F1"
+    },
+    "accent": {
+      "primary": "#B85C38",
+      "primaryHover": "#A34E2D",
+      "secondary": "#C9A227",
+      "tertiary": "#7D4E57"
+    },
+    "border": {
+      "default": "#D9CFC2",
+      "hover": "#BFB099",
+      "accent": "#B85C38"
+    },
+    "state": {
+      "success": "#6B7F5E",
+      "warning": "#C9A227",
+      "error": "#A34E2D"
+    }
+  },
+
+  "typography": {
+    "fontFamily": {
+      "heading": "'Lora', 'Georgia', 'Times New Roman', serif",
+      "body": "'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      "mono": "'IBM Plex Mono', 'SF Mono', 'Fira Code', monospace"
+    },
+    "fontWeight": {
+      "normal": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    }
+  },
+
+  "effects": {
+    "shadow": {
+      "soft": "0 2px 8px rgba(44, 36, 22, 0.08)",
+      "medium": "0 4px 12px rgba(44, 36, 22, 0.12)",
+      "warm": "0 4px 16px rgba(184, 92, 56, 0.1)"
+    }
+  }
+}

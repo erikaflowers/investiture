@@ -19,9 +19,16 @@ module.exports = function(eleventyConfig) {
   // Pass through CLAUDE.md for docs page
   eleventyConfig.addPassthroughCopy("CLAUDE.md");
 
+  // Pass through STC app assets
+  eleventyConfig.addPassthroughCopy({ "apps/stc/core": "stc/core" });
+  eleventyConfig.addPassthroughCopy({ "apps/stc/content": "stc/content" });
+  eleventyConfig.addPassthroughCopy({ "apps/stc/design": "stc/design" });
+  eleventyConfig.addPassthroughCopy({ "apps/stc/views/vanilla/stc.css": "stc/stc.css" });
+
   // Watch for SCSS changes (triggers rebuild)
   eleventyConfig.addWatchTarget("views/vanilla/*.scss");
   eleventyConfig.addWatchTarget("views/vanilla/*.css");
+  eleventyConfig.addWatchTarget("apps/stc/**/*");
 
   // Set Nunjucks options
   eleventyConfig.setNunjucksEnvironmentOptions({

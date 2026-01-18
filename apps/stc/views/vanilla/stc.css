@@ -1,0 +1,553 @@
+/**
+ * Save the Cat App Styles - Novelist's Hovel Theme
+ *
+ * Warm, writerly visual identity.
+ * Think: wooden desk, afternoon light, a cup of tea.
+ *
+ * Note: stc-theme.css is loaded separately from the HTML template.
+ */
+
+/* ============================================================================
+   App Shell
+   ============================================================================ */
+
+.stc-body {
+  background-color: #FAF6F1;
+  min-height: 100vh;
+}
+
+.stc-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.stc-main {
+  flex: 1;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .stc-main {
+    padding: var(--spacing-xl) var(--spacing-lg);
+  }
+}
+
+/* ============================================================================
+   STC Header
+   ============================================================================ */
+
+.stc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: #F5EEE6;
+  border-bottom: 1px solid #D9CFC2;
+  box-shadow: 0 2px 8px rgba(44, 36, 22, 0.06);
+}
+
+@media (min-width: 768px) {
+  .stc-header {
+    padding: var(--spacing-md) var(--spacing-xl);
+  }
+}
+
+.stc-header__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+@media (min-width: 768px) {
+  .stc-header__brand {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--spacing-md);
+  }
+}
+
+.stc-header__title {
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: #B85C38;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.stc-header__tagline {
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--font-size-sm);
+  color: #8B7D6B;
+  font-style: italic;
+}
+
+.stc-header__nav {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.stc-nav__link {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: #5C4D3C;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.stc-nav__link:hover {
+  background: #EDE4D9;
+  color: #2C2416;
+  text-decoration: none;
+}
+
+.stc-nav__link--active {
+  background: #B85C38;
+  color: #FAF6F1;
+}
+
+.stc-nav__link--active:hover {
+  background: #A34E2D;
+  color: #FAF6F1;
+}
+
+/* ============================================================================
+   STC Footer
+   ============================================================================ */
+
+.stc-footer {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: #F5EEE6;
+  border-top: 1px solid #D9CFC2;
+  text-align: center;
+}
+
+.stc-footer__attribution {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: var(--font-size-sm);
+  color: #8B7D6B;
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.stc-footer__attribution em {
+  font-style: italic;
+}
+
+.stc-footer__back {
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--font-size-sm);
+  color: #B85C38;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.stc-footer__back:hover {
+  color: #A34E2D;
+  text-decoration: underline;
+}
+
+/* ============================================================================
+   Progress Bar
+   ============================================================================ */
+
+.stc-progress {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--color-background-secondary);
+  border-bottom: 1px solid var(--color-border-default);
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin: calc(-1 * var(--spacing-lg)) calc(-1 * var(--spacing-md)) var(--spacing-xl);
+  box-shadow: var(--shadow-soft, 0 2px 8px rgba(44, 36, 22, 0.08));
+}
+
+@media (min-width: 768px) {
+  .stc-progress {
+    margin: calc(-1 * var(--spacing-xl)) calc(-1 * var(--spacing-lg)) var(--spacing-xl);
+  }
+}
+
+.stc-progress__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.stc-progress__label {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-heading, 'Lora', serif);
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.stc-progress__count {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-heading, 'Lora', serif);
+  color: var(--color-accent-primary);
+}
+
+.stc-progress__bar {
+  height: 8px;
+  background: var(--color-background-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 1px solid var(--color-border-default);
+}
+
+.stc-progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent-primary), var(--color-accent-secondary, #C9A227));
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+/* ============================================================================
+   Project Header
+   ============================================================================ */
+
+.stc-project {
+  background: var(--color-background-card, var(--color-background-secondary));
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: var(--shadow-soft, 0 2px 8px rgba(44, 36, 22, 0.08));
+}
+
+.stc-project__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-heading, 'Lora', serif);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+  letter-spacing: -0.01em;
+}
+
+.stc-project__fields {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .stc-project__fields {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.stc-project__field label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-heading, 'Lora', serif);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.stc-project__field input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-body, inherit);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stc-project__field input:focus {
+  outline: none;
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 3px rgba(184, 92, 56, 0.1);
+}
+
+.stc-project__field input::placeholder {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ============================================================================
+   Act Sections
+   ============================================================================ */
+
+.stc-act {
+  margin-bottom: var(--spacing-xxl);
+}
+
+.stc-act__title {
+  font-size: var(--font-size-xxl, 1.75rem);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-heading, 'Lora', serif);
+  color: var(--color-accent-primary);
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--color-accent-primary);
+  letter-spacing: -0.02em;
+}
+
+/* ============================================================================
+   Beat Cards
+   ============================================================================ */
+
+.stc-beat {
+  background: var(--color-background-card, var(--color-background-secondary));
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--shadow-soft, 0 2px 8px rgba(44, 36, 22, 0.08));
+}
+
+.stc-beat:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-medium, 0 4px 12px rgba(44, 36, 22, 0.12));
+}
+
+.stc-beat--completed {
+  border-left: 4px solid var(--color-accent-secondary, #C9A227);
+  background: linear-gradient(90deg, rgba(201, 162, 39, 0.05) 0%, transparent 20%);
+}
+
+.stc-beat__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.stc-beat__number {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: var(--color-accent-primary);
+  color: var(--color-text-inverse, #FAF6F1);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-heading, 'Lora', serif);
+  box-shadow: 0 2px 4px rgba(184, 92, 56, 0.3);
+}
+
+.stc-beat__info {
+  flex: 1;
+}
+
+.stc-beat__name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-heading, 'Lora', serif);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+  letter-spacing: -0.01em;
+}
+
+.stc-beat__description {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-body, inherit);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+.stc-beat__prompt {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-body, inherit);
+  color: var(--color-accent-tertiary, #7D4E57);
+  font-style: italic;
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(125, 78, 87, 0.06);
+  border-left: 3px solid var(--color-accent-tertiary, #7D4E57);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.stc-beat__textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: var(--spacing-md);
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-body, inherit);
+  line-height: 1.7;
+  resize: vertical;
+  margin-top: var(--spacing-md);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stc-beat__textarea:focus {
+  outline: none;
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 3px rgba(184, 92, 56, 0.1);
+}
+
+.stc-beat__textarea::placeholder {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ============================================================================
+   Finale Sub-beats
+   ============================================================================ */
+
+.stc-beat--parent {
+  background: var(--color-background-secondary);
+  border: 2px solid var(--color-border-default);
+  border-left: 4px solid var(--color-accent-primary);
+}
+
+.stc-beat--parent > .stc-beat__textarea {
+  display: none;
+}
+
+.stc-subbeats {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px dashed var(--color-border-default);
+}
+
+.stc-subbeats__title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-heading, 'Lora', serif);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--spacing-md);
+}
+
+.stc-beat--sub {
+  margin-left: var(--spacing-md);
+  border-left: 3px solid var(--color-accent-secondary, #C9A227);
+  background: var(--color-background-card, #FFFCF8);
+}
+
+.stc-beat--sub .stc-beat__number {
+  width: 32px;
+  height: 32px;
+  font-size: var(--font-size-xs);
+  background: var(--color-background-tertiary);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-accent-secondary, #C9A227);
+  box-shadow: none;
+}
+
+/* ============================================================================
+   Action Buttons
+   ============================================================================ */
+
+.stc-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: var(--spacing-xxl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--color-border-default);
+}
+
+/* Override button styles for STC theme */
+#stc-app .button--primary {
+  background: var(--color-accent-primary);
+  color: var(--color-text-inverse, #FAF6F1);
+  border: none;
+  font-family: var(--font-family-heading, 'Lora', serif);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 4px rgba(184, 92, 56, 0.3);
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#stc-app .button--primary:hover {
+  background: var(--color-accent-primary-hover, #A34E2D);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(184, 92, 56, 0.3);
+}
+
+#stc-app .button--secondary {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-default);
+  font-family: var(--font-family-heading, 'Lora', serif);
+  font-weight: var(--font-weight-medium);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+#stc-app .button--secondary:hover {
+  background: var(--color-background-tertiary);
+  border-color: var(--color-border-hover);
+}
+
+/* ============================================================================
+   Attribution
+   ============================================================================ */
+
+.stc-attribution {
+  text-align: center;
+  margin-top: var(--spacing-xl);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-body, inherit);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ============================================================================
+   Warm Decorative Elements
+   ============================================================================ */
+
+/* Subtle warm glow on completed beats */
+.stc-beat--completed::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 20px rgba(201, 162, 39, 0.05);
+}
+
+/* Relative positioning for the glow effect */
+.stc-beat {
+  position: relative;
+}
+
+/* ============================================================================
+   Placeholder (Under Construction)
+   ============================================================================ */
+
+.stc-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+}
+
+.stc-placeholder__icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.stc-placeholder__text {
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--font-size-xl);
+  color: var(--color-text-muted, #8B7D6B);
+  font-style: italic;
+}

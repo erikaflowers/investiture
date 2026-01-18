@@ -1,0 +1,102 @@
+{
+  "opening-image": {
+    "name": "Opening Image",
+    "description": "A visual that represents the starting point of your protagonist. This is a 'before' snapshot that will contrast with the Final Image.",
+    "prompt": "What single image or moment captures your protagonist's world before everything changes?"
+  },
+  "theme-stated": {
+    "name": "Theme Stated",
+    "description": "Someone (usually not the protagonist) states the theme of the story. The protagonist doesn't understand it yet.",
+    "prompt": "What life lesson will your protagonist learn? How can a character hint at it early on?"
+  },
+  "setup": {
+    "name": "Setup",
+    "description": "Introduce the protagonist's world, their flaws, and what needs fixing. Plant seeds that will pay off later.",
+    "prompt": "What is broken in your protagonist's life? What do they want vs. what do they need?"
+  },
+  "catalyst": {
+    "name": "Catalyst",
+    "description": "The inciting incident. Something happens that disrupts the status quo and sets the story in motion.",
+    "prompt": "What event knocks your protagonist out of their ordinary world?"
+  },
+  "debate": {
+    "name": "Debate",
+    "description": "The protagonist hesitates. Should they accept the call to adventure? This is the last chance to turn back.",
+    "prompt": "Why would your protagonist resist the call? What fears or obligations hold them back?"
+  },
+  "break-into-two": {
+    "name": "Break Into Two",
+    "description": "The protagonist makes a choice and enters Act Two—the 'upside-down world' that contrasts with Act One.",
+    "prompt": "What decision does your protagonist make that commits them to the journey?"
+  },
+  "b-story": {
+    "name": "B Story",
+    "description": "A secondary storyline begins, often involving a love interest or mentor who helps the protagonist learn the theme.",
+    "prompt": "Who will teach your protagonist the theme? What relationship develops alongside the main plot?"
+  },
+  "fun-and-games": {
+    "name": "Fun and Games",
+    "description": "The promise of the premise. This is why the audience came—deliver the goods here.",
+    "prompt": "What scenes showcase your concept at its fullest? What's the 'trailer moment' material?"
+  },
+  "midpoint": {
+    "name": "Midpoint",
+    "description": "A false victory or false defeat that raises the stakes. The protagonist is no longer just playing—now it's real.",
+    "prompt": "Does your protagonist get what they want (false victory) or lose badly (false defeat)? How do stakes escalate?"
+  },
+  "bad-guys-close-in": {
+    "name": "Bad Guys Close In",
+    "description": "External pressures mount and internal flaws resurface. The team fractures. Things get worse.",
+    "prompt": "How do antagonistic forces tighten the noose? What internal doubts resurface?"
+  },
+  "all-is-lost": {
+    "name": "All Is Lost",
+    "description": "The lowest point. Often involves a 'whiff of death'—literal or metaphorical. The old self must die.",
+    "prompt": "What is taken from your protagonist? What loss forces them to rock bottom?"
+  },
+  "dark-night-of-the-soul": {
+    "name": "Dark Night of the Soul",
+    "description": "The protagonist mourns, reflects, and eventually finds clarity. This is the moment before transformation.",
+    "prompt": "How does your protagonist process their loss? What realization finally breaks through?"
+  },
+  "break-into-three": {
+    "name": "Break Into Three",
+    "description": "Armed with new understanding, the protagonist chooses to act. A and B stories often combine here.",
+    "prompt": "What solution emerges from the protagonist's reflection? How does the B Story inform the answer?"
+  },
+  "finale": {
+    "name": "Finale",
+    "description": "The climactic sequence where the protagonist applies their lessons, defeats the antagonist, and transforms.",
+    "prompt": "How does your protagonist prove they've changed by facing the final challenge?"
+  },
+  "finale-gathering": {
+    "name": "Gathering the Team",
+    "description": "The protagonist rallies allies, gathers resources, and prepares for the final push.",
+    "prompt": "Who joins the protagonist? What do they need to assemble before the climax?"
+  },
+  "finale-executing": {
+    "name": "Executing the Plan",
+    "description": "The initial plan is put into action. Early signs suggest it might work.",
+    "prompt": "What's the protagonist's strategy? How does it begin to unfold?"
+  },
+  "finale-high-tower": {
+    "name": "High Tower Surprise",
+    "description": "A twist! The plan fails or the antagonist reveals a hidden advantage. All seems lost again.",
+    "prompt": "What unexpected obstacle throws the plan into chaos?"
+  },
+  "finale-dig-deep": {
+    "name": "Dig Deep Down",
+    "description": "The protagonist must reach inside and find their true strength—the lesson learned from the theme.",
+    "prompt": "How does the protagonist summon what they've learned to push through?"
+  },
+  "finale-new-plan": {
+    "name": "Execution of New Plan",
+    "description": "Using their newfound wisdom, the protagonist executes a new approach and achieves victory.",
+    "prompt": "What does the protagonist do differently this time? How does their change enable success?"
+  },
+  "final-image": {
+    "name": "Final Image",
+    "description": "A visual that represents the ending—the 'after' snapshot that contrasts with the Opening Image.",
+    "prompt": "What image shows how your protagonist and their world have transformed?"
+  }
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{{ description or 'Save the Cat Beat Sheet Builder for novelists' }}">
+  <title>{% if title %}{{ title }} - Novelist's Hovel{% else %}Save the Cat - Novelist's Hovel{% endif %}</title>
+  <link rel="icon" href="{{ '/favicon.svg' | url }}" type="image/svg+xml">
+
+  <!-- Base Investiture styles (for tokens and resets) -->
+  <link rel="stylesheet" href="{{ '/design-system/tokens/tokens.css' | url }}">
+  <link rel="stylesheet" href="{{ '/styles.css' | url }}">
+
+  <!-- STC Theme -->
+  <link rel="stylesheet" href="{{ '/stc/design/stc-theme.css' | url }}">
+  <link rel="stylesheet" href="{{ '/stc/stc.css' | url }}">
+
+  {{ customHead | safe }}
+</head>
+<body class="stc-body">
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <div class="stc-shell">
+    <!-- STC Header -->
+    <header class="stc-header">
+      <div class="stc-header__brand">
+        <h1 class="stc-header__title">Save the Cat</h1>
+        <span class="stc-header__tagline">Beat Sheet Builder</span>
+      </div>
+      <nav class="stc-header__nav">
+        <a href="{{ '/stc/' | url }}" class="stc-nav__link stc-nav__link--active">Beat Sheet</a>
+        <!-- Future nav items will go here -->
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="stc-main">
+      {{ content | safe }}
+    </main>
+
+    <!-- STC Footer -->
+    <footer class="stc-footer">
+      <p class="stc-footer__attribution">
+        Based on <em>Save the Cat!</em> by Blake Snyder
+      </p>
+      <a href="{{ '/' | url }}" class="stc-footer__back">← Return to Investiture</a>
+    </footer>
+  </div>
+
+  {{ scripts | safe }}
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "welcome": {
+    "title": "Welcome to the Beat Sheet Builder",
+    "description": "Work through each beat to structure your novel. Don't worry about perfection—this is a planning tool. You can always revise."
+  },
+  "tips": {
+    "general": "Focus on your protagonist's emotional journey, not just the plot events.",
+    "openingImage": "Think visually. What would this look like as the opening shot of a movie?",
+    "theme": "The theme is often stated as advice that the protagonist initially ignores.",
+    "catalyst": "This should happen around the 10% mark of your story.",
+    "midpoint": "The midpoint divides Act Two in half. It's a major turning point.",
+    "allIsLost": "Include a 'whiff of death'—someone dies, or something symbolically dies.",
+    "finale": "The five sub-beats ensure your climax has proper structure, not just action."
+  },
+  "help": {
+    "whatIsSTC": "Save the Cat! is a storytelling methodology created by Blake Snyder. Originally for screenwriters, it's been adapted for novelists by Jessica Brody.",
+    "howToUse": "Work through each beat in order, or jump around as inspiration strikes. The progress bar tracks your completion.",
+    "export": "Export creates a plain text or markdown file you can use in your writing software."
+  }
+}
