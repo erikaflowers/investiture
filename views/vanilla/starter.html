@@ -86,6 +86,11 @@
         </a>
         <span class="header__tagline">Starter</span>
       </div>
+      <button class="header__menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <nav class="header__nav">
         <a href="getting-started.html" class="button button--secondary button--small">Get Started</a>
         <a href="docs.html" class="button button--secondary button--small">Docs</a>
@@ -128,8 +133,11 @@
     </footer>
   </div>
 
+  <!-- Load Navigation (view-layer UI interaction) -->
+  <script src="nav.js"></script>
+
   <!--
-    This page intentionally has no JavaScript.
+    This page intentionally has minimal JavaScript.
     Add your own app.js or import from core when you're ready:
 
     <script type="module">

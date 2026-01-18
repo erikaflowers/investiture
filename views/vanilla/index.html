@@ -24,14 +24,16 @@
         <h1 class="header__title">Investiture</h1>
         <span class="header__tagline">Core + Shell Architecture</span>
       </div>
+      <button class="header__menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <nav class="header__nav">
         <a href="starter.html" class="button button--secondary button--small">Starter Page</a>
         <a href="getting-started.html" class="button button--secondary button--small">Get Started</a>
         <a href="docs.html" class="button button--secondary button--small">Docs</a>
         <a href="https://github.com/erikaflowers/investiture" target="_blank" rel="noopener" class="button button--secondary button--small">GitHub</a>
-        <div class="auth-status" id="auth-status">
-          <!-- Auth status will be rendered by JS -->
-        </div>
       </nav>
     </header>
 
@@ -44,8 +46,9 @@
           A learning scaffold for designers who want to use Claude Code
           to build actual applications—not just prototypes that dead-end.
         </p>
-        <div class="hero__actions" id="hero-actions">
-          <!-- Actions will be rendered by JS -->
+        <div class="hero__actions">
+          <a href="getting-started.html" class="button button--primary">Get Started</a>
+          <a href="docs.html" class="button button--secondary">View Documentation</a>
         </div>
       </section>
 
@@ -129,32 +132,46 @@
         </div>
       </section>
 
-      <!-- Demo Section -->
-      <section class="demo">
-        <h3 class="section-title">Live Demo</h3>
-        <div class="demo__panels">
-          <!-- State Panel -->
-          <div class="demo-panel">
-            <h4 class="demo-panel__title">Application State</h4>
-            <pre class="demo-panel__content" id="state-display">Loading...</pre>
-          </div>
+      <!-- Explore Section -->
+      <section class="explore">
+        <h3 class="section-title">Explore the Scaffold</h3>
+        <p class="explore__intro">These are the key files that make Investiture work. Start here.</p>
+        <div class="explore__grid">
+          <a href="https://github.com/erikaflowers/investiture/blob/main/CLAUDE.md" target="_blank" rel="noopener" class="explore-card">
+            <div class="explore-card__icon">🤖</div>
+            <h4 class="explore-card__title">CLAUDE.md</h4>
+            <p class="explore-card__path">./CLAUDE.md</p>
+            <p class="explore-card__description">
+              The AI reads this to understand the rules. This is where the architecture knowledge lives.
+            </p>
+          </a>
 
-          <!-- AI Demo Panel -->
-          <div class="demo-panel">
-            <h4 class="demo-panel__title">AI Service Demo</h4>
-            <div class="ai-demo">
-              <input
-                type="text"
-                id="ai-input"
-                class="input"
-                placeholder="Type a prompt..."
-              >
-              <button id="ai-submit" class="button button--primary">
-                Send
-              </button>
-            </div>
-            <div class="ai-response" id="ai-response"></div>
-          </div>
+          <a href="https://github.com/erikaflowers/investiture/blob/main/design-system/tokens/tokens.json" target="_blank" rel="noopener" class="explore-card">
+            <div class="explore-card__icon">🎨</div>
+            <h4 class="explore-card__title">tokens.json</h4>
+            <p class="explore-card__path">./design-system/tokens/tokens.json</p>
+            <p class="explore-card__description">
+              Your design system lives here. Colors, spacing, typography — one source of truth.
+            </p>
+          </a>
+
+          <a href="https://github.com/erikaflowers/investiture/tree/main/content/en" target="_blank" rel="noopener" class="explore-card">
+            <div class="explore-card__icon">📝</div>
+            <h4 class="explore-card__title">content/en/</h4>
+            <p class="explore-card__path">./content/en/*.json</p>
+            <p class="explore-card__description">
+              All your copy in one place. Never hardcode strings — edit them here.
+            </p>
+          </a>
+
+          <a href="https://github.com/erikaflowers/investiture/tree/main/core/services" target="_blank" rel="noopener" class="explore-card">
+            <div class="explore-card__icon">🔌</div>
+            <h4 class="explore-card__title">core/services/</h4>
+            <p class="explore-card__path">./core/services/*.js</p>
+            <p class="explore-card__description">
+              Where you'll connect real backends. Auth, database, AI — all wrapped and swappable.
+            </p>
+          </a>
         </div>
       </section>
     </main>
@@ -170,6 +187,9 @@
       </p>
     </footer>
   </div>
+
+  <!-- Load Navigation (view-layer UI interaction) -->
+  <script src="nav.js"></script>
 
   <!-- Load Application -->
   <script type="module" src="app.js"></script>
