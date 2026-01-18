@@ -1,0 +1,80 @@
+# Investiture Changelog
+
+A running log of changes to the scaffold.
+
+---
+
+## 2025-01-17 (Evening) - Eleventy & CI/CD
+
+### Major Changes
+- **Eleventy Integration**: Refactored vanilla view from static HTML to Nunjucks templating
+  - Created `eleventy.config.cjs` for static site generation
+  - Added `_includes/` partials (base, head, nav, footer)
+  - Added `_data/` for site config and navigation
+  - Environment-based path prefixing (dev vs production)
+
+- **GitHub Actions**: Auto-deploy to GitHub Pages on every push to `main`
+  - Removed manual `docs/` folder commits
+  - CI builds fresh on each deploy
+
+- **Cosmere Reference Page**: Added `/cosmere/` with all magic systems
+  - Footer link: "What is Investiture?"
+
+### Commits
+- `1329328` Update CLAUDE.md comprehensively and fix dev/build scripts
+- `48fba9c` Add Cosmere magic systems reference page
+- `68ce20e` Fix passthrough copy paths for GitHub Actions compatibility
+- `341831a` Add clean step before Eleventy build in GitHub Actions
+- `493c803` Remove css.map passthrough to fix GitHub Actions build
+- `b1967e5` Add favicon
+- `18e3f2c` Remove app.js from homepage - core services are stubs
+- `4cbfdb0` Add GitHub Actions for auto-deploy to GitHub Pages
+- `42d1637` Fix production build paths for GitHub Pages
+- `d76d431` Fix Eleventy templates to render content correctly
+- `f36508f` Refactor vanilla view to use Eleventy for static site generation
+
+---
+
+## 2025-01-17 (Afternoon) - Navigation & Polish
+
+### Changes
+- Standardized navigation across all pages
+- Fixed anchor link navigation on docs page (hash handling after dynamic load)
+- Added mobile hamburger menu
+- Added "Explore the Scaffold" section to homepage
+- Removed auth demo (core services are stubs)
+- Added GitHub repo link to header
+
+### Commits
+- `602ac4b` Standardize navigation across all pages
+- `0482e45` Fix anchor link navigation on docs page
+- `d518727` Add mobile nav, remove auth demo, add Explore the Scaffold section
+- `80d386f` Add GitHub repo link to header navigation on all pages
+
+---
+
+## 2025-01-17 (Morning) - Initial Setup
+
+### Changes
+- Initial scaffold structure created
+- Design system with tokens (colors, typography, spacing)
+- Content layer with JSON strings
+- Core services layer (stubs for auth, database, AI)
+- Vanilla view implementation
+- Getting Started guide and Starter page
+- Documentation page with architecture overview
+- Ethos messaging for designer audience
+
+### Commits
+- `5a34f09` Add ethos messaging for designer audience
+- `57ea3f2` Add root index.html redirect for GitHub Pages
+- `b39e0f2` Add getting started guide, starter page, and navigation
+- `58de5fd` faq page
+- `97aaba3` de-gender
+- `c1d5fa2` Add briefing section to CLAUDE.md
+- `2acb267` Fix content loading to use fetch instead of import attributes
+- `d6ffa9d` Initial commit: Investiture scaffold
+
+---
+
+*Updated: 2025-01-17*
