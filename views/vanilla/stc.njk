@@ -139,6 +139,43 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         <div class="stc-spine__vertebrae" id="vertebrae-container">
           <!-- Vertebrae will be rendered by JS from config -->
         </div>
+
+        <div class="stc-spine__actions">
+          <button id="btn-save-genome" class="button button--primary">
+            Save Genome
+          </button>
+          <span id="genome-status" class="stc-spine__status"></span>
+        </div>
+      </div>
+
+      <!-- Story Concept Section -->
+      <div class="stc-concept" id="concept-section">
+        <div class="stc-concept__header">
+          <h3 class="stc-concept__heading">Story Concept</h3>
+          <button id="btn-generate-concept" class="button button--primary" style="display: none;">
+            Generate Story Concept
+          </button>
+        </div>
+        <p class="stc-concept__note" id="concept-note">Save your genome to unlock AI-powered story concept generation.</p>
+
+        <div id="concept-loading" class="stc-concept__loading" style="display: none;">
+          <span class="stc-concept__spinner"></span>
+          <span>Claude is thinking...</span>
+        </div>
+
+        <div id="concept-result" class="stc-concept__result" style="display: none;">
+          <div id="concept-content" class="stc-concept__content"></div>
+          <div class="stc-concept__actions">
+            <button id="btn-regenerate-concept" class="button button--secondary">
+              Regenerate
+            </button>
+            <span id="concept-status" class="stc-concept__status"></span>
+          </div>
+        </div>
+
+        <div id="concept-error" class="stc-concept__error" style="display: none;">
+          <p id="concept-error-message"></p>
+        </div>
       </div>
     </div>
   </div>
@@ -906,6 +943,297 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     updateHumorStyleState();
   }
 
+  // ========== GENOME PERSISTENCE ==========
+
+  function getGenomeData() {
+    return {
+      genre: spineSelections.genre || [],
+      archetype: spineSelections.archetype || [],
+      theme: spineSelections.theme || [],
+      tone: spineSelections.tone || [],
+      stakes: spineSelections.stakes || [],
+      humorRole: spineSelections.humorRole || 'none',
+      humorStyle: spineSelections.humorStyle || []
+    };
+  }
+
+  async function saveGenome() {
+    if (!currentProject) {
+      showGenomeStatus('No project selected', 'error');
+      return;
+    }
+
+    const btnSave = document.getElementById('btn-save-genome');
+    btnSave.disabled = true;
+    btnSave.textContent = 'Saving...';
+
+    try {
+      const genome = getGenomeData();
+
+      const { error } = await supabase
+        .from('projects')
+        .update({ genome: genome })
+        .eq('id', currentProject.id);
+
+      if (error) throw error;
+
+      // Update local project state
+      currentProject.genome = genome;
+
+      showGenomeStatus('Genome saved!', 'success');
+
+      // Update concept UI now that genome is saved
+      updateConceptUI();
+    } catch (e) {
+      console.error('Save genome error:', e);
+      showGenomeStatus('Failed to save: ' + e.message, 'error');
+    } finally {
+      btnSave.disabled = false;
+      btnSave.textContent = 'Save Genome';
+    }
+  }
+
+  function loadGenomeIntoUI(genome) {
+    if (!genome) {
+      resetSpineSelections();
+      return;
+    }
+
+    // Load multi-select vertebrae
+    ['genre', 'archetype', 'theme', 'tone', 'stakes'].forEach(key => {
+      spineSelections[key] = genome[key] || [];
+      const config = VERTEBRAE_CONFIG.find(v => v.key === key);
+      if (config) {
+        renderTags(key, config.options);
+        if (comboboxInstances[key]) {
+          comboboxInstances[key].refresh();
+        }
+      }
+    });
+
+    // Load humor role (single select)
+    spineSelections.humorRole = genome.humorRole || 'none';
+    renderSingleTag('humorRole', HUMOR_CONFIG.role.options);
+    if (comboboxInstances.humorRole) {
+      if (spineSelections.humorRole && spineSelections.humorRole !== 'none') {
+        const selectedOpt = HUMOR_CONFIG.role.options.find(o => o.id === spineSelections.humorRole);
+        if (selectedOpt) {
+          comboboxInstances.humorRole.input.placeholder = 'Select humor role...';
+        }
+      } else {
+        comboboxInstances.humorRole.input.placeholder = 'Select humor role...';
+      }
+      comboboxInstances.humorRole.refresh();
+    }
+
+    // Load humor style
+    spineSelections.humorStyle = genome.humorStyle || [];
+    renderTags('humorStyle', HUMOR_CONFIG.style.options);
+    if (comboboxInstances.humorStyle) {
+      comboboxInstances.humorStyle.refresh();
+    }
+
+    updateHumorStyleState();
+  }
+
+  function showGenomeStatus(message, type) {
+    const status = document.getElementById('genome-status');
+    status.textContent = message;
+    status.className = `stc-spine__status stc-spine__status--${type}`;
+
+    // Clear after 3 seconds
+    setTimeout(() => {
+      status.textContent = '';
+      status.className = 'stc-spine__status';
+    }, 3000);
+  }
+
+  // ========== STORY CONCEPT GENERATION ==========
+
+  // Hydrate genome IDs with full vertebrae definitions
+  function hydrateGenome(genome) {
+    const findOption = (options, id) => options.find(o => o.id === id);
+
+    return {
+      genres: (genome.genre || []).map(id => findOption(genres.options, id)).filter(Boolean),
+      archetypes: (genome.archetype || []).map(id => findOption(archetypes.options, id)).filter(Boolean),
+      themes: (genome.theme || []).map(id => findOption(themes.options, id)).filter(Boolean),
+      tones: (genome.tone || []).map(id => findOption(tones.options, id)).filter(Boolean),
+      stakes: (genome.stakes || []).map(id => findOption(stakes.options, id)).filter(Boolean),
+      humorRole: findOption(humorRole.options, genome.humorRole) || null,
+      humorStyles: (genome.humorStyle || []).map(id => findOption(humorStyle.options, id)).filter(Boolean)
+    };
+  }
+
+  async function generateStoryConcept() {
+    if (!currentBraindump || !currentProject?.genome) {
+      showConceptError('No braindump or genome available');
+      return;
+    }
+
+    const btnGenerate = document.getElementById('btn-generate-concept');
+    const btnRegenerate = document.getElementById('btn-regenerate-concept');
+    const loadingEl = document.getElementById('concept-loading');
+    const resultEl = document.getElementById('concept-result');
+    const errorEl = document.getElementById('concept-error');
+
+    // Show loading state
+    btnGenerate.style.display = 'none';
+    btnRegenerate.style.display = 'none';
+    loadingEl.style.display = 'flex';
+    resultEl.style.display = 'none';
+    errorEl.style.display = 'none';
+
+    try {
+      // Hydrate genome with full definitions
+      const hydratedGenome = hydrateGenome(currentProject.genome);
+
+      // Call Netlify function
+      const response = await fetch('/.netlify/functions/generate-concept', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          braindump: currentBraindump.raw_input,
+          genome: hydratedGenome
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate concept');
+      }
+
+      const data = await response.json();
+
+      // Display the concept
+      displayConcept(data.concept);
+
+      // Save to database
+      await saveConcept(data.concept);
+
+    } catch (e) {
+      console.error('Generate concept error:', e);
+      showConceptError(e.message);
+    } finally {
+      loadingEl.style.display = 'none';
+    }
+  }
+
+  function displayConcept(conceptText) {
+    const resultEl = document.getElementById('concept-result');
+    const contentEl = document.getElementById('concept-content');
+    const btnRegenerate = document.getElementById('btn-regenerate-concept');
+
+    // Convert markdown-like text to HTML
+    const htmlContent = formatConceptAsHtml(conceptText);
+    contentEl.innerHTML = htmlContent;
+
+    resultEl.style.display = 'block';
+    btnRegenerate.style.display = 'inline-block';
+  }
+
+  function formatConceptAsHtml(text) {
+    // Basic markdown-like formatting
+    return text
+      // Headers
+      .replace(/^### (.+)$/gm, '<h4 class="stc-concept__subhead">$1</h4>')
+      .replace(/^## (.+)$/gm, '<h3 class="stc-concept__head">$1</h3>')
+      // Bold
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      // Italic
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      // Line breaks to paragraphs
+      .split('\n\n')
+      .map(p => p.trim())
+      .filter(p => p && !p.startsWith('<h'))
+      .map(p => p.startsWith('<h') ? p : `<p>${p}</p>`)
+      .join('\n')
+      // Fix headers that got wrapped in <p>
+      .replace(/<p>(<h[34][^>]*>)/g, '$1')
+      .replace(/(<\/h[34]>)<\/p>/g, '$1');
+  }
+
+  async function saveConcept(conceptText) {
+    if (!currentProject) return;
+
+    try {
+      // Save to projects table as story_concept JSON field
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          story_concept: {
+            text: conceptText,
+            generated_at: new Date().toISOString()
+          }
+        })
+        .eq('id', currentProject.id);
+
+      if (error) throw error;
+
+      // Update local state
+      currentProject.story_concept = {
+        text: conceptText,
+        generated_at: new Date().toISOString()
+      };
+
+      showConceptStatus('Concept saved!', 'success');
+    } catch (e) {
+      console.error('Save concept error:', e);
+      showConceptStatus('Failed to save', 'error');
+    }
+  }
+
+  function showConceptError(message) {
+    const errorEl = document.getElementById('concept-error');
+    const errorMsg = document.getElementById('concept-error-message');
+    const btnGenerate = document.getElementById('btn-generate-concept');
+
+    errorMsg.textContent = message;
+    errorEl.style.display = 'block';
+    btnGenerate.style.display = 'inline-block';
+  }
+
+  function showConceptStatus(message, type) {
+    const status = document.getElementById('concept-status');
+    status.textContent = message;
+    status.className = `stc-concept__status stc-concept__status--${type}`;
+
+    setTimeout(() => {
+      status.textContent = '';
+      status.className = 'stc-concept__status';
+    }, 3000);
+  }
+
+  function updateConceptUI() {
+    const btnGenerate = document.getElementById('btn-generate-concept');
+    const noteEl = document.getElementById('concept-note');
+    const resultEl = document.getElementById('concept-result');
+    const contentEl = document.getElementById('concept-content');
+    const btnRegenerate = document.getElementById('btn-regenerate-concept');
+
+    // Check if we have a genome saved
+    const hasGenome = currentProject?.genome &&
+      Object.values(currentProject.genome).some(v =>
+        Array.isArray(v) ? v.length > 0 : (v && v !== 'none')
+      );
+
+    if (hasGenome) {
+      btnGenerate.style.display = 'inline-block';
+      noteEl.textContent = 'Generate a story concept based on your braindump and genome.';
+    } else {
+      btnGenerate.style.display = 'none';
+      noteEl.textContent = 'Save your genome to unlock AI-powered story concept generation.';
+    }
+
+    // Check if we have an existing concept
+    if (currentProject?.story_concept?.text) {
+      displayConcept(currentProject.story_concept.text);
+    } else {
+      resultEl.style.display = 'none';
+      btnRegenerate.style.display = 'none';
+    }
+  }
+
   // View switching
   function showListView(skipURLUpdate = false) {
     listView.style.display = 'block';
@@ -942,7 +1270,16 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
     // Initialize spine builder
     renderVertebrae();
-    resetSpineSelections();
+
+    // Load existing genome or reset to defaults
+    if (project && project.genome) {
+      loadGenomeIntoUI(project.genome);
+    } else {
+      resetSpineSelections();
+    }
+
+    // Update concept section UI
+    updateConceptUI();
   }
 
   // Save new braindump
@@ -1141,6 +1478,13 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   btnEdit.addEventListener('click', enterEditMode);
   btnCancelEdit.addEventListener('click', exitEditMode);
   btnSaveEdit.addEventListener('click', saveEdit);
+
+  // Event listener - Genome
+  document.getElementById('btn-save-genome').addEventListener('click', saveGenome);
+
+  // Event listeners - Story Concept
+  document.getElementById('btn-generate-concept').addEventListener('click', generateStoryConcept);
+  document.getElementById('btn-regenerate-concept').addEventListener('click', generateStoryConcept);
 
   diveIntoNew.addEventListener('click', (e) => {
     e.preventDefault();
@@ -1581,6 +1925,29 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     margin-bottom: var(--spacing-xl);
   }
 
+  .stc-spine__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-spine__status {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    transition: opacity 0.2s ease;
+  }
+
+  .stc-spine__status--success {
+    color: #28A745;
+  }
+
+  .stc-spine__status--error {
+    color: #DC3545;
+  }
+
   /* Vertical spine layout */
   .stc-spine__vertebrae {
     display: flex;
@@ -1955,5 +2322,164 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   .stc-combobox__dropdown::-webkit-scrollbar-thumb:hover {
     background: var(--color-text-muted, #8B7D6B);
+  }
+
+  /* ========== STORY CONCEPT SECTION ========== */
+  .stc-concept {
+    margin-top: var(--spacing-xxl);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-concept__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-concept__heading {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.5rem;
+    color: var(--color-text-primary, #2C2416);
+    margin: 0;
+  }
+
+  .stc-concept__note {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted, #8B7D6B);
+    margin: 0 0 var(--spacing-md) 0;
+  }
+
+  /* Loading state */
+  .stc-concept__loading {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    background: var(--color-background-secondary, #F5EEE6);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-concept__spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--color-border-default, #D9CFC2);
+    border-top-color: var(--color-accent-primary, #B85C38);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .stc-concept__loading-text {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
+  }
+
+  /* Result display */
+  .stc-concept__result {
+    margin-top: var(--spacing-md);
+  }
+
+  .stc-concept__content {
+    padding: var(--spacing-lg);
+    background: var(--color-background-card, #FFFCF8);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-concept__content h3.stc-concept__head {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.25rem;
+    color: var(--color-accent-primary, #B85C38);
+    margin: var(--spacing-lg) 0 var(--spacing-sm) 0;
+  }
+
+  .stc-concept__content h3.stc-concept__head:first-child {
+    margin-top: 0;
+  }
+
+  .stc-concept__content h4.stc-concept__subhead {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #2C2416);
+    margin: var(--spacing-md) 0 var(--spacing-xs) 0;
+  }
+
+  .stc-concept__content p {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--color-text-secondary, #5C4F3D);
+    margin: 0 0 var(--spacing-sm) 0;
+  }
+
+  .stc-concept__content p:last-child {
+    margin-bottom: 0;
+  }
+
+  .stc-concept__content strong {
+    color: var(--color-text-primary, #2C2416);
+    font-weight: 600;
+  }
+
+  .stc-concept__content em {
+    font-style: italic;
+    color: var(--color-text-secondary, #5C4F3D);
+  }
+
+  /* Actions row */
+  .stc-concept__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+  }
+
+  .stc-concept__status {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    transition: opacity 0.2s ease;
+  }
+
+  .stc-concept__status--success {
+    color: #28A745;
+  }
+
+  .stc-concept__status--error {
+    color: #DC3545;
+  }
+
+  /* Error display */
+  .stc-concept__error {
+    padding: var(--spacing-md);
+    background: #FDF2F2;
+    border: 1px solid #F5C6CB;
+    border-radius: var(--radius-md);
+    margin-top: var(--spacing-md);
+  }
+
+  .stc-concept__error-title {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: #721C24;
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .stc-concept__error-message {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: #721C24;
+    margin: 0;
   }
 </style>
