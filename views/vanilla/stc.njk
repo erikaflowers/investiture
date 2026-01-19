@@ -1282,12 +1282,37 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         ...hydrated.humorStyles.map(h => ({ label: h.name, category: 'humor' }))
       ];
 
+      // Store tag names for copying
+      const tagNames = allTags.map(tag => tag.label);
+
       genomeEl.innerHTML = `
-        <div class="stc-concept__genome-label">Story DNA</div>
+        <div class="stc-concept__genome-header">
+          <span class="stc-concept__genome-label">Story DNA</span>
+          <button class="stc-concept__genome-copy" title="Copy Story DNA">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </div>
         <div class="stc-concept__genome-tags">
           ${allTags.map(tag => `<span class="stc-concept__genome-tag stc-concept__genome-tag--${tag.category}">${tag.label}</span>`).join('')}
         </div>
       `;
+
+      // Set up genome copy button
+      const genomeCopyBtn = genomeEl.querySelector('.stc-concept__genome-copy');
+      genomeCopyBtn.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(tagNames.join(', '));
+          genomeCopyBtn.classList.add('stc-concept__genome-copy--success');
+          setTimeout(() => {
+            genomeCopyBtn.classList.remove('stc-concept__genome-copy--success');
+          }, 1500);
+        } catch (err) {
+          console.error('Failed to copy genome:', err);
+        }
+      };
     }
 
     // Parse and render sections
@@ -2910,6 +2935,13 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     margin-bottom: var(--spacing-md);
   }
 
+  .stc-concept__genome-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: var(--spacing-xs);
+  }
+
   .stc-concept__genome-label {
     font-family: 'Source Sans 3', sans-serif;
     font-size: var(--font-size-xs);
@@ -2917,7 +2949,32 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--color-text-muted, #8B7D6B);
-    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-concept__genome-copy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background: transparent;
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted, #8B7D6B);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .stc-concept__genome-copy:hover {
+    background: var(--color-background-secondary, #F5EEE6);
+    border-color: var(--color-accent-primary, #7C5E4A);
+    color: var(--color-accent-primary, #7C5E4A);
+  }
+
+  .stc-concept__genome-copy--success {
+    background: #E8F5E9;
+    border-color: #28A745;
+    color: #28A745;
   }
 
   .stc-concept__genome-tags {
