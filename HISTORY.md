@@ -4,6 +4,19 @@ A running log of changes to the scaffold.
 
 ---
 
+## 2025-01-19 (Continued) - STC Concept View Toggle & Copy
+
+### Changes
+- **Combined View Toggle**: Added toggle between "Sections" and "Combined" views for story concept
+  - Sections view shows editable cards with edit/refine buttons (default)
+  - Combined view shows full concept as single text block
+- **Copy to Clipboard**: Added copy button in combined view for easy sharing
+  - Click copies formatted concept text
+  - Visual feedback shows "Copied!" confirmation
+- Combined view auto-updates when switching if sections were edited
+
+---
+
 ## 2025-01-17 (Evening) - Eleventy & CI/CD
 
 ### Major Changes

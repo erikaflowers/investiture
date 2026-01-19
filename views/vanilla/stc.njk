@@ -165,7 +165,32 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
         <div id="concept-result" class="stc-concept__result" style="display: none;">
           <div id="concept-genome" class="stc-concept__genome"></div>
+
+          <div class="stc-concept__view-toggle">
+            <button class="stc-concept__view-btn stc-concept__view-btn--active" data-view="sections">
+              Sections
+            </button>
+            <button class="stc-concept__view-btn" data-view="combined">
+              Combined
+            </button>
+          </div>
+
           <div id="concept-content" class="stc-concept__content"></div>
+
+          <div id="concept-combined" class="stc-concept__combined" style="display: none;">
+            <div class="stc-concept__combined-header">
+              <span class="stc-concept__combined-label">Full Concept</span>
+              <button class="stc-concept__copy-btn" title="Copy to clipboard">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span class="stc-concept__copy-text">Copy</span>
+              </button>
+            </div>
+            <pre id="concept-combined-text" class="stc-concept__combined-text"></pre>
+          </div>
+
           <div class="stc-concept__actions">
             <button id="btn-regenerate-concept" class="button button--secondary">
               Regenerate
@@ -1131,6 +1156,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   // Store parsed sections for editing
   let currentSections = [];
+  let currentConceptText = ''; // Raw concept text for combined view
 
   function parseConcept(text) {
     // Parse concept text into sections by ### headers
@@ -1234,7 +1260,12 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     const resultEl = document.getElementById('concept-result');
     const genomeEl = document.getElementById('concept-genome');
     const contentEl = document.getElementById('concept-content');
+    const combinedEl = document.getElementById('concept-combined');
+    const combinedTextEl = document.getElementById('concept-combined-text');
     const btnRegenerate = document.getElementById('btn-regenerate-concept');
+
+    // Store raw concept text for combined view
+    currentConceptText = conceptText;
 
     // Display genome DNA tags
     if (currentProject?.genome) {
@@ -1263,11 +1294,77 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     currentSections = parseConcept(conceptText);
     contentEl.innerHTML = currentSections.map((section, i) => renderSection(section, i)).join('');
 
+    // Populate combined view
+    combinedTextEl.textContent = formatConceptForCopy();
+
     // Attach event listeners to section buttons
     attachSectionListeners(contentEl);
 
+    // Set up view toggle (reset to sections view)
+    setupViewToggle();
+
     resultEl.style.display = 'block';
     btnRegenerate.style.display = 'inline-block';
+  }
+
+  function formatConceptForCopy() {
+    // Format sections into clean, copyable text
+    return currentSections.map(section => `### ${section.name}\n${section.content}`).join('\n\n');
+  }
+
+  function setupViewToggle() {
+    const toggleBtns = document.querySelectorAll('.stc-concept__view-btn');
+    const sectionsView = document.getElementById('concept-content');
+    const combinedView = document.getElementById('concept-combined');
+    const copyBtn = document.querySelector('.stc-concept__copy-btn');
+
+    // Reset to sections view
+    toggleBtns.forEach(btn => btn.classList.remove('stc-concept__view-btn--active'));
+    document.querySelector('[data-view="sections"]').classList.add('stc-concept__view-btn--active');
+    sectionsView.style.display = 'block';
+    combinedView.style.display = 'none';
+
+    // Set up toggle click handlers
+    toggleBtns.forEach(btn => {
+      btn.onclick = () => {
+        const view = btn.dataset.view;
+
+        // Update active states
+        toggleBtns.forEach(b => b.classList.remove('stc-concept__view-btn--active'));
+        btn.classList.add('stc-concept__view-btn--active');
+
+        // Show/hide views
+        if (view === 'sections') {
+          sectionsView.style.display = 'block';
+          combinedView.style.display = 'none';
+        } else {
+          sectionsView.style.display = 'none';
+          combinedView.style.display = 'block';
+          // Update combined text in case sections were edited
+          document.getElementById('concept-combined-text').textContent = formatConceptForCopy();
+        }
+      };
+    });
+
+    // Set up copy button
+    copyBtn.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(formatConceptForCopy());
+
+        // Visual feedback
+        const textEl = copyBtn.querySelector('.stc-concept__copy-text');
+        const originalText = textEl.textContent;
+        copyBtn.classList.add('stc-concept__copy-btn--success');
+        textEl.textContent = 'Copied!';
+
+        setTimeout(() => {
+          copyBtn.classList.remove('stc-concept__copy-btn--success');
+          textEl.textContent = originalText;
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    };
   }
 
   function attachSectionListeners(container) {
@@ -2915,6 +3012,113 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     font-size: var(--font-size-sm);
     color: #721C24;
     margin: 0;
+  }
+
+  /* ========== VIEW TOGGLE ========== */
+  .stc-concept__view-toggle {
+    display: flex;
+    gap: 0;
+    margin-bottom: var(--spacing-md);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    width: fit-content;
+  }
+
+  .stc-concept__view-btn {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary, #5C5346);
+    background: var(--color-background-card, #FFFCF8);
+    border: none;
+    padding: var(--spacing-xs) var(--spacing-md);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .stc-concept__view-btn:hover {
+    background: var(--color-background-secondary, #F5EEE6);
+  }
+
+  .stc-concept__view-btn--active {
+    background: var(--color-accent-primary, #7C5E4A);
+    color: white;
+  }
+
+  .stc-concept__view-btn--active:hover {
+    background: var(--color-accent-primary, #7C5E4A);
+  }
+
+  /* ========== COMBINED VIEW ========== */
+  .stc-concept__combined {
+    background: var(--color-background-card, #FFFCF8);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .stc-concept__combined-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-background-secondary, #F5EEE6);
+    border-bottom: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-concept__combined-label {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-primary, #2C2416);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .stc-concept__copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary, #5C5346);
+    background: transparent;
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .stc-concept__copy-btn:hover {
+    background: var(--color-background-card, #FFFCF8);
+    border-color: var(--color-accent-primary, #7C5E4A);
+    color: var(--color-accent-primary, #7C5E4A);
+  }
+
+  .stc-concept__copy-btn--success {
+    background: #E8F5E9;
+    border-color: #28A745;
+    color: #28A745;
+  }
+
+  .stc-concept__copy-btn svg {
+    flex-shrink: 0;
+  }
+
+  .stc-concept__combined-text {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    line-height: 1.7;
+    color: var(--color-text-primary, #2C2416);
+    padding: var(--spacing-md);
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 600px;
+    overflow-y: auto;
   }
 
   /* ========== SECTION EDITOR ========== */
