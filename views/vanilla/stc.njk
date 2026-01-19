@@ -1733,14 +1733,14 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     }
   }
 
-  // Edit mode
-  function enterEditMode() {
+  // Braindump edit mode
+  function enterBraindumpEditMode() {
     diveDisplay.style.display = 'none';
     diveEdit.style.display = 'block';
     diveTextarea.focus();
   }
 
-  function exitEditMode() {
+  function exitBraindumpEditMode() {
     diveDisplay.style.display = 'block';
     diveEdit.style.display = 'none';
     diveTextarea.value = currentBraindump.raw_input; // Reset
@@ -1765,7 +1765,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
       currentBraindump = data;
       diveContent.textContent = data.raw_input;
-      exitEditMode();
+      exitBraindumpEditMode();
 
     } catch (e) {
       alert(`Failed to save: ${e.message}`);
@@ -1793,8 +1793,8 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   // Event listeners - Braindumps
   btnSave.addEventListener('click', saveBraindump);
   btnBack.addEventListener('click', () => showListView()); // User clicked, so update URL
-  btnEdit.addEventListener('click', enterEditMode);
-  btnCancelEdit.addEventListener('click', exitEditMode);
+  btnEdit.addEventListener('click', enterBraindumpEditMode);
+  btnCancelEdit.addEventListener('click', exitBraindumpEditMode);
   btnSaveEdit.addEventListener('click', saveEdit);
 
   // Event listener - Genome
