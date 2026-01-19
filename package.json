@@ -13,6 +13,8 @@
     "html:watch": "eleventy --serve --config=eleventy.config.cjs",
     "build:netlify": "npm-run-all clean sass:build html:netlify",
     "html:netlify": "eleventy --config=eleventy.config.cjs",
+    "deploy": "npm run build:netlify && npx netlify-cli deploy --prod --dir=docs",
+    "deploy:preview": "npm run build:netlify && npx netlify-cli deploy --dir=docs",
     "build:tokens": "node scripts/build-tokens.js",
     "serve": "eleventy --serve --config=eleventy.config.cjs",
     "start": "npm run dev"

@@ -142,7 +142,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
         <div class="stc-spine__actions">
           <button id="btn-save-genome" class="button button--primary">
-            Save Genome
+            Apply Genome Changes
           </button>
           <span id="genome-status" class="stc-spine__status"></span>
         </div>
@@ -156,7 +156,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
             Generate Story Concept
           </button>
         </div>
-        <p class="stc-concept__note" id="concept-note">Save your genome to unlock AI-powered story concept generation.</p>
+        <p class="stc-concept__note" id="concept-note">Apply your genome to unlock AI-powered story concept generation.</p>
 
         <div id="concept-loading" class="stc-concept__loading" style="display: none;">
           <span class="stc-concept__spinner"></span>
@@ -991,7 +991,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
     const btnSave = document.getElementById('btn-save-genome');
     btnSave.disabled = true;
-    btnSave.textContent = 'Saving...';
+    btnSave.textContent = 'Applying...';
 
     try {
       const genome = getGenomeData();
@@ -1003,27 +1003,216 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
       if (error) throw error;
 
+      // Check if we have an existing concept that needs cascade analysis
+      const hasExistingConcept = currentSections && currentSections.length > 0;
+      const hadPreviousGenome = previousGenome !== null;
+
       // Update local project state
       currentProject.genome = genome;
 
-      showGenomeStatus('Genome saved!', 'success');
+      showGenomeStatus('Genome applied!', 'success');
 
       // Update concept UI now that genome is saved
       updateConceptUI();
+
+      // If we have an existing concept and had a previous genome, check for cascade impacts
+      if (hasExistingConcept && hadPreviousGenome) {
+        await checkGenomeCascade(previousGenome, genome);
+      }
+
+      // Update previousGenome to current for next comparison
+      previousGenome = JSON.parse(JSON.stringify(genome));
+
     } catch (e) {
       console.error('Save genome error:', e);
-      showGenomeStatus('Failed to save: ' + e.message, 'error');
+      showGenomeStatus('Failed to apply: ' + e.message, 'error');
     } finally {
       btnSave.disabled = false;
-      btnSave.textContent = 'Save Genome';
+      btnSave.textContent = 'Apply Genome Changes';
+    }
+  }
+
+  async function checkGenomeCascade(prevGenome, newGenome) {
+    // Show loading state in concept section
+    const cascadeContainer = document.getElementById('genome-cascade-suggestions');
+    if (!cascadeContainer) {
+      // Create cascade suggestions container if it doesn't exist
+      const conceptResult = document.getElementById('concept-result');
+      const cascadeDiv = document.createElement('div');
+      cascadeDiv.id = 'genome-cascade-suggestions';
+      cascadeDiv.className = 'stc-cascade';
+      conceptResult.insertBefore(cascadeDiv, conceptResult.firstChild);
+    }
+
+    const container = document.getElementById('genome-cascade-suggestions');
+    container.innerHTML = `
+      <div class="stc-cascade__loading">
+        <span class="stc-concept__spinner"></span>
+        <span>Analyzing how genome changes affect your concept...</span>
+      </div>
+    `;
+    container.style.display = 'block';
+
+    try {
+      const response = await fetch('/.netlify/functions/cascade-genome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          previousGenome: prevGenome,
+          newGenome: newGenome,
+          allSections: currentSections,
+          braindump: currentBraindump?.raw_input || ''
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Cascade analysis failed');
+      }
+
+      const data = await response.json();
+
+      if (data.affectedSections && data.affectedSections.length > 0) {
+        renderCascadeSuggestions(data.summary, data.affectedSections);
+      } else {
+        // No changes needed
+        container.innerHTML = `
+          <div class="stc-cascade__success">
+            <span class="stc-cascade__success-icon">✓</span>
+            <span>${data.summary || 'Your concept aligns well with the genome changes.'}</span>
+          </div>
+        `;
+        setTimeout(() => {
+          container.style.display = 'none';
+        }, 4000);
+      }
+    } catch (err) {
+      console.error('Cascade check error:', err);
+      container.innerHTML = `
+        <div class="stc-cascade__error">
+          Could not analyze genome impact. You may want to review your concept manually.
+        </div>
+      `;
+      setTimeout(() => {
+        container.style.display = 'none';
+      }, 5000);
+    }
+  }
+
+  function renderCascadeSuggestions(summary, affectedSections) {
+    const container = document.getElementById('genome-cascade-suggestions');
+
+    const sectionsHtml = affectedSections.map((affected, idx) => `
+      <div class="stc-cascade__item" data-cascade-index="${idx}">
+        <div class="stc-cascade__item-header">
+          <strong>${affected.section}</strong>
+          <span class="stc-cascade__item-reason">${affected.reason}</span>
+        </div>
+        <div class="stc-cascade__item-suggestion">
+          <div class="stc-cascade__item-label">Suggested revision:</div>
+          <div class="stc-cascade__item-content">${formatSectionContent(affected.suggestedFix)}</div>
+        </div>
+        <div class="stc-cascade__item-actions">
+          <button class="button button--secondary stc-cascade__ignore" data-section="${affected.section}">Ignore</button>
+          <button class="button button--primary stc-cascade__apply" data-section="${affected.section}" data-fix="${encodeURIComponent(affected.suggestedFix)}">Apply Change</button>
+        </div>
+      </div>
+    `).join('');
+
+    container.innerHTML = `
+      <div class="stc-cascade__header">
+        <span class="stc-cascade__icon">⚠️</span>
+        <span class="stc-cascade__title">Genome changes may affect your concept</span>
+      </div>
+      <p class="stc-cascade__summary">${summary}</p>
+      <div class="stc-cascade__list">${sectionsHtml}</div>
+      <div class="stc-cascade__bulk-actions">
+        <button class="button button--secondary" id="cascade-ignore-all">Ignore All</button>
+        <button class="button button--primary" id="cascade-apply-all">Apply All Changes</button>
+      </div>
+    `;
+
+    // Attach event listeners
+    container.querySelectorAll('.stc-cascade__apply').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sectionName = btn.dataset.section;
+        const fix = decodeURIComponent(btn.dataset.fix);
+        applyCascadeFix(sectionName, fix);
+        btn.closest('.stc-cascade__item').remove();
+        checkCascadeComplete();
+      });
+    });
+
+    container.querySelectorAll('.stc-cascade__ignore').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.stc-cascade__item').remove();
+        checkCascadeComplete();
+      });
+    });
+
+    document.getElementById('cascade-ignore-all')?.addEventListener('click', () => {
+      container.style.display = 'none';
+    });
+
+    document.getElementById('cascade-apply-all')?.addEventListener('click', async () => {
+      const items = container.querySelectorAll('.stc-cascade__item');
+      for (const item of items) {
+        const applyBtn = item.querySelector('.stc-cascade__apply');
+        if (applyBtn) {
+          const sectionName = applyBtn.dataset.section;
+          const fix = decodeURIComponent(applyBtn.dataset.fix);
+          await applyCascadeFix(sectionName, fix);
+        }
+      }
+      container.style.display = 'none';
+    });
+  }
+
+  async function applyCascadeFix(sectionName, newContent) {
+    const sectionIndex = currentSections.findIndex(s => s.name === sectionName);
+    if (sectionIndex === -1) return;
+
+    // Update the section
+    currentSections[sectionIndex].content = newContent;
+
+    // Update the display
+    const sectionEl = document.querySelector(`[data-section-index="${sectionIndex}"]`);
+    if (sectionEl) {
+      sectionEl.querySelector('.stc-section__display').innerHTML = formatSectionContent(newContent);
+      sectionEl.querySelector('.stc-section__textarea').value = newContent;
+    }
+
+    // Update combined view
+    document.getElementById('concept-combined-text').textContent = formatConceptForCopy();
+
+    // Save to database
+    await saveConceptSections();
+  }
+
+  function checkCascadeComplete() {
+    const container = document.getElementById('genome-cascade-suggestions');
+    const remainingItems = container.querySelectorAll('.stc-cascade__item');
+    if (remainingItems.length === 0) {
+      container.innerHTML = `
+        <div class="stc-cascade__success">
+          <span class="stc-cascade__success-icon">✓</span>
+          <span>All suggested changes have been addressed.</span>
+        </div>
+      `;
+      setTimeout(() => {
+        container.style.display = 'none';
+      }, 3000);
     }
   }
 
   function loadGenomeIntoUI(genome) {
     if (!genome) {
       resetSpineSelections();
+      previousGenome = null;
       return;
     }
+
+    // Store as previous genome for cascade detection
+    previousGenome = JSON.parse(JSON.stringify(genome));
 
     // Load multi-select vertebrae
     ['genre', 'archetype', 'theme', 'tone', 'stakes'].forEach(key => {
@@ -1157,6 +1346,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   // Store parsed sections for editing
   let currentSections = [];
   let currentConceptText = ''; // Raw concept text for combined view
+  let previousGenome = null; // Store genome before changes for cascade detection
 
   function parseConcept(text) {
     // Parse concept text into sections by ### headers
@@ -1764,7 +1954,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       noteEl.textContent = 'Generate a story concept based on your braindump and genome.';
     } else {
       btnGenerate.style.display = 'none';
-      noteEl.textContent = 'Save your genome to unlock AI-powered story concept generation.';
+      noteEl.textContent = 'Apply your genome to unlock AI-powered story concept generation.';
     }
 
     // Check if we have an existing concept
@@ -2638,9 +2828,9 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     width: 100%;
   }
 
-  /* Humor role column - center, narrower */
+  /* Humor role column - left aligned like humor style */
   .stc-vertebra-col--humor-role {
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
   }
 
@@ -3438,5 +3628,142 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   .button--small {
     padding: 4px 12px;
     font-size: var(--font-size-xs);
+  }
+
+  /* ========== GENOME CASCADE SUGGESTIONS ========== */
+  .stc-cascade {
+    background: #FFF8E6;
+    border: 2px solid #F0D58C;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .stc-cascade__loading {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: #8B6914;
+  }
+
+  .stc-cascade__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-cascade__icon {
+    font-size: var(--font-size-lg);
+  }
+
+  .stc-cascade__title {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: #8B6914;
+  }
+
+  .stc-cascade__summary {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary, #5C5346);
+    margin: 0 0 var(--spacing-md) 0;
+    line-height: 1.5;
+  }
+
+  .stc-cascade__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-cascade__item {
+    background: #fff;
+    border: 1px solid #E8D9A8;
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+  }
+
+  .stc-cascade__item-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-cascade__item-header strong {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary, #2C2416);
+  }
+
+  .stc-cascade__item-reason {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: #8B6914;
+    font-style: italic;
+  }
+
+  .stc-cascade__item-suggestion {
+    background: var(--color-background-secondary, #F5EEE6);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-cascade__item-label {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-text-muted, #8B7D6B);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-cascade__item-content {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary, #2C2416);
+    line-height: 1.5;
+  }
+
+  .stc-cascade__item-content p {
+    margin: 0;
+  }
+
+  .stc-cascade__item-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-xs);
+  }
+
+  .stc-cascade__bulk-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid #E8D9A8;
+  }
+
+  .stc-cascade__success {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: #28A745;
+  }
+
+  .stc-cascade__success-icon {
+    font-size: var(--font-size-lg);
+  }
+
+  .stc-cascade__error {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: #DC3545;
   }
 </style>

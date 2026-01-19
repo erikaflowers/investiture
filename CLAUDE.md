@@ -248,6 +248,24 @@ npm run build:tokens
 - Use glob patterns with `/` destination in passthrough copy → use explicit filenames
 - Commit the `docs/` folder → it's built by GitHub Actions
 
+## STC App Design Principles
+
+The Save the Cat (STC) app at `/stc/` has specific design principles:
+
+### Downstream Impact Rule
+
+**CRITICAL:** When a user changes an upstream element (like the Story Genome), the system MUST consider and warn about downstream impacts on dependent elements (like the Story Concept).
+
+- **Genome → Concept cascade:** When genome changes are applied, analyze how they affect each concept section and offer suggested revisions
+- **Section → Section drift:** When refining one section, check if changes create inconsistencies with other sections
+- **Always warn, never silently break:** If an upstream change could invalidate downstream content, surface this to the user with actionable suggestions
+
+This principle applies to any hierarchical/dependent data structure in the app. The user should never be surprised to find their downstream content no longer aligns with upstream changes.
+
+### Editor Persona
+
+The AI assistant uses a specific "editor persona" defined in `/apps/stc/core/logic/system-prompts.js`. This persona is warm, collaborative, and focused on helping writers discover their story - not writing it for them.
+
 ## Adding a New View Framework
 
 1. Create `/views/[framework]/`

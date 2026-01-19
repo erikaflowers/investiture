@@ -31,6 +31,8 @@ export const archetypes = {
     { id: 'voyage-return', name: 'Voyage and Return', description: 'Protagonist travels to strange world, returns transformed', examples: 'Alice in Wonderland, The Wizard of Oz, Narnia' },
     { id: 'comedy', name: 'Comedy', description: 'Confusion and misunderstanding resolved through revelation', examples: 'A Midsummer Night\'s Dream, Bridget Jones' },
     { id: 'tragedy', name: 'Tragedy', description: 'Protagonist\'s flaw leads to their downfall', examples: 'Macbeth, Anna Karenina, Breaking Bad' },
+    { id: 'the-fool', name: 'The Fool', description: 'Protagonist causes disaster through hubris or ignorance, earns wisdom through consequences', examples: 'King Lear, Groundhog Day, Liar Liar' },
+    { id: 'fall-and-rise', name: 'Fall & Rise', description: 'Starts with status/comfort, loses everything through their own flaws, earns back something more genuine', examples: 'Its a Wonderful Life, Schitts Creek, A Christmas Carol' },
     { id: 'rebirth', name: 'Rebirth', description: 'Protagonist transformed by redemption or second chance', examples: 'A Christmas Carol, Beauty and the Beast' }
   ]
 };
@@ -53,6 +55,8 @@ export const themes = {
     { id: 'truth-vs-lies', name: 'Truth vs. Deception', description: 'Hidden truths, the cost of lies' },
     { id: 'nature-vs-nurture', name: 'Nature vs. Nurture', description: 'Are we born or made?' },
     { id: 'man-vs-nature', name: 'Man vs. Nature', description: 'Humanity against the wild' },
+    { id: 'pride-and-humility', name: 'Pride & Humility', description: 'Arrogance leads to downfall; redemption requires genuine vulnerability', examples: 'Pride and Prejudice, The Devil Wears Prada, Thor' },
+    { id: 'status-vs-authenticity', name: 'Status vs. Authenticity', description: 'Choosing between social standing and being true to oneself or others', examples: 'My Fair Lady, The Talented Mr. Ripley, Crazy Rich Asians' },
     { id: 'faith', name: 'Faith & Doubt', description: 'Belief tested, questions of meaning' }
   ]
 };
