@@ -146,7 +146,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-  import { genres, archetypes, themes, tones, stakes, humorPresence, humorStyle } from '/stc/core/logic/vertebrae.js';
+  import { genres, archetypes, themes, tones, stakes, humorRole, humorStyle } from '/stc/core/logic/vertebrae.js';
 
   // Supabase config
   const SUPABASE_URL = 'https://vfufedgmfcqwimvglvls.supabase.co';
@@ -216,19 +216,20 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   });
 
   // ========== VERTEBRAE CONFIGURATION ==========
-  // Built from imported arrays in /apps/stc/core/logic/vertebrae.js
+  // Built from imported objects in /apps/stc/core/logic/vertebrae.js
+  // Each vertebra object has: label, description, options
   const VERTEBRAE_CONFIG = [
-    { key: 'genre', label: 'Genre', options: genres, multiSelect: true },
-    { key: 'archetype', label: 'Story Archetype', options: archetypes, multiSelect: true },
-    { key: 'theme', label: 'Theme', options: themes, multiSelect: true },
-    { key: 'tone', label: 'Tone', options: tones, multiSelect: true },
-    { key: 'stakes', label: 'Stakes', options: stakes, multiSelect: true },
+    { key: 'genre', ...genres, multiSelect: true },
+    { key: 'archetype', ...archetypes, multiSelect: true },
+    { key: 'theme', ...themes, multiSelect: true },
+    { key: 'tone', ...tones, multiSelect: true },
+    { key: 'stakes', ...stakes, multiSelect: true },
   ];
 
   // Humor modifier config (separate from main vertebrae)
   const HUMOR_CONFIG = {
-    presence: { key: 'humorPresence', label: 'Humor', options: humorPresence, multiSelect: false },
-    style: { key: 'humorStyle', label: 'Humor Style', options: humorStyle, multiSelect: true }
+    role: { key: 'humorRole', ...humorRole, multiSelect: false },
+    style: { key: 'humorStyle', ...humorStyle, multiSelect: true }
   };
 
   // Initialize spine selections for each vertebra
@@ -236,7 +237,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     spineSelections[v.key] = [];
   });
   // Initialize humor selections
-  spineSelections.humorPresence = null; // Single select, so null or single value
+  spineSelections.humorRole = null; // Single select, so null or single value
   spineSelections.humorStyle = [];
 
   // DOM elements - Auth
@@ -349,164 +350,6 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   // ========== SPINE BUILDER FUNCTIONS ==========
 
-  // Helper to get option name by id
-  function getOptionName(options, id) {
-    const opt = options.find(o => o.id === id);
-    return opt ? opt.name : id;
-  }
-
-  function renderVertebrae() {
-    const container = document.getElementById('vertebrae-container');
-
-    // Helper to render a standard vertebra row
-    const renderRow = (vertebra, extraClass = '') => `
-      <div class="stc-vertebra-row ${extraClass}" data-key="${vertebra.key}">
-        <div class="stc-vertebra-row__header">
-          <span class="stc-vertebra-row__number">${vertebra.number || ''}</span>
-          <label class="stc-vertebra-row__label">${vertebra.label}</label>
-        </div>
-        <div class="stc-vertebra-row__body">
-          <div class="stc-vertebra-row__tags" id="tags-${vertebra.key}"></div>
-          <div class="stc-vertebra-row__select-wrap">
-            <select class="stc-vertebra-row__select" id="select-${vertebra.key}">
-              <option value="">+ Add ${vertebra.label.toLowerCase()}...</option>
-              ${vertebra.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Build the spine from top to bottom
-    let html = '';
-
-    // 1. GENRE
-    const genreConfig = VERTEBRAE_CONFIG.find(v => v.key === 'genre');
-    html += renderRow({ ...genreConfig, number: '1' });
-
-    // 2. ARCHETYPE
-    const archetypeConfig = VERTEBRAE_CONFIG.find(v => v.key === 'archetype');
-    html += renderRow({ ...archetypeConfig, number: '2' });
-
-    // 3. THEME
-    const themeConfig = VERTEBRAE_CONFIG.find(v => v.key === 'theme');
-    html += renderRow({ ...themeConfig, number: '3' });
-
-    // 4. TONE & HUMOR (combined row with three columns)
-    const toneConfig = VERTEBRAE_CONFIG.find(v => v.key === 'tone');
-    html += `
-      <div class="stc-vertebra-row stc-vertebra-row--combined" data-key="tone-humor">
-        <div class="stc-vertebra-row__header">
-          <span class="stc-vertebra-row__number">4</span>
-          <label class="stc-vertebra-row__label">Tone & Humor</label>
-        </div>
-        <div class="stc-vertebra-row__body stc-vertebra-row__body--three-col">
-          <!-- Tone (left) -->
-          <div class="stc-vertebra-col" data-key="tone">
-            <label class="stc-vertebra-col__label">Tone</label>
-            <div class="stc-vertebra-col__tags" id="tags-tone"></div>
-            <select class="stc-vertebra-col__select" id="select-tone">
-              <option value="">+ Add tone...</option>
-              ${toneConfig.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
-            </select>
-          </div>
-          <!-- Humor Presence (center) -->
-          <div class="stc-vertebra-col stc-vertebra-col--humor-presence" data-key="humorPresence">
-            <label class="stc-vertebra-col__label">Humor</label>
-            <select class="stc-vertebra-col__select stc-vertebra-col__select--single" id="select-humorPresence">
-              ${HUMOR_CONFIG.presence.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
-            </select>
-          </div>
-          <!-- Humor Style (right) -->
-          <div class="stc-vertebra-col stc-vertebra-col--humor-style" data-key="humorStyle" id="humorStyle-container">
-            <label class="stc-vertebra-col__label">Humor Style</label>
-            <div class="stc-vertebra-col__tags" id="tags-humorStyle"></div>
-            <select class="stc-vertebra-col__select" id="select-humorStyle">
-              <option value="">+ Add style...</option>
-              ${HUMOR_CONFIG.style.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // 5. STAKES
-    const stakesConfig = VERTEBRAE_CONFIG.find(v => v.key === 'stakes');
-    html += renderRow({ ...stakesConfig, number: '5' });
-
-    container.innerHTML = html;
-
-    // Attach change handlers for standard rows (genre, archetype, theme, stakes)
-    ['genre', 'archetype', 'theme', 'stakes'].forEach(key => {
-      const config = VERTEBRAE_CONFIG.find(v => v.key === key);
-      const select = document.getElementById(`select-${key}`);
-      select.addEventListener('change', () => {
-        if (select.value) {
-          addTag(key, select.value, config.options);
-          select.value = '';
-        }
-      });
-    });
-
-    // Tone handler
-    const toneSelect = document.getElementById('select-tone');
-    toneSelect.addEventListener('change', () => {
-      if (toneSelect.value) {
-        addTag('tone', toneSelect.value, toneConfig.options);
-        toneSelect.value = '';
-      }
-    });
-
-    // Humor presence handler (single-select)
-    const humorPresenceSelect = document.getElementById('select-humorPresence');
-    humorPresenceSelect.addEventListener('change', () => {
-      spineSelections.humorPresence = humorPresenceSelect.value;
-      updateHumorStyleState();
-    });
-
-    // Humor style handler (multi-select, conditional)
-    const humorStyleSelect = document.getElementById('select-humorStyle');
-    humorStyleSelect.addEventListener('change', () => {
-      if (humorStyleSelect.value) {
-        addTag('humorStyle', humorStyleSelect.value, HUMOR_CONFIG.style.options);
-        humorStyleSelect.value = '';
-      }
-    });
-
-    // Set initial humor style state
-    updateHumorStyleState();
-  }
-
-  function updateHumorStyleState() {
-    const styleContainer = document.getElementById('humorStyle-container');
-    const styleSelect = document.getElementById('select-humorStyle');
-    const isEnabled = spineSelections.humorPresence && spineSelections.humorPresence !== 'none';
-
-    if (isEnabled) {
-      styleContainer.classList.remove('stc-vertebra--disabled');
-      styleSelect.disabled = false;
-    } else {
-      styleContainer.classList.add('stc-vertebra--disabled');
-      styleSelect.disabled = true;
-      // Clear style selections if humor is "none"
-      spineSelections.humorStyle = [];
-      renderTags('humorStyle', HUMOR_CONFIG.style.options);
-    }
-  }
-
-  function addTag(vertebraKey, id, options) {
-    // Don't add duplicates
-    if (spineSelections[vertebraKey].includes(id)) return;
-
-    spineSelections[vertebraKey].push(id);
-    renderTags(vertebraKey, options);
-  }
-
-  function removeTag(vertebraKey, id, options) {
-    spineSelections[vertebraKey] = spineSelections[vertebraKey].filter(v => v !== id);
-    renderTags(vertebraKey, options);
-  }
-
   // Rainbow colors for tags
   const TAG_COLORS = [
     '#B85C38', // Terracotta (original accent)
@@ -521,7 +364,306 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     '#5C8B7A', // Teal
   ];
 
-  function renderTags(vertebraKey, options) {
+  // Store combobox instances for cleanup/updates
+  const comboboxInstances = {};
+
+  // ========== COMBOBOX CLASS ==========
+  // Custom accessible combobox with filtering, keyboard nav, and custom styling
+  class Combobox {
+    constructor(container, config) {
+      this.container = container;
+      this.key = config.key;
+      this.options = config.options;
+      this.placeholder = config.placeholder || '+ Add...';
+      this.multiSelect = config.multiSelect !== false;
+      this.onSelect = config.onSelect || (() => {});
+      this.onRemove = config.onRemove || (() => {});
+      this.getSelected = config.getSelected || (() => []);
+      this.disabled = false;
+
+      this.isOpen = false;
+      this.highlightedIndex = -1;
+      this.filterText = '';
+
+      this.render();
+      this.attachEvents();
+    }
+
+    render() {
+      this.container.innerHTML = `
+        <div class="stc-combobox" data-key="${this.key}">
+          <div class="stc-combobox__input-wrap">
+            <input
+              type="text"
+              class="stc-combobox__input"
+              placeholder="${this.placeholder}"
+              role="combobox"
+              aria-expanded="false"
+              aria-haspopup="listbox"
+              aria-autocomplete="list"
+              autocomplete="off"
+            >
+            <span class="stc-combobox__arrow">▾</span>
+          </div>
+          <ul class="stc-combobox__dropdown" role="listbox" tabindex="-1"></ul>
+        </div>
+      `;
+
+      this.combobox = this.container.querySelector('.stc-combobox');
+      this.input = this.container.querySelector('.stc-combobox__input');
+      this.dropdown = this.container.querySelector('.stc-combobox__dropdown');
+      this.arrow = this.container.querySelector('.stc-combobox__arrow');
+    }
+
+    attachEvents() {
+      // Input focus - open dropdown
+      this.input.addEventListener('focus', () => {
+        if (!this.disabled) this.open();
+      });
+
+      // Input blur - close after delay (allows click on dropdown)
+      this.input.addEventListener('blur', (e) => {
+        setTimeout(() => {
+          if (!this.combobox.contains(document.activeElement)) {
+            this.close();
+          }
+        }, 150);
+      });
+
+      // Input typing - filter options
+      this.input.addEventListener('input', (e) => {
+        this.filterText = e.target.value.toLowerCase();
+        this.highlightedIndex = -1;
+        this.renderOptions();
+        if (!this.isOpen) this.open();
+      });
+
+      // Keyboard navigation
+      this.input.addEventListener('keydown', (e) => {
+        if (this.disabled) return;
+
+        const visibleOptions = this.getVisibleOptions();
+
+        switch (e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            if (!this.isOpen) {
+              this.open();
+            } else {
+              this.highlightedIndex = Math.min(this.highlightedIndex + 1, visibleOptions.length - 1);
+              this.updateHighlight();
+            }
+            break;
+
+          case 'ArrowUp':
+            e.preventDefault();
+            if (this.isOpen) {
+              this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
+              this.updateHighlight();
+            }
+            break;
+
+          case 'Enter':
+            e.preventDefault();
+            if (this.isOpen && this.highlightedIndex >= 0) {
+              const option = visibleOptions[this.highlightedIndex];
+              if (option) this.selectOption(option);
+            }
+            break;
+
+          case 'Escape':
+            e.preventDefault();
+            this.close();
+            break;
+
+          case 'Tab':
+            this.close();
+            break;
+        }
+      });
+
+      // Click on arrow toggles
+      this.arrow.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (this.disabled) return;
+        if (this.isOpen) {
+          this.close();
+        } else {
+          this.input.focus();
+          this.open();
+        }
+      });
+
+      // Click on dropdown option
+      this.dropdown.addEventListener('click', (e) => {
+        const item = e.target.closest('.stc-combobox__option');
+        if (item && !item.classList.contains('stc-combobox__option--disabled')) {
+          const optionId = item.dataset.id;
+          const option = this.options.find(o => o.id === optionId);
+          if (option) this.selectOption(option);
+        }
+      });
+
+      // Prevent dropdown from closing when clicking inside it
+      this.dropdown.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+      });
+    }
+
+    getVisibleOptions() {
+      const selected = this.getSelected();
+      return this.options.filter(opt => {
+        // Filter out already selected (for multi-select)
+        if (this.multiSelect && selected.includes(opt.id)) return false;
+        // Filter by search text
+        if (this.filterText) {
+          return opt.name.toLowerCase().includes(this.filterText) ||
+                 (opt.description && opt.description.toLowerCase().includes(this.filterText));
+        }
+        return true;
+      });
+    }
+
+    renderOptions() {
+      const visibleOptions = this.getVisibleOptions();
+
+      if (visibleOptions.length === 0) {
+        this.dropdown.innerHTML = `
+          <li class="stc-combobox__empty">
+            ${this.filterText ? 'No matches found' : 'All options selected'}
+          </li>
+        `;
+        return;
+      }
+
+      this.dropdown.innerHTML = visibleOptions.map((opt, index) => `
+        <li
+          class="stc-combobox__option ${index === this.highlightedIndex ? 'stc-combobox__option--highlighted' : ''}"
+          data-id="${opt.id}"
+          role="option"
+          aria-selected="${index === this.highlightedIndex}"
+        >
+          <span class="stc-combobox__option-name">${this.highlightMatch(opt.name)}</span>
+          ${opt.description ? `<span class="stc-combobox__option-desc">${opt.description}</span>` : ''}
+        </li>
+      `).join('');
+    }
+
+    highlightMatch(text) {
+      if (!this.filterText) return text;
+      const regex = new RegExp(`(${this.escapeRegex(this.filterText)})`, 'gi');
+      return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    escapeRegex(str) {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    updateHighlight() {
+      const items = this.dropdown.querySelectorAll('.stc-combobox__option');
+      items.forEach((item, index) => {
+        item.classList.toggle('stc-combobox__option--highlighted', index === this.highlightedIndex);
+        item.setAttribute('aria-selected', index === this.highlightedIndex);
+      });
+
+      // Scroll highlighted item into view
+      const highlighted = this.dropdown.querySelector('.stc-combobox__option--highlighted');
+      if (highlighted) {
+        highlighted.scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    selectOption(option) {
+      this.onSelect(option.id);
+      this.filterText = '';
+      this.input.value = '';
+      this.highlightedIndex = -1;
+
+      if (this.multiSelect) {
+        this.renderOptions();
+        this.input.focus();
+      } else {
+        this.close();
+      }
+    }
+
+    open() {
+      if (this.disabled) return;
+      this.isOpen = true;
+      this.combobox.classList.add('stc-combobox--open');
+      this.input.setAttribute('aria-expanded', 'true');
+      this.renderOptions();
+    }
+
+    close() {
+      this.isOpen = false;
+      this.combobox.classList.remove('stc-combobox--open');
+      this.input.setAttribute('aria-expanded', 'false');
+      this.filterText = '';
+      this.input.value = '';
+      this.highlightedIndex = -1;
+    }
+
+    setDisabled(disabled) {
+      this.disabled = disabled;
+      this.combobox.classList.toggle('stc-combobox--disabled', disabled);
+      this.input.disabled = disabled;
+      if (disabled) this.close();
+    }
+
+    refresh() {
+      this.renderOptions();
+    }
+  }
+
+  // ========== TAG RENDERING ==========
+
+  function getOptionName(options, id) {
+    const opt = options.find(o => o.id === id);
+    return opt ? opt.name : id;
+  }
+
+  // Render a single-select tag (for humor role)
+  function renderSingleTag(vertebraKey, options, onRemove) {
+    const container = document.getElementById(`tags-${vertebraKey}`);
+    if (!container) return;
+
+    const selectedId = spineSelections[vertebraKey];
+
+    // Don't show tag for "none" or empty
+    if (!selectedId || selectedId === 'none') {
+      container.innerHTML = '';
+      return;
+    }
+
+    const name = getOptionName(options, selectedId);
+    const color = TAG_COLORS[0]; // Use first color for single select
+
+    container.innerHTML = `
+      <span class="stc-tag" style="background-color: ${color}">
+        <span class="stc-tag__text">${name}</span>
+        <button class="stc-tag__remove" data-vertebra="${vertebraKey}" data-id="${selectedId}" aria-label="Remove ${name}">×</button>
+      </span>
+    `;
+
+    // Attach remove handler
+    container.querySelector('.stc-tag__remove').addEventListener('click', () => {
+      spineSelections[vertebraKey] = 'none';
+      renderSingleTag(vertebraKey, options, onRemove);
+      if (onRemove) onRemove();
+      // Reset combobox placeholder
+      if (comboboxInstances[vertebraKey]) {
+        comboboxInstances[vertebraKey].input.placeholder = 'Select humor role...';
+        comboboxInstances[vertebraKey].refresh();
+      }
+      // Update humor style state when role changes
+      if (vertebraKey === 'humorRole') {
+        updateHumorStyleState();
+      }
+    });
+  }
+
+  function renderTags(vertebraKey, options, onRemove) {
     const container = document.getElementById(`tags-${vertebraKey}`);
     if (!container) return;
 
@@ -546,22 +688,221 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     // Attach remove handlers
     container.querySelectorAll('.stc-tag__remove').forEach(btn => {
       btn.addEventListener('click', () => {
-        removeTag(btn.dataset.vertebra, btn.dataset.id, options);
+        const id = btn.dataset.id;
+        spineSelections[vertebraKey] = spineSelections[vertebraKey].filter(v => v !== id);
+        renderTags(vertebraKey, options, onRemove);
+        if (onRemove) onRemove(id);
+        // Refresh combobox to show the option again
+        if (comboboxInstances[vertebraKey]) {
+          comboboxInstances[vertebraKey].refresh();
+        }
       });
     });
   }
 
+  // ========== RENDER VERTEBRAE ==========
+
+  function renderVertebrae() {
+    const container = document.getElementById('vertebrae-container');
+
+    // Helper to render a standard vertebra row
+    const renderRow = (vertebra, extraClass = '') => `
+      <div class="stc-vertebra-row ${extraClass}" data-key="${vertebra.key}">
+        <div class="stc-vertebra-row__header">
+          <span class="stc-vertebra-row__number">${vertebra.number || ''}</span>
+          <div class="stc-vertebra-row__header-text">
+            <label class="stc-vertebra-row__label">${vertebra.label}</label>
+            ${vertebra.description ? `<span class="stc-vertebra-row__description">${vertebra.description}</span>` : ''}
+          </div>
+        </div>
+        <div class="stc-vertebra-row__body">
+          <div class="stc-vertebra-row__tags" id="tags-${vertebra.key}"></div>
+          <div class="stc-vertebra-row__combobox" id="combobox-${vertebra.key}"></div>
+        </div>
+      </div>
+    `;
+
+    // Build the spine from top to bottom
+    const toneConfig = VERTEBRAE_CONFIG.find(v => v.key === 'tone');
+
+    let html = '';
+
+    // 1. GENRE
+    const genreConfig = VERTEBRAE_CONFIG.find(v => v.key === 'genre');
+    html += renderRow({ ...genreConfig, number: '1' });
+
+    // 2. ARCHETYPE
+    const archetypeConfig = VERTEBRAE_CONFIG.find(v => v.key === 'archetype');
+    html += renderRow({ ...archetypeConfig, number: '2' });
+
+    // 3. THEME
+    const themeConfig = VERTEBRAE_CONFIG.find(v => v.key === 'theme');
+    html += renderRow({ ...themeConfig, number: '3' });
+
+    // 4. TONE & HUMOR (combined row with three columns)
+    html += `
+      <div class="stc-vertebra-row stc-vertebra-row--combined" data-key="tone-humor">
+        <div class="stc-vertebra-row__header">
+          <span class="stc-vertebra-row__number">4</span>
+          <div class="stc-vertebra-row__header-text">
+            <label class="stc-vertebra-row__label">Tone & Humor</label>
+            <span class="stc-vertebra-row__description">How does it feel, and how much does humor carry?</span>
+          </div>
+        </div>
+        <div class="stc-vertebra-row__body stc-vertebra-row__body--three-col">
+          <!-- Tone (left) -->
+          <div class="stc-vertebra-col" data-key="tone">
+            <label class="stc-vertebra-col__label">${toneConfig.label}</label>
+            <span class="stc-vertebra-col__description">${toneConfig.description}</span>
+            <div class="stc-vertebra-col__tags" id="tags-tone"></div>
+            <div class="stc-vertebra-col__combobox" id="combobox-tone"></div>
+          </div>
+          <!-- Humor Role (center) -->
+          <div class="stc-vertebra-col stc-vertebra-col--humor-role" data-key="humorRole" id="humorRole-container">
+            <label class="stc-vertebra-col__label">${HUMOR_CONFIG.role.label}</label>
+            <span class="stc-vertebra-col__description">${HUMOR_CONFIG.role.description}</span>
+            <div class="stc-vertebra-col__tags" id="tags-humorRole"></div>
+            <div class="stc-vertebra-col__combobox" id="combobox-humorRole"></div>
+          </div>
+          <!-- Humor Style (right) -->
+          <div class="stc-vertebra-col stc-vertebra-col--humor-style" data-key="humorStyle" id="humorStyle-container">
+            <label class="stc-vertebra-col__label">${HUMOR_CONFIG.style.label}</label>
+            <span class="stc-vertebra-col__description">${HUMOR_CONFIG.style.description}</span>
+            <div class="stc-vertebra-col__tags" id="tags-humorStyle"></div>
+            <div class="stc-vertebra-col__combobox" id="combobox-humorStyle"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 5. STAKES
+    const stakesConfig = VERTEBRAE_CONFIG.find(v => v.key === 'stakes');
+    html += renderRow({ ...stakesConfig, number: '5' });
+
+    container.innerHTML = html;
+
+    // Initialize comboboxes for main vertebrae
+    ['genre', 'archetype', 'theme', 'stakes'].forEach(key => {
+      const config = VERTEBRAE_CONFIG.find(v => v.key === key);
+      const comboContainer = document.getElementById(`combobox-${key}`);
+
+      comboboxInstances[key] = new Combobox(comboContainer, {
+        key: key,
+        options: config.options,
+        placeholder: `+ Add ${config.label.toLowerCase()}...`,
+        multiSelect: true,
+        getSelected: () => spineSelections[key],
+        onSelect: (id) => {
+          if (!spineSelections[key].includes(id)) {
+            spineSelections[key].push(id);
+            renderTags(key, config.options);
+          }
+        }
+      });
+
+      // Initial tag render
+      renderTags(key, config.options);
+    });
+
+    // Tone combobox
+    const toneComboContainer = document.getElementById('combobox-tone');
+    comboboxInstances.tone = new Combobox(toneComboContainer, {
+      key: 'tone',
+      options: toneConfig.options,
+      placeholder: '+ Add tone...',
+      multiSelect: true,
+      getSelected: () => spineSelections.tone,
+      onSelect: (id) => {
+        if (!spineSelections.tone.includes(id)) {
+          spineSelections.tone.push(id);
+          renderTags('tone', toneConfig.options);
+        }
+      }
+    });
+    renderTags('tone', toneConfig.options);
+
+    // Humor Role combobox (single-select behavior, but shows as tag)
+    const humorRoleContainer = document.getElementById('combobox-humorRole');
+    comboboxInstances.humorRole = new Combobox(humorRoleContainer, {
+      key: 'humorRole',
+      options: HUMOR_CONFIG.role.options,
+      placeholder: 'Select humor role...',
+      multiSelect: false,
+      getSelected: () => spineSelections.humorRole && spineSelections.humorRole !== 'none' ? [spineSelections.humorRole] : [],
+      onSelect: (id) => {
+        spineSelections.humorRole = id;
+        renderSingleTag('humorRole', HUMOR_CONFIG.role.options);
+        updateHumorStyleState();
+      }
+    });
+    renderSingleTag('humorRole', HUMOR_CONFIG.role.options);
+
+    // Humor Style combobox
+    const humorStyleContainer = document.getElementById('combobox-humorStyle');
+    comboboxInstances.humorStyle = new Combobox(humorStyleContainer, {
+      key: 'humorStyle',
+      options: HUMOR_CONFIG.style.options,
+      placeholder: '+ Add style...',
+      multiSelect: true,
+      getSelected: () => spineSelections.humorStyle,
+      onSelect: (id) => {
+        if (!spineSelections.humorStyle.includes(id)) {
+          spineSelections.humorStyle.push(id);
+          renderTags('humorStyle', HUMOR_CONFIG.style.options);
+        }
+      }
+    });
+    renderTags('humorStyle', HUMOR_CONFIG.style.options);
+
+    // Set initial humor style state
+    updateHumorStyleState();
+  }
+
+  function updateHumorStyleState() {
+    const styleContainer = document.getElementById('humorStyle-container');
+    const isEnabled = spineSelections.humorRole && spineSelections.humorRole !== 'none';
+
+    if (isEnabled) {
+      styleContainer.classList.remove('stc-vertebra--disabled');
+      if (comboboxInstances.humorStyle) {
+        comboboxInstances.humorStyle.setDisabled(false);
+      }
+    } else {
+      styleContainer.classList.add('stc-vertebra--disabled');
+      if (comboboxInstances.humorStyle) {
+        comboboxInstances.humorStyle.setDisabled(true);
+      }
+      // Clear style selections if humor is "none"
+      spineSelections.humorStyle = [];
+      renderTags('humorStyle', HUMOR_CONFIG.style.options);
+    }
+  }
+
   function resetSpineSelections() {
+    // Reset all multi-select vertebrae
     VERTEBRAE_CONFIG.forEach(v => {
       spineSelections[v.key] = [];
       renderTags(v.key, v.options);
+      if (comboboxInstances[v.key]) {
+        comboboxInstances[v.key].refresh();
+      }
     });
-    // Reset humor
-    spineSelections.humorPresence = 'none';
+
+    // Reset humor role
+    spineSelections.humorRole = 'none';
+    renderSingleTag('humorRole', HUMOR_CONFIG.role.options);
+    if (comboboxInstances.humorRole) {
+      comboboxInstances.humorRole.input.placeholder = 'Select humor role...';
+      comboboxInstances.humorRole.refresh();
+    }
+
+    // Reset humor style
     spineSelections.humorStyle = [];
-    const presenceSelect = document.getElementById('select-humorPresence');
-    if (presenceSelect) presenceSelect.value = 'none';
     renderTags('humorStyle', HUMOR_CONFIG.style.options);
+    if (comboboxInstances.humorStyle) {
+      comboboxInstances.humorStyle.refresh();
+    }
+
     updateHumorStyleState();
   }
 
@@ -1298,12 +1639,25 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     flex-shrink: 0;
   }
 
+  .stc-vertebra-row__header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
   .stc-vertebra-row__label {
     font-family: 'Lora', Georgia, serif;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--color-text-primary, #2C2416);
     margin: 0;
+  }
+
+  .stc-vertebra-row__description {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
   }
 
   .stc-vertebra-row__body {
@@ -1322,25 +1676,9 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     align-items: center;
   }
 
-  .stc-vertebra-row__select-wrap {
+  .stc-vertebra-row__combobox {
     flex-shrink: 0;
-  }
-
-  .stc-vertebra-row__select {
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: var(--font-size-sm);
-    color: var(--color-text-primary, #2C2416);
-    background: var(--color-background-primary, #FAF6F1);
-    border: 1px solid var(--color-border-default, #D9CFC2);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    min-width: 180px;
-  }
-
-  .stc-vertebra-row__select:focus {
-    outline: none;
-    border-color: var(--color-accent-primary, #B85C38);
+    min-width: 200px;
   }
 
   /* Combined row (Tone & Humor) with three columns */
@@ -1371,6 +1709,14 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     color: var(--color-text-muted, #8B7D6B);
   }
 
+  .stc-vertebra-col__description {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
+    margin-top: -4px;
+  }
+
   .stc-vertebra-col__tags {
     display: flex;
     flex-wrap: wrap;
@@ -1379,42 +1725,23 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     align-items: center;
   }
 
-  .stc-vertebra-col__select {
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: var(--font-size-sm);
-    color: var(--color-text-primary, #2C2416);
-    background: var(--color-background-primary, #FAF6F1);
-    border: 1px solid var(--color-border-default, #D9CFC2);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
+  .stc-vertebra-col__combobox {
     width: 100%;
   }
 
-  .stc-vertebra-col__select:focus {
-    outline: none;
-    border-color: var(--color-accent-primary, #B85C38);
-  }
-
-  /* Humor presence column - center, narrower */
-  .stc-vertebra-col--humor-presence {
+  /* Humor role column - center, narrower */
+  .stc-vertebra-col--humor-role {
     align-items: center;
     justify-content: flex-start;
   }
 
-  .stc-vertebra-col--humor-presence .stc-vertebra-col__select {
+  .stc-vertebra-col--humor-role .stc-combobox {
     min-width: 160px;
-    text-align: center;
   }
 
   /* Humor style disabled state */
   .stc-vertebra-col--humor-style.stc-vertebra--disabled {
     opacity: 0.4;
-  }
-
-  .stc-vertebra-col--humor-style.stc-vertebra--disabled .stc-vertebra-col__select {
-    cursor: not-allowed;
-    background: var(--color-background-tertiary, #EDE4D9);
   }
 
   /* Empty state text */
@@ -1463,5 +1790,170 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   .stc-tag__remove:hover {
     background: rgba(255, 255, 255, 0.4);
+  }
+
+  /* ========== CUSTOM COMBOBOX ========== */
+  .stc-combobox {
+    position: relative;
+    width: 100%;
+  }
+
+  .stc-combobox__input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .stc-combobox__input {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-xl) var(--spacing-sm) var(--spacing-md);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary, #2C2416);
+    background: var(--color-background-primary, #FAF6F1);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-sm);
+    cursor: text;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .stc-combobox__input::placeholder {
+    color: var(--color-text-muted, #8B7D6B);
+  }
+
+  .stc-combobox__input:focus {
+    outline: none;
+    border-color: var(--color-accent-primary, #B85C38);
+    box-shadow: 0 0 0 3px rgba(184, 92, 56, 0.1);
+  }
+
+  .stc-combobox__arrow {
+    position: absolute;
+    right: var(--spacing-sm);
+    color: var(--color-text-muted, #8B7D6B);
+    font-size: 12px;
+    pointer-events: auto;
+    cursor: pointer;
+    padding: 4px;
+    transition: transform 0.15s ease;
+  }
+
+  .stc-combobox--open .stc-combobox__arrow {
+    transform: rotate(180deg);
+  }
+
+  .stc-combobox__dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: var(--color-background-card, #FFFCF8);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    box-shadow: 0 4px 12px rgba(44, 36, 22, 0.1);
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+  }
+
+  .stc-combobox--open .stc-combobox__dropdown {
+    display: block;
+  }
+
+  .stc-combobox--open .stc-combobox__input {
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  }
+
+  .stc-combobox__option {
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    transition: background 0.1s ease;
+    border-bottom: 1px solid var(--color-border-light, #EDE4D9);
+  }
+
+  .stc-combobox__option:last-child {
+    border-bottom: none;
+  }
+
+  .stc-combobox__option:hover {
+    background: var(--color-background-secondary, #F5EEE6);
+  }
+
+  .stc-combobox__option--highlighted {
+    background: var(--color-background-tertiary, #EDE4D9);
+  }
+
+  .stc-combobox__option--highlighted:hover {
+    background: var(--color-background-tertiary, #EDE4D9);
+  }
+
+  .stc-combobox__option-name {
+    display: block;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-primary, #2C2416);
+  }
+
+  .stc-combobox__option-name mark {
+    background: rgba(184, 92, 56, 0.2);
+    color: inherit;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  .stc-combobox__option-desc {
+    display: block;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted, #8B7D6B);
+    margin-top: 2px;
+  }
+
+  .stc-combobox__empty {
+    padding: var(--spacing-md);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
+    text-align: center;
+  }
+
+  /* Disabled state */
+  .stc-combobox--disabled {
+    opacity: 0.5;
+  }
+
+  .stc-combobox--disabled .stc-combobox__input {
+    cursor: not-allowed;
+    background: var(--color-background-tertiary, #EDE4D9);
+  }
+
+  .stc-combobox--disabled .stc-combobox__arrow {
+    cursor: not-allowed;
+  }
+
+  /* Scrollbar styling for dropdown */
+  .stc-combobox__dropdown::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .stc-combobox__dropdown::-webkit-scrollbar-track {
+    background: var(--color-background-secondary, #F5EEE6);
+    border-radius: 0 0 var(--radius-sm) 0;
+  }
+
+  .stc-combobox__dropdown::-webkit-scrollbar-thumb {
+    background: var(--color-border-default, #D9CFC2);
+    border-radius: 4px;
+  }
+
+  .stc-combobox__dropdown::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted, #8B7D6B);
   }
 </style>

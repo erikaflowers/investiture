@@ -2,6 +2,29 @@
 
 ## 2025-01-18
 
+### Late Night Session - Combobox UX Overhaul
+
+**Custom Combobox Component**
+- Replaced native `<select>` elements with custom accessible combobox
+- Type-ahead filtering: type to narrow options (searches name and description)
+- Keyboard navigation: ↓/↑ arrows, Enter to select, Escape to close, Tab to move
+- Selected options removed from dropdown (can't select twice)
+- Search match highlighting in dropdown options
+- Custom styled to match novelist hovel theme:
+  - Warm cream backgrounds
+  - Terracotta accent on focus
+  - Subtle shadows and scrollbars
+  - Option descriptions shown in dropdown
+
+**Vertebrae Data Structure**
+- Refactored vertebrae.js: each vertebra now an object with label, description, options
+- UI pulls labels and descriptions from data file (no hardcoding)
+- Renamed `humorPresence` → `humorRole` with expanded options
+
+**Visual Consistency**
+- Humor Role (single-select) now displays as tag like multi-selects
+- Click × on tag to remove selection
+
 ### Evening Session - Spine Builder & Routing
 
 **Vertebrae System**
