@@ -2,6 +2,18 @@
 
 ## 2025-01-18
 
+### Story Concept Polish & Bug Fixes
+
+**Story DNA Display**
+- Added genome tags at top of story concept showing all selected vertebrae
+- "Story DNA" label with colored tags for each category
+- Category colors: genre (brown), archetype (green), theme (purple), tone (tan), stakes (red), humor (blue)
+
+**Bug Fixes**
+- Fixed empty concept display: `formatConceptAsHtml` was filtering out all headers
+- Fixed text color: concept content now uses dark brown (#2C2416) instead of inheriting gray from body
+- Added graceful error when Netlify function unavailable (guides user to run `netlify dev`)
+
 ### Claude API Integration - Story Concept Generation
 
 **Netlify Serverless Function**
