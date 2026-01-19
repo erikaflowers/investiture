@@ -146,6 +146,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  import { genres, archetypes, themes, tones, stakes, humorPresence, humorStyle } from '/stc/core/logic/vertebrae.js';
 
   // Supabase config
   const SUPABASE_URL = 'https://vfufedgmfcqwimvglvls.supabase.co';
@@ -215,63 +216,28 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   });
 
   // ========== VERTEBRAE CONFIGURATION ==========
-  // Each vertebra has a key, label, and array of options
-  // Modify this array to change what appears in the spine builder
+  // Built from imported arrays in /apps/stc/core/logic/vertebrae.js
   const VERTEBRAE_CONFIG = [
-    {
-      key: 'genre',
-      label: 'Genre',
-      options: [
-        'Fantasy', 'Science Fiction', 'Mystery', 'Thriller', 'Romance',
-        'Horror', 'Literary Fiction', 'Historical Fiction', 'Young Adult',
-        'Middle Grade', 'Urban Fantasy', 'Epic Fantasy', 'Space Opera',
-        'Cozy Mystery', 'Psychological Thriller', 'Paranormal Romance'
-      ]
-    },
-    {
-      key: 'archetype',
-      label: 'Character Archetype',
-      options: [
-        'The Hero', 'The Mentor', 'The Shapeshifter', 'The Shadow',
-        'The Trickster', 'The Herald', 'The Guardian', 'The Outcast',
-        'The Innocent', 'The Orphan', 'The Warrior', 'The Caregiver',
-        'The Seeker', 'The Lover', 'The Destroyer', 'The Creator'
-      ]
-    },
-    {
-      key: 'arc',
-      label: 'Character Arc',
-      options: [
-        'Positive Change Arc', 'Flat Arc', 'Negative Change Arc',
-        'Disillusionment Arc', 'Fall Arc', 'Corruption Arc',
-        'Coming of Age', 'Redemption', 'Tragic Fall', 'Rebirth'
-      ]
-    },
-    {
-      key: 'structure',
-      label: 'Narrative Structure',
-      options: [
-        'Three-Act Structure', 'Save the Cat', 'Hero\'s Journey',
-        'Seven-Point Story', 'Fichtean Curve', 'In Medias Res',
-        'Freytag\'s Pyramid', 'Dan Harmon Story Circle', 'Kishotenketsu',
-        'Nonlinear', 'Frame Narrative', 'Parallel Storylines'
-      ]
-    },
-    {
-      key: 'tone',
-      label: 'Tone & Mood',
-      options: [
-        'Dark', 'Light', 'Humorous', 'Serious', 'Whimsical',
-        'Gritty', 'Hopeful', 'Melancholic', 'Suspenseful', 'Romantic',
-        'Adventurous', 'Introspective', 'Satirical', 'Bittersweet'
-      ]
-    }
+    { key: 'genre', label: 'Genre', options: genres, multiSelect: true },
+    { key: 'archetype', label: 'Story Archetype', options: archetypes, multiSelect: true },
+    { key: 'theme', label: 'Theme', options: themes, multiSelect: true },
+    { key: 'tone', label: 'Tone', options: tones, multiSelect: true },
+    { key: 'stakes', label: 'Stakes', options: stakes, multiSelect: true },
   ];
+
+  // Humor modifier config (separate from main vertebrae)
+  const HUMOR_CONFIG = {
+    presence: { key: 'humorPresence', label: 'Humor', options: humorPresence, multiSelect: false },
+    style: { key: 'humorStyle', label: 'Humor Style', options: humorStyle, multiSelect: true }
+  };
 
   // Initialize spine selections for each vertebra
   VERTEBRAE_CONFIG.forEach(v => {
     spineSelections[v.key] = [];
   });
+  // Initialize humor selections
+  spineSelections.humorPresence = null; // Single select, so null or single value
+  spineSelections.humorStyle = [];
 
   // DOM elements - Auth
   const authView = document.getElementById('auth-view');
@@ -383,9 +349,17 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   // ========== SPINE BUILDER FUNCTIONS ==========
 
+  // Helper to get option name by id
+  function getOptionName(options, id) {
+    const opt = options.find(o => o.id === id);
+    return opt ? opt.name : id;
+  }
+
   function renderVertebrae() {
     const container = document.getElementById('vertebrae-container');
-    container.innerHTML = VERTEBRAE_CONFIG.map(vertebra => `
+
+    // Render main vertebrae (all multi-select)
+    let html = VERTEBRAE_CONFIG.map(vertebra => `
       <div class="stc-vertebra" data-key="${vertebra.key}">
         <label class="stc-vertebra__label">${vertebra.label}</label>
         <div class="stc-vertebra__tags" id="tags-${vertebra.key}">
@@ -394,35 +368,97 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         <div class="stc-vertebra__input-wrap">
           <select class="stc-vertebra__select" id="select-${vertebra.key}">
             <option value="">+ Add ${vertebra.label.toLowerCase()}...</option>
-            ${vertebra.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+            ${vertebra.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
           </select>
         </div>
       </div>
     `).join('');
 
-    // Attach change handlers to each select
+    // Render humor modifier (presence = single select, style = multi-select)
+    html += `
+      <div class="stc-vertebra stc-vertebra--humor" data-key="humorPresence">
+        <label class="stc-vertebra__label">${HUMOR_CONFIG.presence.label}</label>
+        <div class="stc-vertebra__input-wrap">
+          <select class="stc-vertebra__select stc-vertebra__select--single" id="select-humorPresence">
+            ${HUMOR_CONFIG.presence.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="stc-vertebra stc-vertebra--humor-style" data-key="humorStyle" id="humorStyle-container">
+        <label class="stc-vertebra__label">${HUMOR_CONFIG.style.label}</label>
+        <div class="stc-vertebra__tags" id="tags-humorStyle">
+          <!-- Selected tags will appear here -->
+        </div>
+        <div class="stc-vertebra__input-wrap">
+          <select class="stc-vertebra__select" id="select-humorStyle">
+            <option value="">+ Add style...</option>
+            ${HUMOR_CONFIG.style.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    `;
+
+    container.innerHTML = html;
+
+    // Attach change handlers to main vertebrae (multi-select)
     VERTEBRAE_CONFIG.forEach(vertebra => {
       const select = document.getElementById(`select-${vertebra.key}`);
       select.addEventListener('change', () => {
         if (select.value) {
-          addTag(vertebra.key, select.value);
+          addTag(vertebra.key, select.value, vertebra.options);
           select.value = ''; // Reset dropdown
         }
       });
     });
+
+    // Humor presence handler (single-select)
+    const humorPresenceSelect = document.getElementById('select-humorPresence');
+    humorPresenceSelect.addEventListener('change', () => {
+      spineSelections.humorPresence = humorPresenceSelect.value;
+      updateHumorStyleState();
+    });
+
+    // Humor style handler (multi-select, conditional)
+    const humorStyleSelect = document.getElementById('select-humorStyle');
+    humorStyleSelect.addEventListener('change', () => {
+      if (humorStyleSelect.value) {
+        addTag('humorStyle', humorStyleSelect.value, HUMOR_CONFIG.style.options);
+        humorStyleSelect.value = '';
+      }
+    });
+
+    // Set initial humor style state
+    updateHumorStyleState();
   }
 
-  function addTag(vertebraKey, value) {
+  function updateHumorStyleState() {
+    const styleContainer = document.getElementById('humorStyle-container');
+    const styleSelect = document.getElementById('select-humorStyle');
+    const isEnabled = spineSelections.humorPresence && spineSelections.humorPresence !== 'none';
+
+    if (isEnabled) {
+      styleContainer.classList.remove('stc-vertebra--disabled');
+      styleSelect.disabled = false;
+    } else {
+      styleContainer.classList.add('stc-vertebra--disabled');
+      styleSelect.disabled = true;
+      // Clear style selections if humor is "none"
+      spineSelections.humorStyle = [];
+      renderTags('humorStyle', HUMOR_CONFIG.style.options);
+    }
+  }
+
+  function addTag(vertebraKey, id, options) {
     // Don't add duplicates
-    if (spineSelections[vertebraKey].includes(value)) return;
+    if (spineSelections[vertebraKey].includes(id)) return;
 
-    spineSelections[vertebraKey].push(value);
-    renderTags(vertebraKey);
+    spineSelections[vertebraKey].push(id);
+    renderTags(vertebraKey, options);
   }
 
-  function removeTag(vertebraKey, value) {
-    spineSelections[vertebraKey] = spineSelections[vertebraKey].filter(v => v !== value);
-    renderTags(vertebraKey);
+  function removeTag(vertebraKey, id, options) {
+    spineSelections[vertebraKey] = spineSelections[vertebraKey].filter(v => v !== id);
+    renderTags(vertebraKey, options);
   }
 
   // Rainbow colors for tags
@@ -439,21 +475,24 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     '#5C8B7A', // Teal
   ];
 
-  function renderTags(vertebraKey) {
+  function renderTags(vertebraKey, options) {
     const container = document.getElementById(`tags-${vertebraKey}`);
+    if (!container) return;
+
     const tags = spineSelections[vertebraKey];
 
-    if (tags.length === 0) {
+    if (!tags || tags.length === 0) {
       container.innerHTML = '<span class="stc-vertebra__empty">None selected</span>';
       return;
     }
 
-    container.innerHTML = tags.map((tag, index) => {
+    container.innerHTML = tags.map((id, index) => {
       const color = TAG_COLORS[index % TAG_COLORS.length];
+      const name = getOptionName(options, id);
       return `
         <span class="stc-tag" style="background-color: ${color}">
-          <span class="stc-tag__text">${tag}</span>
-          <button class="stc-tag__remove" data-vertebra="${vertebraKey}" data-value="${tag}" aria-label="Remove ${tag}">×</button>
+          <span class="stc-tag__text">${name}</span>
+          <button class="stc-tag__remove" data-vertebra="${vertebraKey}" data-id="${id}" aria-label="Remove ${name}">×</button>
         </span>
       `;
     }).join('');
@@ -461,7 +500,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     // Attach remove handlers
     container.querySelectorAll('.stc-tag__remove').forEach(btn => {
       btn.addEventListener('click', () => {
-        removeTag(btn.dataset.vertebra, btn.dataset.value);
+        removeTag(btn.dataset.vertebra, btn.dataset.id, options);
       });
     });
   }
@@ -469,8 +508,15 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   function resetSpineSelections() {
     VERTEBRAE_CONFIG.forEach(v => {
       spineSelections[v.key] = [];
-      renderTags(v.key);
+      renderTags(v.key, v.options);
     });
+    // Reset humor
+    spineSelections.humorPresence = 'none';
+    spineSelections.humorStyle = [];
+    const presenceSelect = document.getElementById('select-humorPresence');
+    if (presenceSelect) presenceSelect.value = 'none';
+    renderTags('humorStyle', HUMOR_CONFIG.style.options);
+    updateHumorStyleState();
   }
 
   // View switching
@@ -1252,5 +1298,21 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   .stc-tag__remove:hover {
     background: rgba(255, 255, 255, 0.4);
+  }
+
+  /* Disabled vertebra state (for humor style when presence is "none") */
+  .stc-vertebra--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .stc-vertebra--disabled .stc-vertebra__select {
+    cursor: not-allowed;
+    background: var(--color-background-tertiary, #EDE4D9);
+  }
+
+  /* Single-select styling (no tags area) */
+  .stc-vertebra__select--single {
+    font-weight: 500;
   }
 </style>
