@@ -1344,7 +1344,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   }
 
   function enterRefineMode(sectionEl, index) {
-    sectionEl.querySelector('.stc-section__display').style.display = 'none';
+    // Keep display visible so user can read the text while writing direction
     sectionEl.querySelector('.stc-section__actions').style.display = 'none';
     sectionEl.querySelector('.stc-section__refine-mode').style.display = 'block';
     sectionEl.querySelector('.stc-section__direction').value = '';
@@ -1354,7 +1354,6 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   function exitRefineMode(sectionEl) {
     sectionEl.querySelector('.stc-section__refine-mode').style.display = 'none';
     sectionEl.querySelector('.stc-section__suggestion').style.display = 'none';
-    sectionEl.querySelector('.stc-section__display').style.display = 'block';
     sectionEl.querySelector('.stc-section__actions').style.display = 'flex';
   }
 
