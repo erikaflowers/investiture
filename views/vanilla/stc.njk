@@ -102,9 +102,43 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         </div>
       </div>
 
-      <!-- Future: This is where we'd add the next phase UI -->
-      <div class="stc-dive__next">
-        <p>Next up: Extract the premise spine from this braindump...</p>
+      <!-- Brief: AI-extracted summary (stubbed for now) -->
+      <div class="stc-brief">
+        <h3 class="stc-brief__heading">The Brief</h3>
+        <p class="stc-brief__note">Based on your braindump, here's what we're working with:</p>
+
+        <div class="stc-brief__grid">
+          <div class="stc-brief__item">
+            <h4 class="stc-brief__label">Core Concept</h4>
+            <p class="stc-brief__content" id="brief-concept">
+              <span class="stc-brief__placeholder">AI will extract the central idea...</span>
+            </p>
+          </div>
+
+          <div class="stc-brief__item">
+            <h4 class="stc-brief__label">Premise</h4>
+            <p class="stc-brief__content" id="brief-premise">
+              <span class="stc-brief__placeholder">The "what if" driving the story...</span>
+            </p>
+          </div>
+
+          <div class="stc-brief__item">
+            <h4 class="stc-brief__label">World & Tone</h4>
+            <p class="stc-brief__content" id="brief-world">
+              <span class="stc-brief__placeholder">The feel, setting, atmosphere...</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spine Builder: Multi-select vertebrae -->
+      <div class="stc-spine">
+        <h3 class="stc-spine__heading">Build Your Spine</h3>
+        <p class="stc-spine__note">Select the building blocks for your story structure:</p>
+
+        <div class="stc-spine__vertebrae" id="vertebrae-container">
+          <!-- Vertebrae will be rendered by JS from config -->
+        </div>
       </div>
     </div>
   </div>
@@ -122,6 +156,66 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   let currentUser = null;
   let currentBraindump = null;
   let currentProject = null;
+  let spineSelections = {}; // Tracks selected tags per vertebra
+
+  // ========== VERTEBRAE CONFIGURATION ==========
+  // Each vertebra has a key, label, and array of options
+  // Modify this array to change what appears in the spine builder
+  const VERTEBRAE_CONFIG = [
+    {
+      key: 'genre',
+      label: 'Genre',
+      options: [
+        'Fantasy', 'Science Fiction', 'Mystery', 'Thriller', 'Romance',
+        'Horror', 'Literary Fiction', 'Historical Fiction', 'Young Adult',
+        'Middle Grade', 'Urban Fantasy', 'Epic Fantasy', 'Space Opera',
+        'Cozy Mystery', 'Psychological Thriller', 'Paranormal Romance'
+      ]
+    },
+    {
+      key: 'archetype',
+      label: 'Character Archetype',
+      options: [
+        'The Hero', 'The Mentor', 'The Shapeshifter', 'The Shadow',
+        'The Trickster', 'The Herald', 'The Guardian', 'The Outcast',
+        'The Innocent', 'The Orphan', 'The Warrior', 'The Caregiver',
+        'The Seeker', 'The Lover', 'The Destroyer', 'The Creator'
+      ]
+    },
+    {
+      key: 'arc',
+      label: 'Character Arc',
+      options: [
+        'Positive Change Arc', 'Flat Arc', 'Negative Change Arc',
+        'Disillusionment Arc', 'Fall Arc', 'Corruption Arc',
+        'Coming of Age', 'Redemption', 'Tragic Fall', 'Rebirth'
+      ]
+    },
+    {
+      key: 'structure',
+      label: 'Narrative Structure',
+      options: [
+        'Three-Act Structure', 'Save the Cat', 'Hero\'s Journey',
+        'Seven-Point Story', 'Fichtean Curve', 'In Medias Res',
+        'Freytag\'s Pyramid', 'Dan Harmon Story Circle', 'Kishotenketsu',
+        'Nonlinear', 'Frame Narrative', 'Parallel Storylines'
+      ]
+    },
+    {
+      key: 'tone',
+      label: 'Tone & Mood',
+      options: [
+        'Dark', 'Light', 'Humorous', 'Serious', 'Whimsical',
+        'Gritty', 'Hopeful', 'Melancholic', 'Suspenseful', 'Romantic',
+        'Adventurous', 'Introspective', 'Satirical', 'Bittersweet'
+      ]
+    }
+  ];
+
+  // Initialize spine selections for each vertebra
+  VERTEBRAE_CONFIG.forEach(v => {
+    spineSelections[v.key] = [];
+  });
 
   // DOM elements - Auth
   const authView = document.getElementById('auth-view');
@@ -217,6 +311,81 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     }
   }
 
+  // ========== SPINE BUILDER FUNCTIONS ==========
+
+  function renderVertebrae() {
+    const container = document.getElementById('vertebrae-container');
+    container.innerHTML = VERTEBRAE_CONFIG.map(vertebra => `
+      <div class="stc-vertebra" data-key="${vertebra.key}">
+        <label class="stc-vertebra__label">${vertebra.label}</label>
+        <div class="stc-vertebra__tags" id="tags-${vertebra.key}">
+          <!-- Selected tags will appear here -->
+        </div>
+        <div class="stc-vertebra__input-wrap">
+          <select class="stc-vertebra__select" id="select-${vertebra.key}">
+            <option value="">+ Add ${vertebra.label.toLowerCase()}...</option>
+            ${vertebra.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach change handlers to each select
+    VERTEBRAE_CONFIG.forEach(vertebra => {
+      const select = document.getElementById(`select-${vertebra.key}`);
+      select.addEventListener('change', () => {
+        if (select.value) {
+          addTag(vertebra.key, select.value);
+          select.value = ''; // Reset dropdown
+        }
+      });
+    });
+  }
+
+  function addTag(vertebraKey, value) {
+    // Don't add duplicates
+    if (spineSelections[vertebraKey].includes(value)) return;
+
+    spineSelections[vertebraKey].push(value);
+    renderTags(vertebraKey);
+  }
+
+  function removeTag(vertebraKey, value) {
+    spineSelections[vertebraKey] = spineSelections[vertebraKey].filter(v => v !== value);
+    renderTags(vertebraKey);
+  }
+
+  function renderTags(vertebraKey) {
+    const container = document.getElementById(`tags-${vertebraKey}`);
+    const tags = spineSelections[vertebraKey];
+
+    if (tags.length === 0) {
+      container.innerHTML = '<span class="stc-vertebra__empty">None selected</span>';
+      return;
+    }
+
+    container.innerHTML = tags.map(tag => `
+      <span class="stc-tag">
+        <span class="stc-tag__text">${tag}</span>
+        <button class="stc-tag__remove" data-vertebra="${vertebraKey}" data-value="${tag}" aria-label="Remove ${tag}">×</button>
+      </span>
+    `).join('');
+
+    // Attach remove handlers
+    container.querySelectorAll('.stc-tag__remove').forEach(btn => {
+      btn.addEventListener('click', () => {
+        removeTag(btn.dataset.vertebra, btn.dataset.value);
+      });
+    });
+  }
+
+  function resetSpineSelections() {
+    VERTEBRAE_CONFIG.forEach(v => {
+      spineSelections[v.key] = [];
+      renderTags(v.key);
+    });
+  }
+
   // View switching
   function showListView() {
     listView.style.display = 'block';
@@ -239,6 +408,10 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     // Reset to display mode
     diveDisplay.style.display = 'block';
     diveEdit.style.display = 'none';
+
+    // Initialize spine builder
+    renderVertebrae();
+    resetSpineSelections();
   }
 
   // Save new braindump
@@ -791,18 +964,193 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     margin-top: var(--spacing-md);
   }
 
-  .stc-dive__next {
+  /* ========== BRIEF SECTION ========== */
+  .stc-brief {
     margin-top: var(--spacing-xxl);
-    padding: var(--spacing-lg);
-    background: var(--color-background-tertiary, #EDE4D9);
-    border-radius: var(--radius-md);
-    text-align: center;
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
   }
 
-  .stc-dive__next p {
+  .stc-brief__heading {
     font-family: 'Lora', Georgia, serif;
-    font-style: italic;
+    font-size: 1.5rem;
+    color: var(--color-text-primary, #2C2416);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-brief__note {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
     color: var(--color-text-muted, #8B7D6B);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .stc-brief__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  @media (min-width: 600px) {
+    .stc-brief__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .stc-brief__item {
+    background: var(--color-background-card, #FFFCF8);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+  }
+
+  .stc-brief__label {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-accent-primary, #B85C38);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-brief__content {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary, #2C2416);
+    line-height: 1.5;
     margin: 0;
+  }
+
+  .stc-brief__placeholder {
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
+  }
+
+  /* ========== SPINE BUILDER ========== */
+  .stc-spine {
+    margin-top: var(--spacing-xxl);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-spine__heading {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.5rem;
+    color: var(--color-text-primary, #2C2416);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-spine__note {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted, #8B7D6B);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .stc-spine__vertebrae {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  @media (min-width: 768px) {
+    .stc-spine__vertebrae {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .stc-spine__vertebrae {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Individual vertebra selector */
+  .stc-vertebra {
+    background: var(--color-background-card, #FFFCF8);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+  }
+
+  .stc-vertebra__label {
+    display: block;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary, #5C4D3C);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-vertebra__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    min-height: 32px;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-vertebra__empty {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
+  }
+
+  .stc-vertebra__select {
+    width: 100%;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary, #2C2416);
+    background: var(--color-background-primary, #FAF6F1);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+
+  .stc-vertebra__select:focus {
+    outline: none;
+    border-color: var(--color-accent-primary, #B85C38);
+  }
+
+  /* Tags */
+  .stc-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: var(--color-accent-primary, #B85C38);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+  }
+
+  .stc-tag__text {
+    line-height: 1;
+  }
+
+  .stc-tag__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .stc-tag__remove:hover {
+    background: rgba(255, 255, 255, 0.4);
   }
 </style>
