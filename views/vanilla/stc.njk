@@ -1165,12 +1165,9 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       // Line breaks to paragraphs
       .split('\n\n')
       .map(p => p.trim())
-      .filter(p => p && !p.startsWith('<h'))
+      .filter(p => p)
       .map(p => p.startsWith('<h') ? p : `<p>${p}</p>`)
-      .join('\n')
-      // Fix headers that got wrapped in <p>
-      .replace(/<p>(<h[34][^>]*>)/g, '$1')
-      .replace(/(<\/h[34]>)<\/p>/g, '$1');
+      .join('\n');
   }
 
   async function saveConcept(conceptText) {
