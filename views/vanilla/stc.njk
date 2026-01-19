@@ -1098,12 +1098,17 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         })
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate concept');
+      // Check if response is JSON (Netlify functions return JSON)
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Netlify function not available. Run "netlify dev" locally or deploy to Netlify.');
       }
 
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate concept');
+      }
 
       // Display the concept
       displayConcept(data.concept);
