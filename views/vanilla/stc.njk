@@ -1105,9 +1105,18 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       }
 
       const data = await response.json();
+      console.log('=== CLAUDE API DEBUG ===');
+      console.log('Full response data:', data);
+      console.log('data.concept:', data.concept);
+      console.log('typeof data.concept:', typeof data.concept);
+      console.log('data.concept?.length:', data.concept?.length);
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to generate concept');
+      }
+
+      if (!data.concept) {
+        throw new Error('Claude returned empty concept');
       }
 
       // Display the concept
@@ -1125,13 +1134,19 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   }
 
   function displayConcept(conceptText) {
+    console.log('=== DISPLAY CONCEPT DEBUG ===');
+    console.log('Input conceptText:', conceptText);
+
     const resultEl = document.getElementById('concept-result');
     const contentEl = document.getElementById('concept-content');
     const btnRegenerate = document.getElementById('btn-regenerate-concept');
 
     // Convert markdown-like text to HTML
     const htmlContent = formatConceptAsHtml(conceptText);
+    console.log('Formatted HTML:', htmlContent);
+
     contentEl.innerHTML = htmlContent;
+    console.log('contentEl after innerHTML:', contentEl.innerHTML);
 
     resultEl.style.display = 'block';
     btnRegenerate.style.display = 'inline-block';
