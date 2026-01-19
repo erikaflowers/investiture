@@ -1308,8 +1308,28 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   }
 
   function formatConceptForCopy() {
+    // Build genome line as comma-separated tags
+    let genomeLine = '';
+    if (currentProject?.genome) {
+      const hydrated = hydrateGenome(currentProject.genome);
+      const allTags = [
+        ...hydrated.genres.map(g => g.name),
+        ...hydrated.archetypes.map(a => a.name),
+        ...hydrated.themes.map(t => t.name),
+        ...hydrated.tones.map(t => t.name),
+        ...hydrated.stakes.map(s => s.name),
+        ...(hydrated.humorRole && hydrated.humorRole.id !== 'none' ? [hydrated.humorRole.name] : []),
+        ...hydrated.humorStyles.map(h => h.name)
+      ];
+      if (allTags.length > 0) {
+        genomeLine = `**Story DNA:** ${allTags.join(', ')}\n\n`;
+      }
+    }
+
     // Format sections into clean, copyable text
-    return currentSections.map(section => `### ${section.name}\n${section.content}`).join('\n\n');
+    const sectionsText = currentSections.map(section => `### ${section.name}\n${section.content}`).join('\n\n');
+
+    return genomeLine + sectionsText;
   }
 
   function setupViewToggle() {
