@@ -1441,27 +1441,35 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   }
 
   async function saveConceptSections() {
-    if (!currentProject) return;
+    if (!currentProject) {
+      console.error('saveConceptSections: No current project');
+      return;
+    }
 
     const conceptText = reconstructConceptText();
+    console.log('Saving concept sections, text length:', conceptText.length);
+
+    // Build the story_concept object, handling case where it might be null
+    const existingConcept = currentProject.story_concept || {};
+    const updatedConcept = {
+      ...existingConcept,
+      concept: conceptText,
+      updated_at: new Date().toISOString()
+    };
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('projects')
-        .update({
-          story_concept: {
-            ...currentProject.story_concept,
-            concept: conceptText,
-            updated_at: new Date().toISOString()
-          }
-        })
-        .eq('id', currentProject.id);
+        .update({ story_concept: updatedConcept })
+        .eq('id', currentProject.id)
+        .select();
 
       if (error) throw error;
 
+      console.log('Save successful:', data);
+
       // Update local state
-      currentProject.story_concept.concept = conceptText;
-      currentProject.story_concept.updated_at = new Date().toISOString();
+      currentProject.story_concept = updatedConcept;
 
       showConceptStatus('Saved', 'success');
     } catch (e) {
