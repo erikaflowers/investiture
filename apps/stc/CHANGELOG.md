@@ -2,6 +2,36 @@
 
 ## 2025-01-18
 
+### Claude API Integration - Story Concept Generation
+
+**Netlify Serverless Function**
+- Created `netlify/functions/generate-concept.js` for secure API calls
+- Uses `ANTHROPIC_API_KEY` environment variable (no client-side exposure)
+- Calls Claude Sonnet 4 with structured prompt for story concept generation
+
+**Genome Hydration**
+- Converts genome ID arrays to full definitions (name + description)
+- Provides Claude with rich context about selected vertebrae
+- Handles all vertebrae types: genre, archetype, theme, tone, stakes, humor
+
+**Story Concept UI**
+- "Generate Story Concept" button appears when braindump + genome exist
+- Loading state with spinner animation
+- Result display with formatted markdown (headings, paragraphs, emphasis)
+- "Regenerate" button for trying again
+- Error display for API failures
+
+**Prompt Structure**
+- Logline: 25-35 word dramatic question
+- Premise: "What if" hook (2-3 sentences)
+- Thematic Core: Underlying truth/question
+- Tonal Compass: Emotional texture with comparable works
+- The Promise: What makes this story unique
+
+**Persistence**
+- Saves generated concept to Supabase `story_concept` JSONB column
+- Stores raw text, model info, usage stats, and timestamp
+
 ### Late Night Session - Combobox UX Overhaul
 
 **Custom Combobox Component**
