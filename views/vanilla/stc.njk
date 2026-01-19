@@ -1216,6 +1216,10 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         <div class="stc-section__suggestion" style="display: none;">
           <div class="stc-section__suggestion-label">Claude's Suggestion</div>
           <div class="stc-section__suggestion-content"></div>
+          <div class="stc-section__affected" style="display: none;">
+            <div class="stc-section__affected-label">⚠️ This change may affect other sections:</div>
+            <div class="stc-section__affected-list"></div>
+          </div>
           <div class="stc-section__suggestion-actions">
             <button class="button button--secondary stc-section__discard">Discard</button>
             <button class="button button--secondary stc-section__try-again">Try Again</button>
@@ -1370,12 +1374,13 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     try {
       const hydratedGenome = hydrateGenome(currentProject.genome);
 
+      // Send ALL sections for context-aware refinement
       const response = await fetch('/.netlify/functions/refine-section', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sectionName: section.name,
-          currentContent: section.content,
+          allSections: currentSections,
           direction: direction,
           genome: hydratedGenome,
           braindump: currentBraindump?.raw_input || ''
@@ -1396,8 +1401,56 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       // Show suggestion
       sectionEl.querySelector('.stc-section__refine-mode').style.display = 'none';
       sectionEl.querySelector('.stc-section__suggestion').style.display = 'block';
-      sectionEl.querySelector('.stc-section__suggestion-content').innerHTML = formatSectionContent(data.refinedContent);
-      sectionEl.dataset.suggestionContent = data.refinedContent;
+      sectionEl.querySelector('.stc-section__suggestion-content').innerHTML = formatSectionContent(data.revisedSection);
+      sectionEl.dataset.suggestionContent = data.revisedSection;
+
+      // Handle affected sections if any
+      const affectedEl = sectionEl.querySelector('.stc-section__affected');
+      const affectedListEl = sectionEl.querySelector('.stc-section__affected-list');
+
+      if (data.affectedSections && data.affectedSections.length > 0) {
+        affectedEl.style.display = 'block';
+        affectedListEl.innerHTML = data.affectedSections.map((affected, i) => `
+          <div class="stc-affected-item" data-affected-index="${i}">
+            <div class="stc-affected-item__header">
+              <strong>${affected.section}</strong>
+            </div>
+            <div class="stc-affected-item__reason">${affected.reason}</div>
+            <div class="stc-affected-item__fix">
+              <div class="stc-affected-item__fix-label">Suggested fix:</div>
+              <div class="stc-affected-item__fix-content">${formatSectionContent(affected.suggestedFix)}</div>
+            </div>
+            <div class="stc-affected-item__actions">
+              <button class="button button--small button--secondary stc-affected-item__ignore">Ignore</button>
+              <button class="button button--small button--primary stc-affected-item__apply">Apply Fix</button>
+            </div>
+          </div>
+        `).join('');
+
+        // Store affected sections data
+        sectionEl.dataset.affectedSections = JSON.stringify(data.affectedSections);
+
+        // Attach event listeners to affected section buttons
+        affectedListEl.querySelectorAll('.stc-affected-item').forEach((itemEl, i) => {
+          itemEl.querySelector('.stc-affected-item__ignore').addEventListener('click', () => {
+            itemEl.remove();
+            // Hide affected container if no more items
+            if (affectedListEl.children.length === 0) {
+              affectedEl.style.display = 'none';
+            }
+          });
+
+          itemEl.querySelector('.stc-affected-item__apply').addEventListener('click', async () => {
+            const affectedData = data.affectedSections[i];
+            await applyAffectedFix(affectedData.section, affectedData.suggestedFix);
+            itemEl.classList.add('stc-affected-item--applied');
+            itemEl.querySelector('.stc-affected-item__actions').innerHTML = '<span class="stc-affected-item__applied-label">✓ Applied</span>';
+          });
+        });
+      } else {
+        affectedEl.style.display = 'none';
+        affectedListEl.innerHTML = '';
+      }
 
     } catch (e) {
       console.error('Refine error:', e);
@@ -1406,6 +1459,28 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       sendBtn.textContent = originalText;
       sendBtn.disabled = false;
     }
+  }
+
+  async function applyAffectedFix(sectionName, newContent) {
+    // Find the section by name and update it
+    const sectionIndex = currentSections.findIndex(s => s.name === sectionName);
+    if (sectionIndex === -1) {
+      console.error('Could not find section:', sectionName);
+      return;
+    }
+
+    // Update the section content
+    currentSections[sectionIndex].content = newContent;
+
+    // Update the display for that section
+    const sectionEl = document.querySelector(`[data-section-index="${sectionIndex}"]`);
+    if (sectionEl) {
+      sectionEl.querySelector('.stc-section__display').innerHTML = formatSectionContent(newContent);
+      sectionEl.querySelector('.stc-section__textarea').value = newContent;
+    }
+
+    // Save to database
+    await saveConceptSections();
   }
 
   function discardSuggestion(sectionEl) {
@@ -2990,5 +3065,97 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   .stc-section__suggestion-content p:last-child {
     margin-bottom: 0;
+  }
+
+  /* Affected sections warning */
+  .stc-section__affected {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: #FFF8E6;
+    border: 1px solid #F0D58C;
+    border-radius: var(--radius-sm);
+  }
+
+  .stc-section__affected-label {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: #8B6914;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-affected-item {
+    background: #fff;
+    border: 1px solid #E8D9A8;
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-affected-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .stc-affected-item--applied {
+    opacity: 0.6;
+  }
+
+  .stc-affected-item__header {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary, #2C2416);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-affected-item__reason {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: #8B6914;
+    font-style: italic;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-affected-item__fix {
+    background: var(--color-background-secondary, #F5EEE6);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-affected-item__fix-label {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-text-muted, #8B7D6B);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-affected-item__fix-content {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary, #2C2416);
+    line-height: 1.5;
+  }
+
+  .stc-affected-item__fix-content p {
+    margin: 0;
+  }
+
+  .stc-affected-item__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-xs);
+  }
+
+  .stc-affected-item__applied-label {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: #28A745;
+    font-weight: 500;
+  }
+
+  .button--small {
+    padding: 4px 12px;
+    font-size: var(--font-size-xs);
   }
 </style>

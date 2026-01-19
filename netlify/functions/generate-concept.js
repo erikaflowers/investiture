@@ -2,6 +2,7 @@
 // Environment variable ANTHROPIC_API_KEY must be set in Netlify dashboard
 
 import Anthropic from '@anthropic-ai/sdk';
+import { editorPersona } from './shared/system-prompts.js';
 
 export async function handler(event) {
   // Only allow POST
@@ -40,6 +41,7 @@ export async function handler(event) {
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2048,
+      system: editorPersona,
       messages: [
         {
           role: 'user',

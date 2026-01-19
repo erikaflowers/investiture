@@ -2,6 +2,7 @@
 // Environment variable ANTHROPIC_API_KEY must be set in Netlify dashboard
 
 import Anthropic from '@anthropic-ai/sdk';
+import { editorPersona } from './shared/system-prompts.js';
 
 export async function handler(event) {
   // Only allow POST
@@ -22,24 +23,25 @@ export async function handler(event) {
   }
 
   try {
-    const { sectionName, currentContent, direction, genome, braindump } = JSON.parse(event.body);
+    const { sectionName, allSections, direction, genome, braindump } = JSON.parse(event.body);
 
-    if (!sectionName || !currentContent) {
+    if (!sectionName || !allSections) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Missing section name or content' })
+        body: JSON.stringify({ error: 'Missing section name or sections' })
       };
     }
 
     // Build the prompt
-    const prompt = buildRefinePrompt(sectionName, currentContent, direction, genome, braindump);
+    const prompt = buildRefinePrompt(sectionName, allSections, direction, genome, braindump);
 
     // Call Claude API
     const anthropic = new Anthropic({ apiKey });
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
+      max_tokens: 2048,
+      system: editorPersona,
       messages: [
         {
           role: 'user',
@@ -49,11 +51,41 @@ export async function handler(event) {
     });
 
     // Extract text response
-    const refinedContent = message.content
+    const rawResponse = message.content
       .filter(block => block.type === 'text')
       .map(block => block.text)
       .join('\n')
       .trim();
+
+    // Try to parse as JSON, with fallback
+    let result;
+    try {
+      // Try to extract JSON from the response (Claude might wrap it in markdown code blocks)
+      let jsonStr = rawResponse;
+
+      // Remove markdown code blocks if present
+      const jsonMatch = rawResponse.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (jsonMatch) {
+        jsonStr = jsonMatch[1];
+      }
+
+      result = JSON.parse(jsonStr);
+
+      // Validate structure
+      if (!result.revisedSection) {
+        throw new Error('Missing revisedSection in response');
+      }
+      if (!Array.isArray(result.affectedSections)) {
+        result.affectedSections = [];
+      }
+    } catch (parseError) {
+      // Fallback: treat the whole response as the revised section
+      console.log('JSON parse failed, using fallback:', parseError.message);
+      result = {
+        revisedSection: rawResponse,
+        affectedSections: []
+      };
+    }
 
     return {
       statusCode: 200,
@@ -62,7 +94,8 @@ export async function handler(event) {
         'Access-Control-Allow-Origin': '*'
       },
       body: JSON.stringify({
-        refinedContent,
+        revisedSection: result.revisedSection,
+        affectedSections: result.affectedSections,
         model: message.model,
         usage: message.usage
       })
@@ -80,9 +113,12 @@ export async function handler(event) {
   }
 }
 
-function buildRefinePrompt(sectionName, currentContent, direction, genome, braindump) {
+function buildRefinePrompt(sectionName, allSections, direction, genome, braindump) {
   // Format the genome into readable context
   const genomeText = formatGenome(genome);
+
+  // Format all sections for context
+  const sectionsText = allSections.map(s => `### ${s.name}\n${s.content}`).join('\n\n');
 
   const directionText = direction
     ? `\n\n## Writer's Direction\nThe writer wants you to: ${direction}`
@@ -90,13 +126,11 @@ function buildRefinePrompt(sectionName, currentContent, direction, genome, brain
 
   return `You are a story development assistant helping a novelist refine a specific section of their story concept.
 
-## Section to Refine: ${sectionName}
-
-### Current Version:
-${currentContent}
+## Full Story Concept (for context)
+${sectionsText}
 ${directionText}
 
-## Story Context
+## Story DNA
 
 ### The Writer's Original Braindump:
 ${braindump || '(Not provided)'}
@@ -105,18 +139,35 @@ ${braindump || '(Not provided)'}
 ${genomeText || '(Not provided)'}
 
 ## Your Task
-Rewrite ONLY the "${sectionName}" section based on the writer's direction (if provided) or improve it while staying true to the story's DNA.
+Refine the "${sectionName}" section based on the writer's direction (if provided) or improve it while staying true to the story's DNA.
 
-**Important Guidelines:**
-- Return ONLY the refined content for this section, no headers or labels
+**Critical Instructions:**
+1. Rewrite ONLY the "${sectionName}" section
+2. Review ALL OTHER sections for consistency with your changes
+3. If your change creates contradictions or drift with other sections, flag them
+
+**Response Format:**
+Return ONLY valid JSON in this exact format (no markdown code blocks, no extra text):
+{
+  "revisedSection": "the new text for ${sectionName}",
+  "affectedSections": [
+    {
+      "section": "Name of affected section",
+      "reason": "Brief explanation of the inconsistency",
+      "suggestedFix": "Proposed revised text for that section"
+    }
+  ]
+}
+
+If no other sections are affected, return an empty array for affectedSections.
+
+**Guidelines for the revised section:**
 - Maintain the same general purpose of this section type
 - Stay grounded in the braindump and genome context
-- If the writer gave direction, prioritize that
-- If no direction given, make it tighter, more specific, or more compelling
 - Use markdown formatting (*italics* for titles, **bold** for emphasis) as appropriate
 - Keep approximately the same length unless the direction suggests otherwise
 
-Write the refined "${sectionName}" now:`;
+Return the JSON now:`;
 }
 
 function formatGenome(genome) {
