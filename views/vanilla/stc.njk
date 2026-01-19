@@ -1746,7 +1746,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     diveTextarea.value = currentBraindump.raw_input; // Reset
   }
 
-  async function saveEdit() {
+  async function saveBraindumpEdit() {
     const newContent = diveTextarea.value.trim();
     if (!newContent) return;
 
@@ -1795,7 +1795,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   btnBack.addEventListener('click', () => showListView()); // User clicked, so update URL
   btnEdit.addEventListener('click', enterBraindumpEditMode);
   btnCancelEdit.addEventListener('click', exitBraindumpEditMode);
-  btnSaveEdit.addEventListener('click', saveEdit);
+  btnSaveEdit.addEventListener('click', saveBraindumpEdit);
 
   // Event listener - Genome
   document.getElementById('btn-save-genome').addEventListener('click', saveGenome);
