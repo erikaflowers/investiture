@@ -1129,6 +1129,103 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     }
   }
 
+  // Store parsed sections for editing
+  let currentSections = [];
+
+  function parseConcept(text) {
+    // Parse concept text into sections by ### headers
+    const sections = [];
+    const sectionRegex = /^### (.+)$/gm;
+    let lastIndex = 0;
+    let match;
+
+    // Skip the ## Story Concept header if present
+    const cleanText = text.replace(/^## Story Concept\s*\n+/, '');
+
+    const matches = [...cleanText.matchAll(sectionRegex)];
+
+    matches.forEach((match, i) => {
+      const name = match[1].trim();
+      const startContent = match.index + match[0].length;
+      const endContent = matches[i + 1]?.index || cleanText.length;
+      const content = cleanText.slice(startContent, endContent).trim();
+
+      // Create a slug from the name for data attributes
+      const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+      sections.push({ name, slug, content });
+    });
+
+    return sections;
+  }
+
+  function formatSectionContent(content) {
+    // Format a section's content (bold, italic, paragraphs)
+    return content
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .split('\n\n')
+      .map(p => p.trim())
+      .filter(p => p)
+      .map(p => `<p>${p}</p>`)
+      .join('\n');
+  }
+
+  function renderSection(section, index) {
+    const formattedContent = formatSectionContent(section.content);
+
+    return `
+      <div class="stc-section" data-section-index="${index}" data-section-slug="${section.slug}">
+        <div class="stc-section__header">
+          <h4 class="stc-section__title">${section.name}</h4>
+          <div class="stc-section__actions">
+            <button class="stc-section__btn stc-section__btn--edit" title="Edit manually">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button class="stc-section__btn stc-section__btn--refine" title="Refine with AI">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="stc-section__display">
+          ${formattedContent}
+        </div>
+
+        <div class="stc-section__edit-mode" style="display: none;">
+          <textarea class="stc-section__textarea">${section.content}</textarea>
+          <div class="stc-section__edit-actions">
+            <button class="button button--secondary stc-section__cancel-edit">Cancel</button>
+            <button class="button button--primary stc-section__save-edit">Save</button>
+          </div>
+        </div>
+
+        <div class="stc-section__refine-mode" style="display: none;">
+          <textarea class="stc-section__direction" placeholder="What direction should Claude take? e.g., 'Make it punchier' or 'Focus more on the conspiracy angle'"></textarea>
+          <div class="stc-section__refine-actions">
+            <button class="button button--secondary stc-section__cancel-refine">Cancel</button>
+            <button class="button button--primary stc-section__send-refine">Send to Claude</button>
+          </div>
+        </div>
+
+        <div class="stc-section__suggestion" style="display: none;">
+          <div class="stc-section__suggestion-label">Claude's Suggestion</div>
+          <div class="stc-section__suggestion-content"></div>
+          <div class="stc-section__suggestion-actions">
+            <button class="button button--secondary stc-section__discard">Discard</button>
+            <button class="button button--secondary stc-section__try-again">Try Again</button>
+            <button class="button button--primary stc-section__keep">Keep</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function displayConcept(conceptText) {
     const resultEl = document.getElementById('concept-result');
     const genomeEl = document.getElementById('concept-genome');
@@ -1158,30 +1255,220 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       `;
     }
 
-    // Convert markdown-like text to HTML
-    const htmlContent = formatConceptAsHtml(conceptText);
-    contentEl.innerHTML = htmlContent;
+    // Parse and render sections
+    currentSections = parseConcept(conceptText);
+    contentEl.innerHTML = currentSections.map((section, i) => renderSection(section, i)).join('');
+
+    // Attach event listeners to section buttons
+    attachSectionListeners(contentEl);
 
     resultEl.style.display = 'block';
     btnRegenerate.style.display = 'inline-block';
   }
 
-  function formatConceptAsHtml(text) {
-    // Basic markdown-like formatting
-    return text
-      // Headers
-      .replace(/^### (.+)$/gm, '<h4 class="stc-concept__subhead">$1</h4>')
-      .replace(/^## (.+)$/gm, '<h3 class="stc-concept__head">$1</h3>')
-      // Bold
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      // Italic
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      // Line breaks to paragraphs
-      .split('\n\n')
-      .map(p => p.trim())
-      .filter(p => p)
-      .map(p => p.startsWith('<h') ? p : `<p>${p}</p>`)
-      .join('\n');
+  function attachSectionListeners(container) {
+    container.querySelectorAll('.stc-section').forEach(sectionEl => {
+      const index = parseInt(sectionEl.dataset.sectionIndex);
+
+      // Edit button
+      sectionEl.querySelector('.stc-section__btn--edit').addEventListener('click', () => {
+        enterEditMode(sectionEl, index);
+      });
+
+      // Refine button
+      sectionEl.querySelector('.stc-section__btn--refine').addEventListener('click', () => {
+        enterRefineMode(sectionEl, index);
+      });
+
+      // Cancel edit
+      sectionEl.querySelector('.stc-section__cancel-edit').addEventListener('click', () => {
+        exitEditMode(sectionEl, index);
+      });
+
+      // Save edit
+      sectionEl.querySelector('.stc-section__save-edit').addEventListener('click', () => {
+        saveEdit(sectionEl, index);
+      });
+
+      // Cancel refine
+      sectionEl.querySelector('.stc-section__cancel-refine').addEventListener('click', () => {
+        exitRefineMode(sectionEl);
+      });
+
+      // Send to Claude
+      sectionEl.querySelector('.stc-section__send-refine').addEventListener('click', () => {
+        sendRefineRequest(sectionEl, index);
+      });
+
+      // Discard suggestion
+      sectionEl.querySelector('.stc-section__discard').addEventListener('click', () => {
+        discardSuggestion(sectionEl);
+      });
+
+      // Try again
+      sectionEl.querySelector('.stc-section__try-again').addEventListener('click', () => {
+        tryAgain(sectionEl, index);
+      });
+
+      // Keep suggestion
+      sectionEl.querySelector('.stc-section__keep').addEventListener('click', () => {
+        keepSuggestion(sectionEl, index);
+      });
+    });
+  }
+
+  function enterEditMode(sectionEl, index) {
+    sectionEl.querySelector('.stc-section__display').style.display = 'none';
+    sectionEl.querySelector('.stc-section__actions').style.display = 'none';
+    sectionEl.querySelector('.stc-section__edit-mode').style.display = 'block';
+    sectionEl.querySelector('.stc-section__textarea').value = currentSections[index].content;
+    sectionEl.querySelector('.stc-section__textarea').focus();
+  }
+
+  function exitEditMode(sectionEl, index) {
+    sectionEl.querySelector('.stc-section__edit-mode').style.display = 'none';
+    sectionEl.querySelector('.stc-section__display').style.display = 'block';
+    sectionEl.querySelector('.stc-section__actions').style.display = 'flex';
+  }
+
+  async function saveEdit(sectionEl, index) {
+    const newContent = sectionEl.querySelector('.stc-section__textarea').value.trim();
+    currentSections[index].content = newContent;
+
+    // Update display
+    sectionEl.querySelector('.stc-section__display').innerHTML = formatSectionContent(newContent);
+    exitEditMode(sectionEl, index);
+
+    // Save to database
+    await saveConceptSections();
+  }
+
+  function enterRefineMode(sectionEl, index) {
+    sectionEl.querySelector('.stc-section__display').style.display = 'none';
+    sectionEl.querySelector('.stc-section__actions').style.display = 'none';
+    sectionEl.querySelector('.stc-section__refine-mode').style.display = 'block';
+    sectionEl.querySelector('.stc-section__direction').value = '';
+    sectionEl.querySelector('.stc-section__direction').focus();
+  }
+
+  function exitRefineMode(sectionEl) {
+    sectionEl.querySelector('.stc-section__refine-mode').style.display = 'none';
+    sectionEl.querySelector('.stc-section__suggestion').style.display = 'none';
+    sectionEl.querySelector('.stc-section__display').style.display = 'block';
+    sectionEl.querySelector('.stc-section__actions').style.display = 'flex';
+  }
+
+  async function sendRefineRequest(sectionEl, index) {
+    const direction = sectionEl.querySelector('.stc-section__direction').value.trim();
+    const section = currentSections[index];
+
+    // Show loading state
+    const sendBtn = sectionEl.querySelector('.stc-section__send-refine');
+    const originalText = sendBtn.textContent;
+    sendBtn.textContent = 'Thinking...';
+    sendBtn.disabled = true;
+
+    try {
+      const hydratedGenome = hydrateGenome(currentProject.genome);
+
+      const response = await fetch('/.netlify/functions/refine-section', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sectionName: section.name,
+          currentContent: section.content,
+          direction: direction,
+          genome: hydratedGenome,
+          braindump: currentBraindump?.raw_input || ''
+        })
+      });
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Netlify function not available. Run "netlify dev" locally or deploy to Netlify.');
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to refine section');
+      }
+
+      // Show suggestion
+      sectionEl.querySelector('.stc-section__refine-mode').style.display = 'none';
+      sectionEl.querySelector('.stc-section__suggestion').style.display = 'block';
+      sectionEl.querySelector('.stc-section__suggestion-content').innerHTML = formatSectionContent(data.refinedContent);
+      sectionEl.dataset.suggestionContent = data.refinedContent;
+
+    } catch (e) {
+      console.error('Refine error:', e);
+      alert('Error: ' + e.message);
+    } finally {
+      sendBtn.textContent = originalText;
+      sendBtn.disabled = false;
+    }
+  }
+
+  function discardSuggestion(sectionEl) {
+    exitRefineMode(sectionEl);
+  }
+
+  function tryAgain(sectionEl, index) {
+    sectionEl.querySelector('.stc-section__suggestion').style.display = 'none';
+    sectionEl.querySelector('.stc-section__refine-mode').style.display = 'block';
+    sectionEl.querySelector('.stc-section__direction').focus();
+  }
+
+  async function keepSuggestion(sectionEl, index) {
+    const newContent = sectionEl.dataset.suggestionContent;
+    currentSections[index].content = newContent;
+
+    // Update display
+    sectionEl.querySelector('.stc-section__display').innerHTML = formatSectionContent(newContent);
+    sectionEl.querySelector('.stc-section__textarea').value = newContent;
+    exitRefineMode(sectionEl);
+
+    // Save to database
+    await saveConceptSections();
+  }
+
+  function reconstructConceptText() {
+    // Rebuild the full concept text from sections
+    let text = '## Story Concept\n\n';
+    currentSections.forEach(section => {
+      text += `### ${section.name}\n${section.content}\n\n`;
+    });
+    return text.trim();
+  }
+
+  async function saveConceptSections() {
+    if (!currentProject) return;
+
+    const conceptText = reconstructConceptText();
+
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          story_concept: {
+            ...currentProject.story_concept,
+            concept: conceptText,
+            updated_at: new Date().toISOString()
+          }
+        })
+        .eq('id', currentProject.id);
+
+      if (error) throw error;
+
+      // Update local state
+      currentProject.story_concept.concept = conceptText;
+      currentProject.story_concept.updated_at = new Date().toISOString();
+
+      showConceptStatus('Saved', 'success');
+    } catch (e) {
+      console.error('Save error:', e);
+      showConceptStatus('Save failed', 'error');
+    }
   }
 
   async function saveConcept(conceptText) {
@@ -2458,15 +2745,8 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   .stc-concept__genome-tag--humor { background: #5C768B; }
 
   .stc-concept__content {
-    padding: var(--spacing-lg);
-    background: var(--color-background-card, #FFFCF8);
-    border: 1px solid var(--color-border-default, #D9CFC2);
-    border-radius: var(--radius-md);
+    /* Container for section cards - no background since sections have their own */
     margin-bottom: var(--spacing-md);
-    color: #2C2416;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: var(--font-size-base);
-    line-height: 1.6;
   }
 
   .stc-concept__content h3.stc-concept__head {
@@ -2553,5 +2833,155 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     font-size: var(--font-size-sm);
     color: #721C24;
     margin: 0;
+  }
+
+  /* ========== SECTION EDITOR ========== */
+  .stc-section {
+    background: var(--color-background-card, #FFFCF8);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    overflow: hidden;
+  }
+
+  .stc-section__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-background-secondary, #F5EEE6);
+    border-bottom: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-section__title {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-primary, #2C2416);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .stc-section__actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .stc-section__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted, #8B7D6B);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .stc-section__btn:hover {
+    background: var(--color-background-card, #FFFCF8);
+    border-color: var(--color-border-default, #D9CFC2);
+    color: var(--color-text-primary, #2C2416);
+  }
+
+  .stc-section__btn--refine:hover {
+    color: var(--color-accent-primary, #B85C38);
+  }
+
+  .stc-section__display {
+    padding: var(--spacing-md);
+    color: #2C2416;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+  }
+
+  .stc-section__display p {
+    margin: 0 0 var(--spacing-sm) 0;
+  }
+
+  .stc-section__display p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Edit mode */
+  .stc-section__edit-mode,
+  .stc-section__refine-mode {
+    padding: var(--spacing-md);
+  }
+
+  .stc-section__textarea,
+  .stc-section__direction {
+    width: 100%;
+    min-height: 120px;
+    padding: var(--spacing-sm);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--color-text-primary, #2C2416);
+    background: var(--color-background-primary, #FAF6F1);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-sm);
+    resize: vertical;
+  }
+
+  .stc-section__textarea:focus,
+  .stc-section__direction:focus {
+    outline: none;
+    border-color: var(--color-accent-primary, #B85C38);
+    box-shadow: 0 0 0 3px rgba(184, 92, 56, 0.1);
+  }
+
+  .stc-section__direction {
+    min-height: 80px;
+  }
+
+  .stc-section__edit-actions,
+  .stc-section__refine-actions,
+  .stc-section__suggestion-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+  }
+
+  /* Suggestion display */
+  .stc-section__suggestion {
+    padding: var(--spacing-md);
+    background: #F0F7F4;
+  }
+
+  .stc-section__suggestion-label {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #2D6A4F;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-section__suggestion-content {
+    padding: var(--spacing-md);
+    background: #fff;
+    border: 1px solid #B7E4C7;
+    border-radius: var(--radius-sm);
+    color: #2C2416;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+  }
+
+  .stc-section__suggestion-content p {
+    margin: 0 0 var(--spacing-sm) 0;
+  }
+
+  .stc-section__suggestion-content p:last-child {
+    margin-bottom: 0;
   }
 </style>
