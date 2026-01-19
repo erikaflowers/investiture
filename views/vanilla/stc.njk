@@ -358,57 +358,103 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   function renderVertebrae() {
     const container = document.getElementById('vertebrae-container');
 
-    // Render main vertebrae (all multi-select)
-    let html = VERTEBRAE_CONFIG.map(vertebra => `
-      <div class="stc-vertebra" data-key="${vertebra.key}">
-        <label class="stc-vertebra__label">${vertebra.label}</label>
-        <div class="stc-vertebra__tags" id="tags-${vertebra.key}">
-          <!-- Selected tags will appear here -->
+    // Helper to render a standard vertebra row
+    const renderRow = (vertebra, extraClass = '') => `
+      <div class="stc-vertebra-row ${extraClass}" data-key="${vertebra.key}">
+        <div class="stc-vertebra-row__header">
+          <span class="stc-vertebra-row__number">${vertebra.number || ''}</span>
+          <label class="stc-vertebra-row__label">${vertebra.label}</label>
         </div>
-        <div class="stc-vertebra__input-wrap">
-          <select class="stc-vertebra__select" id="select-${vertebra.key}">
-            <option value="">+ Add ${vertebra.label.toLowerCase()}...</option>
-            ${vertebra.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-    `).join('');
-
-    // Render humor modifier (presence = single select, style = multi-select)
-    html += `
-      <div class="stc-vertebra stc-vertebra--humor" data-key="humorPresence">
-        <label class="stc-vertebra__label">${HUMOR_CONFIG.presence.label}</label>
-        <div class="stc-vertebra__input-wrap">
-          <select class="stc-vertebra__select stc-vertebra__select--single" id="select-humorPresence">
-            ${HUMOR_CONFIG.presence.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-      <div class="stc-vertebra stc-vertebra--humor-style" data-key="humorStyle" id="humorStyle-container">
-        <label class="stc-vertebra__label">${HUMOR_CONFIG.style.label}</label>
-        <div class="stc-vertebra__tags" id="tags-humorStyle">
-          <!-- Selected tags will appear here -->
-        </div>
-        <div class="stc-vertebra__input-wrap">
-          <select class="stc-vertebra__select" id="select-humorStyle">
-            <option value="">+ Add style...</option>
-            ${HUMOR_CONFIG.style.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
-          </select>
+        <div class="stc-vertebra-row__body">
+          <div class="stc-vertebra-row__tags" id="tags-${vertebra.key}"></div>
+          <div class="stc-vertebra-row__select-wrap">
+            <select class="stc-vertebra-row__select" id="select-${vertebra.key}">
+              <option value="">+ Add ${vertebra.label.toLowerCase()}...</option>
+              ${vertebra.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
+            </select>
+          </div>
         </div>
       </div>
     `;
 
+    // Build the spine from top to bottom
+    let html = '';
+
+    // 1. GENRE
+    const genreConfig = VERTEBRAE_CONFIG.find(v => v.key === 'genre');
+    html += renderRow({ ...genreConfig, number: '1' });
+
+    // 2. ARCHETYPE
+    const archetypeConfig = VERTEBRAE_CONFIG.find(v => v.key === 'archetype');
+    html += renderRow({ ...archetypeConfig, number: '2' });
+
+    // 3. THEME
+    const themeConfig = VERTEBRAE_CONFIG.find(v => v.key === 'theme');
+    html += renderRow({ ...themeConfig, number: '3' });
+
+    // 4. TONE & HUMOR (combined row with three columns)
+    const toneConfig = VERTEBRAE_CONFIG.find(v => v.key === 'tone');
+    html += `
+      <div class="stc-vertebra-row stc-vertebra-row--combined" data-key="tone-humor">
+        <div class="stc-vertebra-row__header">
+          <span class="stc-vertebra-row__number">4</span>
+          <label class="stc-vertebra-row__label">Tone & Humor</label>
+        </div>
+        <div class="stc-vertebra-row__body stc-vertebra-row__body--three-col">
+          <!-- Tone (left) -->
+          <div class="stc-vertebra-col" data-key="tone">
+            <label class="stc-vertebra-col__label">Tone</label>
+            <div class="stc-vertebra-col__tags" id="tags-tone"></div>
+            <select class="stc-vertebra-col__select" id="select-tone">
+              <option value="">+ Add tone...</option>
+              ${toneConfig.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
+            </select>
+          </div>
+          <!-- Humor Presence (center) -->
+          <div class="stc-vertebra-col stc-vertebra-col--humor-presence" data-key="humorPresence">
+            <label class="stc-vertebra-col__label">Humor</label>
+            <select class="stc-vertebra-col__select stc-vertebra-col__select--single" id="select-humorPresence">
+              ${HUMOR_CONFIG.presence.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
+            </select>
+          </div>
+          <!-- Humor Style (right) -->
+          <div class="stc-vertebra-col stc-vertebra-col--humor-style" data-key="humorStyle" id="humorStyle-container">
+            <label class="stc-vertebra-col__label">Humor Style</label>
+            <div class="stc-vertebra-col__tags" id="tags-humorStyle"></div>
+            <select class="stc-vertebra-col__select" id="select-humorStyle">
+              <option value="">+ Add style...</option>
+              ${HUMOR_CONFIG.style.options.map(opt => `<option value="${opt.id}" title="${opt.description || ''}">${opt.name}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 5. STAKES
+    const stakesConfig = VERTEBRAE_CONFIG.find(v => v.key === 'stakes');
+    html += renderRow({ ...stakesConfig, number: '5' });
+
     container.innerHTML = html;
 
-    // Attach change handlers to main vertebrae (multi-select)
-    VERTEBRAE_CONFIG.forEach(vertebra => {
-      const select = document.getElementById(`select-${vertebra.key}`);
+    // Attach change handlers for standard rows (genre, archetype, theme, stakes)
+    ['genre', 'archetype', 'theme', 'stakes'].forEach(key => {
+      const config = VERTEBRAE_CONFIG.find(v => v.key === key);
+      const select = document.getElementById(`select-${key}`);
       select.addEventListener('change', () => {
         if (select.value) {
-          addTag(vertebra.key, select.value, vertebra.options);
-          select.value = ''; // Reset dropdown
+          addTag(key, select.value, config.options);
+          select.value = '';
         }
       });
+    });
+
+    // Tone handler
+    const toneSelect = document.getElementById('select-tone');
+    toneSelect.addEventListener('change', () => {
+      if (toneSelect.value) {
+        addTag('tone', toneSelect.value, toneConfig.options);
+        toneSelect.value = '';
+      }
     });
 
     // Humor presence handler (single-select)
@@ -1191,62 +1237,97 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     font-family: 'Source Sans 3', sans-serif;
     font-size: var(--font-size-sm);
     color: var(--color-text-muted, #8B7D6B);
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
   }
 
+  /* Vertical spine layout */
   .stc-spine__vertebrae {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
   }
 
-  @media (min-width: 768px) {
-    .stc-spine__vertebrae {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .stc-spine__vertebrae {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
-  /* Individual vertebra selector */
-  .stc-vertebra {
+  /* Individual vertebra row - full width, stacking vertically */
+  .stc-vertebra-row {
     background: var(--color-background-card, #FFFCF8);
     border: 1px solid var(--color-border-default, #D9CFC2);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-md);
+    border-bottom: none;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    position: relative;
   }
 
-  .stc-vertebra__label {
-    display: block;
-    font-family: 'Source Sans 3', sans-serif;
+  .stc-vertebra-row:first-child {
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+
+  .stc-vertebra-row:last-child {
+    border-bottom: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+  }
+
+  /* Subtle separator between vertebrae */
+  .stc-vertebra-row + .stc-vertebra-row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--spacing-xl);
+    right: var(--spacing-xl);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border-default, #D9CFC2), transparent);
+  }
+
+  .stc-vertebra-row__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-vertebra-row__number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--color-accent-primary, #B85C38);
+    color: #fff;
+    font-family: 'Lora', Georgia, serif;
     font-size: var(--font-size-sm);
     font-weight: 600;
-    color: var(--color-text-secondary, #5C4D3C);
-    margin-bottom: var(--spacing-sm);
+    border-radius: 50%;
+    flex-shrink: 0;
   }
 
-  .stc-vertebra__tags {
+  .stc-vertebra-row__label {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #2C2416);
+    margin: 0;
+  }
+
+  .stc-vertebra-row__body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .stc-vertebra-row__tags {
     display: flex;
     flex-wrap: wrap;
     gap: var(--spacing-xs);
-    min-height: 32px;
-    margin-bottom: var(--spacing-sm);
+    flex: 1;
+    min-height: 36px;
+    align-items: center;
   }
 
-  .stc-vertebra__empty {
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted, #8B7D6B);
-    font-style: italic;
+  .stc-vertebra-row__select-wrap {
+    flex-shrink: 0;
   }
 
-  .stc-vertebra__select {
-    width: 100%;
-    padding: var(--spacing-xs) var(--spacing-sm);
+  .stc-vertebra-row__select {
+    padding: var(--spacing-sm) var(--spacing-md);
     font-family: 'Source Sans 3', sans-serif;
     font-size: var(--font-size-sm);
     color: var(--color-text-primary, #2C2416);
@@ -1254,11 +1335,95 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     border: 1px solid var(--color-border-default, #D9CFC2);
     border-radius: var(--radius-sm);
     cursor: pointer;
+    min-width: 180px;
   }
 
-  .stc-vertebra__select:focus {
+  .stc-vertebra-row__select:focus {
     outline: none;
     border-color: var(--color-accent-primary, #B85C38);
+  }
+
+  /* Combined row (Tone & Humor) with three columns */
+  .stc-vertebra-row__body--three-col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  @media (min-width: 768px) {
+    .stc-vertebra-row__body--three-col {
+      grid-template-columns: 1fr auto 1fr;
+    }
+  }
+
+  .stc-vertebra-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .stc-vertebra-col__label {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted, #8B7D6B);
+  }
+
+  .stc-vertebra-col__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    min-height: 32px;
+    align-items: center;
+  }
+
+  .stc-vertebra-col__select {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary, #2C2416);
+    background: var(--color-background-primary, #FAF6F1);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .stc-vertebra-col__select:focus {
+    outline: none;
+    border-color: var(--color-accent-primary, #B85C38);
+  }
+
+  /* Humor presence column - center, narrower */
+  .stc-vertebra-col--humor-presence {
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .stc-vertebra-col--humor-presence .stc-vertebra-col__select {
+    min-width: 160px;
+    text-align: center;
+  }
+
+  /* Humor style disabled state */
+  .stc-vertebra-col--humor-style.stc-vertebra--disabled {
+    opacity: 0.4;
+  }
+
+  .stc-vertebra-col--humor-style.stc-vertebra--disabled .stc-vertebra-col__select {
+    cursor: not-allowed;
+    background: var(--color-background-tertiary, #EDE4D9);
+  }
+
+  /* Empty state text */
+  .stc-vertebra__empty,
+  .stc-vertebra-row__empty {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
   }
 
   /* Tags */
@@ -1298,21 +1463,5 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   .stc-tag__remove:hover {
     background: rgba(255, 255, 255, 0.4);
-  }
-
-  /* Disabled vertebra state (for humor style when presence is "none") */
-  .stc-vertebra--disabled {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-
-  .stc-vertebra--disabled .stc-vertebra__select {
-    cursor: not-allowed;
-    background: var(--color-background-tertiary, #EDE4D9);
-  }
-
-  /* Single-select styling (no tags area) */
-  .stc-vertebra__select--single {
-    font-weight: 500;
   }
 </style>
