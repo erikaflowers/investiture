@@ -157,6 +157,62 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   let currentBraindump = null;
   let currentProject = null;
   let spineSelections = {}; // Tracks selected tags per vertebra
+  let pendingRoute = null; // Stores intended destination when not logged in
+
+  // ========== URL ROUTING ==========
+  // Hash-based routing: #list, #dive/[id], #spine/[id], etc.
+
+  function parseRoute() {
+    const hash = window.location.hash.slice(1); // Remove #
+    if (!hash || hash === 'list') {
+      return { view: 'list', id: null };
+    }
+    const parts = hash.split('/');
+    return { view: parts[0], id: parts[1] || null };
+  }
+
+  function updateURL(view, id = null, replace = false) {
+    const hash = id ? `#${view}/${id}` : `#${view}`;
+    if (replace) {
+      history.replaceState({ view, id }, '', hash);
+    } else {
+      history.pushState({ view, id }, '', hash);
+    }
+  }
+
+  async function navigateToRoute(route, skipURLUpdate = false) {
+    if (!currentUser) {
+      // Save intended destination for after login
+      pendingRoute = route;
+      return;
+    }
+
+    if (!skipURLUpdate) {
+      updateURL(route.view, route.id);
+    }
+
+    switch (route.view) {
+      case 'dive':
+        if (route.id) {
+          await diveIntoBraindump(route.id, true); // true = skip URL update
+        } else {
+          showListView(true);
+        }
+        break;
+      case 'list':
+      default:
+        showListView(true);
+        break;
+    }
+  }
+
+  // Handle back/forward buttons
+  window.addEventListener('popstate', (event) => {
+    if (currentUser) {
+      const route = event.state || parseRoute();
+      navigateToRoute(route, true); // Skip URL update since browser already changed it
+    }
+  });
 
   // ========== VERTEBRAE CONFIGURATION ==========
   // Each vertebra has a key, label, and array of options
@@ -247,6 +303,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   // ========== AUTH FUNCTIONS ==========
 
   function updateAuthUI(user) {
+    const wasLoggedOut = !currentUser;
     currentUser = user;
 
     if (user) {
@@ -254,14 +311,25 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       authView.style.display = 'none';
       userBar.style.display = 'flex';
       userEmail.textContent = user.email;
-      listView.style.display = 'block';
-      loadBraindumps();
+
+      // Check for pending route (deep link before auth) or URL route
+      const routeToNavigate = pendingRoute || parseRoute();
+      pendingRoute = null; // Clear pending route
+
+      // Navigate to the intended destination
+      navigateToRoute(routeToNavigate, false);
     } else {
       // Logged out
       authView.style.display = 'block';
       userBar.style.display = 'none';
       listView.style.display = 'none';
       diveView.style.display = 'none';
+
+      // Check if URL has a destination to save for after login
+      const route = parseRoute();
+      if (route.view !== 'list' || route.id) {
+        pendingRoute = route;
+      }
     }
   }
 
@@ -270,10 +338,12 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     btnGoogleSignin.textContent = 'Signing in...';
 
     try {
+      // Preserve the hash in redirect URL so we return to the right place
+      const redirectUrl = window.location.origin + window.location.pathname + window.location.hash;
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + window.location.pathname
+          redirectTo: redirectUrl
         }
       });
 
@@ -404,19 +474,30 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   }
 
   // View switching
-  function showListView() {
+  function showListView(skipURLUpdate = false) {
     listView.style.display = 'block';
     diveView.style.display = 'none';
     currentBraindump = null;
     currentProject = null;
+
+    if (!skipURLUpdate) {
+      updateURL('list', null);
+    }
+
+    // Load braindumps if not already loaded
+    loadBraindumps();
   }
 
-  function showDiveView(braindump, project) {
+  function showDiveView(braindump, project, skipURLUpdate = false) {
     currentBraindump = braindump;
     currentProject = project;
 
     listView.style.display = 'none';
     diveView.style.display = 'block';
+
+    if (!skipURLUpdate) {
+      updateURL('dive', braindump.id);
+    }
 
     diveTimestamp.textContent = new Date(braindump.created_at).toLocaleString();
     diveContent.textContent = braindump.raw_input;
@@ -546,7 +627,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   }
 
   // Dive into a braindump
-  async function diveIntoBraindump(braindumpId) {
+  async function diveIntoBraindump(braindumpId, skipURLUpdate = false) {
     try {
       const { data: braindump, error } = await supabase
         .from('braindumps')
@@ -556,9 +637,11 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
       if (error) throw error;
 
-      showDiveView(braindump, braindump.projects);
+      showDiveView(braindump, braindump.projects, skipURLUpdate);
     } catch (e) {
       showError(`Failed to load braindump: ${e.message}`);
+      // If deep link fails, go back to list
+      showListView(skipURLUpdate);
     }
   }
 
@@ -621,7 +704,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   // Event listeners - Braindumps
   btnSave.addEventListener('click', saveBraindump);
-  btnBack.addEventListener('click', showListView);
+  btnBack.addEventListener('click', () => showListView()); // User clicked, so update URL
   btnEdit.addEventListener('click', enterEditMode);
   btnCancelEdit.addEventListener('click', exitEditMode);
   btnSaveEdit.addEventListener('click', saveEdit);
