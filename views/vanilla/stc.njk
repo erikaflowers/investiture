@@ -355,6 +355,20 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     renderTags(vertebraKey);
   }
 
+  // Rainbow colors for tags
+  const TAG_COLORS = [
+    '#B85C38', // Terracotta (original accent)
+    '#6B8E6B', // Sage green
+    '#8B6B8E', // Dusty purple
+    '#5C7A8B', // Steel blue
+    '#C4956A', // Warm tan
+    '#7B8B6B', // Olive
+    '#8B7355', // Brown
+    '#6B7B8B', // Slate
+    '#9B6B6B', // Dusty rose
+    '#5C8B7A', // Teal
+  ];
+
   function renderTags(vertebraKey) {
     const container = document.getElementById(`tags-${vertebraKey}`);
     const tags = spineSelections[vertebraKey];
@@ -364,12 +378,15 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       return;
     }
 
-    container.innerHTML = tags.map(tag => `
-      <span class="stc-tag">
-        <span class="stc-tag__text">${tag}</span>
-        <button class="stc-tag__remove" data-vertebra="${vertebraKey}" data-value="${tag}" aria-label="Remove ${tag}">×</button>
-      </span>
-    `).join('');
+    container.innerHTML = tags.map((tag, index) => {
+      const color = TAG_COLORS[index % TAG_COLORS.length];
+      return `
+        <span class="stc-tag" style="background-color: ${color}">
+          <span class="stc-tag__text">${tag}</span>
+          <button class="stc-tag__remove" data-vertebra="${vertebraKey}" data-value="${tag}" aria-label="Remove ${tag}">×</button>
+        </span>
+      `;
+    }).join('');
 
     // Attach remove handlers
     container.querySelectorAll('.stc-tag__remove').forEach(btn => {
