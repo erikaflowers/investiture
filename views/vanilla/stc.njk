@@ -1551,8 +1551,8 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     }
 
     // Check if we have an existing concept
-    if (currentProject?.story_concept?.text) {
-      displayConcept(currentProject.story_concept.text);
+    if (currentProject?.story_concept?.concept) {
+      displayConcept(currentProject.story_concept.concept);
     } else {
       resultEl.style.display = 'none';
       btnRegenerate.style.display = 'none';
