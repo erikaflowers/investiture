@@ -76,7 +76,9 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   <!-- DIVE VIEW: Working with a specific braindump -->
   <div id="dive-view" class="stc-view" style="display: none;">
     <div class="stc-dive__container">
-      <button id="btn-back" class="button button--secondary stc-dive__back">
+      <!-- Narrow content wrapper -->
+      <div class="stc-narrow">
+        <button id="btn-back" class="button button--secondary stc-dive__back">
         ← Back to all ideas
       </button>
 
@@ -247,6 +249,43 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
             Generate Story Concept
           </button>
         </div>
+
+        <!-- AI Suggestions Banner (shown when cascade detects needed updates) -->
+        <div class="stc-concept__suggestions" id="concept-suggestions" style="display: none;">
+          <div class="stc-concept__suggestions-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>AI detected potential updates needed</span>
+            <button class="stc-concept__suggestions-close" id="btn-close-suggestions" title="Dismiss">&times;</button>
+          </div>
+          <div class="stc-concept__suggestions-content">
+            <div class="stc-concept__suggestions-reason" id="suggestions-reason"></div>
+            <div class="stc-concept__suggestions-diff">
+              <div class="stc-concept__suggestions-old">
+                <div class="stc-concept__suggestions-label">Current Concept (excerpt)</div>
+                <div class="stc-concept__suggestions-text" id="suggestions-current"></div>
+              </div>
+              <div class="stc-concept__suggestions-new">
+                <div class="stc-concept__suggestions-label">Suggested Changes</div>
+                <textarea class="stc-concept__suggestions-textarea" id="suggestions-proposed" placeholder="Edit the suggestions here..."></textarea>
+              </div>
+            </div>
+            <div class="stc-concept__suggestions-actions">
+              <button class="button button--secondary" id="btn-suggestions-dismiss">Dismiss</button>
+              <button class="button button--primary" id="btn-suggestions-apply">
+                <span class="btn-text">Apply Changes</span>
+                <span class="btn-loading" style="display: none;">
+                  <span class="stc-concept__suggestions-spinner"></span>
+                  Applying...
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <p class="stc-concept__note" id="concept-note">Apply your genome to unlock AI-powered story concept generation.</p>
 
         <!-- Ready state: genome applied, ready to generate -->
@@ -303,8 +342,239 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
           <p id="concept-error-message"></p>
         </div>
       </div>
+      </div><!-- /.stc-narrow -->
+
+      <!-- Characters Section (full width) -->
+      <div class="stc-characters" id="characters-section" style="display: none;">
+        <div class="stc-characters__header">
+          <h3 class="stc-characters__heading">Characters</h3>
+        </div>
+
+        <p class="stc-characters__coach">
+          Start with your Protagonist and Antagonist. The other roles are tools, not requirements—add them as your story needs them. Characters can share roles or shift roles as the story evolves.
+        </p>
+
+        <!-- Pyramid Layout -->
+        <div class="stc-characters__pyramid">
+          <!-- Tier 1: Core Roles -->
+          <div class="stc-characters__tier stc-characters__tier--1">
+            <div class="stc-character-slot" data-role="protagonist" id="slot-protagonist">
+              <div class="stc-character-slot__empty">
+                <h4 class="stc-character-slot__role">Protagonist</h4>
+                <p class="stc-character-slot__desc">Drives the story toward the goal. The perspective we follow.</p>
+                <button class="button button--secondary stc-character-slot__add">Add Character</button>
+              </div>
+              <div class="stc-character-slot__filled" style="display: none;"></div>
+            </div>
+
+            <div class="stc-character-slot" data-role="antagonist" id="slot-antagonist">
+              <div class="stc-character-slot__empty">
+                <h4 class="stc-character-slot__role">Antagonist</h4>
+                <p class="stc-character-slot__desc">Opposes the goal. Not necessarily evil—just in the way.</p>
+                <button class="button button--secondary stc-character-slot__add">Add Character</button>
+              </div>
+              <div class="stc-character-slot__filled" style="display: none;"></div>
+            </div>
+          </div>
+
+          <!-- Tier 2: Supporting Roles -->
+          <div class="stc-characters__tier stc-characters__tier--2">
+            <div class="stc-character-slot" data-role="mirror" id="slot-mirror">
+              <div class="stc-character-slot__empty">
+                <h4 class="stc-character-slot__role">Mirror</h4>
+                <p class="stc-character-slot__desc">Reflects or challenges the protagonist's worldview. Forces growth.</p>
+                <button class="button button--secondary stc-character-slot__add">Add Character</button>
+              </div>
+              <div class="stc-character-slot__filled" style="display: none;"></div>
+            </div>
+
+            <div class="stc-character-slot" data-role="ally" id="slot-ally">
+              <div class="stc-character-slot__empty">
+                <h4 class="stc-character-slot__role">Ally</h4>
+                <p class="stc-character-slot__desc">Supports the protagonist. Provides faith, help, or mentorship.</p>
+                <button class="button button--secondary stc-character-slot__add">Add Character</button>
+              </div>
+              <div class="stc-character-slot__filled" style="display: none;"></div>
+            </div>
+
+            <div class="stc-character-slot" data-role="skeptic" id="slot-skeptic">
+              <div class="stc-character-slot__empty">
+                <h4 class="stc-character-slot__role">Skeptic</h4>
+                <p class="stc-character-slot__desc">Questions and doubts. Keeps the protagonist honest.</p>
+                <button class="button button--secondary stc-character-slot__add">Add Character</button>
+              </div>
+              <div class="stc-character-slot__filled" style="display: none;"></div>
+            </div>
+
+            <div class="stc-character-slot" data-role="wildcard" id="slot-wildcard">
+              <div class="stc-character-slot__empty">
+                <h4 class="stc-character-slot__role">Wildcard</h4>
+                <p class="stc-character-slot__desc">Doesn't fit neatly. Comic relief, love interest, or chaos agent.</p>
+                <button class="button button--secondary stc-character-slot__add">Add Character</button>
+              </div>
+              <div class="stc-character-slot__filled" style="display: none;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Characters (not in slots) -->
+        <div class="stc-characters__extra" id="characters-extra" style="display: none;">
+          <h4 class="stc-characters__extra-title">Additional Characters</h4>
+          <div class="stc-characters__extra-list" id="characters-extra-list"></div>
+        </div>
+
+        <!-- Add Character Without Role -->
+        <div class="stc-characters__add-more">
+          <button class="button button--secondary" id="btn-add-character">
+            + Add Another Character
+          </button>
+        </div>
+      </div>
+
+      <!-- Character Edit Modal -->
+      <div class="stc-modal" id="character-modal" style="display: none;">
+        <div class="stc-modal__backdrop"></div>
+        <div class="stc-modal__content">
+          <div class="stc-modal__header">
+            <h3 class="stc-modal__title" id="character-modal-title">New Character</h3>
+            <button class="stc-modal__close" id="character-modal-close">&times;</button>
+          </div>
+          <form id="character-form" class="stc-character-form">
+            <input type="hidden" id="character-id" value="">
+            <input type="hidden" id="character-role" value="">
+
+            <!-- Loading overlay -->
+            <div class="stc-character-form__loading" id="character-form-loading" style="display: none;">
+              <div class="loading-spinner"></div>
+              <span>Generating character...</span>
+            </div>
+
+            <div class="stc-character-form__field" data-field="name">
+              <div class="stc-character-form__label-row">
+                <label for="character-name">Name</label>
+                <button type="button" class="stc-character-form__reroll" data-field="name" title="Regenerate name">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                  </svg>
+                </button>
+              </div>
+              <input type="text" id="character-name" placeholder="What's their name?" required>
+            </div>
+
+            <div class="stc-character-form__field" data-field="want">
+              <div class="stc-character-form__label-row">
+                <label for="character-want">Want (External Goal)</label>
+                <button type="button" class="stc-character-form__reroll" data-field="want" title="Regenerate want">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                  </svg>
+                </button>
+              </div>
+              <textarea id="character-want" placeholder="What do they want?" rows="2"></textarea>
+            </div>
+
+            <div class="stc-character-form__field" data-field="need">
+              <div class="stc-character-form__label-row">
+                <label for="character-need">Need (Internal Growth)</label>
+                <button type="button" class="stc-character-form__reroll" data-field="need" title="Regenerate need">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                  </svg>
+                </button>
+              </div>
+              <textarea id="character-need" placeholder="What do they need to learn?" rows="2"></textarea>
+            </div>
+
+            <div class="stc-character-form__field" data-field="arc_type">
+              <div class="stc-character-form__label-row">
+                <label for="character-arc-type">Arc Type</label>
+                <button type="button" class="stc-character-form__reroll" data-field="arc_type" title="Regenerate arc type">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                  </svg>
+                </button>
+              </div>
+              <select id="character-arc-type">
+                <option value="">Select arc type...</option>
+                <option value="positive-change">Positive Change – Transforms for the better</option>
+                <option value="negative-change">Negative Change – Transforms for the worse</option>
+                <option value="steadfast">Steadfast – Holds their ground</option>
+              </select>
+            </div>
+
+            <div class="stc-character-form__field" data-field="arc_description">
+              <div class="stc-character-form__label-row">
+                <label for="character-arc-desc">Arc Description</label>
+                <button type="button" class="stc-character-form__reroll" data-field="arc_description" title="Regenerate arc description">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                  </svg>
+                </button>
+              </div>
+              <textarea id="character-arc-desc" placeholder="How do they change (or hold steady)?" rows="2"></textarea>
+            </div>
+
+            <div class="stc-character-form__field" data-field="connections">
+              <div class="stc-character-form__label-row">
+                <label for="character-connections">Connections</label>
+                <button type="button" class="stc-character-form__reroll" data-field="connections" title="Regenerate connections">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                  </svg>
+                </button>
+              </div>
+              <textarea id="character-connections" placeholder="How do they relate to other characters?" rows="2"></textarea>
+            </div>
+
+            <div class="stc-character-form__actions">
+              <button type="button" class="button button--secondary" id="btn-character-cancel">Cancel</button>
+              <button type="button" class="button button--secondary" id="btn-character-ai">
+                Generate with AI
+              </button>
+              <button type="submit" class="button button--primary" id="btn-character-save">Save Character</button>
+            </div>
+
+            <div class="stc-character-form__delete" id="character-delete-section" style="display: none;">
+              <button type="button" class="button button--danger" id="btn-character-delete">Delete Character</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Cascade Confirmation Modal -->
+      <div class="stc-modal stc-cascade-modal" id="cascade-modal" style="display: none;">
+        <div class="stc-modal__backdrop"></div>
+        <div class="stc-modal__content stc-cascade-modal__content">
+          <div class="stc-modal__header">
+            <h3 class="stc-modal__title">Downstream Impact Detected</h3>
+            <button class="stc-modal__close" id="cascade-modal-close">&times;</button>
+          </div>
+
+          <p class="stc-cascade-modal__intro" id="cascade-intro">
+            Your changes may affect other parts of your story. Review the suggested updates below.
+          </p>
+
+          <div class="stc-cascade-modal__items" id="cascade-items">
+            <!-- Dynamically populated -->
+          </div>
+
+          <div class="stc-cascade-modal__actions">
+            <button type="button" class="button button--secondary" id="btn-cascade-skip">Skip All</button>
+            <button type="button" class="button button--primary" id="btn-cascade-apply">Apply Selected</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Toast notifications container -->
+  <div class="stc-toast-container" id="toast-container"></div>
 </div>
 
 <script type="module">
@@ -1624,6 +1894,9 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
     resultEl.style.display = 'block';
     btnRegenerate.style.display = 'inline-block';
+
+    // Show characters section now that concept exists
+    updateCharactersVisibility();
   }
 
   function formatConceptForCopy() {
@@ -2199,6 +2472,12 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
     // Initialize brief section
     initializeBriefSection(project);
+
+    // Load characters and update visibility
+    if (project) {
+      loadCharacters(project.id);
+    }
+    updateCharactersVisibility();
   }
 
   // Brief state
@@ -2683,6 +2962,55 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     return text.length > len ? text.substring(0, len) + '...' : text;
   }
 
+  // Toast notification system
+  let toastIdCounter = 0;
+
+  function showToast(message, type = 'info', duration = 3000) {
+    const container = document.getElementById('toast-container');
+    const toastId = `toast-${++toastIdCounter}`;
+
+    const iconHtml = type === 'checking'
+      ? '<div class="stc-toast__spinner"></div>'
+      : type === 'success'
+        ? '<svg class="stc-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>'
+        : '<svg class="stc-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+    const toast = document.createElement('div');
+    toast.id = toastId;
+    toast.className = `stc-toast stc-toast--${type}`;
+    toast.innerHTML = `${iconHtml}<span>${escapeHtml(message)}</span>`;
+
+    container.appendChild(toast);
+
+    // Auto-remove after duration (unless duration is 0 for persistent toasts)
+    if (duration > 0) {
+      setTimeout(() => removeToast(toastId), duration);
+    }
+
+    return toastId;
+  }
+
+  function removeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+      toast.classList.add('stc-toast--exiting');
+      setTimeout(() => toast.remove(), 300);
+    }
+  }
+
+  function updateToast(toastId, message, type) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+      toast.className = `stc-toast stc-toast--${type}`;
+      const iconHtml = type === 'checking'
+        ? '<div class="stc-toast__spinner"></div>'
+        : type === 'success'
+          ? '<svg class="stc-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>'
+          : '<svg class="stc-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+      toast.innerHTML = `${iconHtml}<span>${escapeHtml(message)}</span>`;
+    }
+  }
+
   // Event listeners - Auth
   btnGoogleSignin.addEventListener('click', signInWithGoogle);
   btnSignout.addEventListener('click', signOut);
@@ -2754,6 +3082,871 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   // Setup brief item editing (inline edit buttons)
   setupBriefItemEditing();
 
+  // ========== CHARACTER SYSTEM ==========
+
+  // Character role definitions
+  const CHARACTER_ROLES = {
+    protagonist: {
+      label: 'Protagonist',
+      tier: 1,
+      description: 'Drives the story toward the goal. The perspective we follow.'
+    },
+    antagonist: {
+      label: 'Antagonist',
+      tier: 1,
+      description: "Opposes the goal. Not necessarily evil—just in the way."
+    },
+    mirror: {
+      label: 'Mirror',
+      tier: 2,
+      description: "Reflects or challenges the protagonist's worldview. Forces growth."
+    },
+    ally: {
+      label: 'Ally',
+      tier: 2,
+      description: 'Supports the protagonist. Provides faith, help, or mentorship.'
+    },
+    skeptic: {
+      label: 'Skeptic',
+      tier: 2,
+      description: 'Questions and doubts. Keeps the protagonist honest.'
+    },
+    wildcard: {
+      label: 'Wildcard',
+      tier: 2,
+      description: "Doesn't fit neatly. Comic relief, love interest, or chaos agent."
+    }
+  };
+
+  const ARC_TYPES = {
+    'positive-change': {
+      label: 'Positive Change',
+      description: 'Transforms for the better'
+    },
+    'negative-change': {
+      label: 'Negative Change',
+      description: 'Transforms for the worse'
+    },
+    'steadfast': {
+      label: 'Steadfast',
+      description: 'Holds their ground'
+    }
+  };
+
+  // Character state
+  let currentCharacters = []; // Array of character objects for current project
+
+  // Load characters from database
+  async function loadCharacters(projectId) {
+    try {
+      const { data, error } = await supabase
+        .from('characters')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      currentCharacters = data || [];
+      renderAllCharacterSlots();
+      updateCharactersVisibility();
+    } catch (e) {
+      console.error('Failed to load characters:', e);
+      currentCharacters = [];
+    }
+  }
+
+  // Update visibility of characters section based on whether story concept exists
+  function updateCharactersVisibility() {
+    const section = document.getElementById('characters-section');
+    const hasConcept = currentProject?.story_concept?.concept;
+
+    if (hasConcept) {
+      section.style.display = 'block';
+    } else {
+      section.style.display = 'none';
+    }
+  }
+
+  // Render all character slots based on currentCharacters
+  function renderAllCharacterSlots() {
+    // Reset all slots to empty state
+    Object.keys(CHARACTER_ROLES).forEach(role => {
+      const slot = document.getElementById(`slot-${role}`);
+      if (slot) {
+        const emptyEl = slot.querySelector('.stc-character-slot__empty');
+        const filledEl = slot.querySelector('.stc-character-slot__filled');
+        emptyEl.style.display = 'block';
+        filledEl.style.display = 'none';
+        filledEl.innerHTML = '';
+      }
+    });
+
+    // Clear extra characters list
+    const extraList = document.getElementById('characters-extra-list');
+    const extraSection = document.getElementById('characters-extra');
+    extraList.innerHTML = '';
+    extraSection.style.display = 'none';
+
+    // Place characters in slots or extra area
+    const extraCharacters = [];
+
+    currentCharacters.forEach(char => {
+      if (char.role && CHARACTER_ROLES[char.role]) {
+        renderCharacterInSlot(char);
+      } else {
+        extraCharacters.push(char);
+      }
+    });
+
+    // Render extra characters if any
+    if (extraCharacters.length > 0) {
+      extraSection.style.display = 'block';
+      extraCharacters.forEach(char => {
+        extraList.appendChild(createCharacterCard(char));
+      });
+    }
+  }
+
+  // Render a character in its designated slot
+  function renderCharacterInSlot(character) {
+    const slot = document.getElementById(`slot-${character.role}`);
+    if (!slot) return;
+
+    const emptyEl = slot.querySelector('.stc-character-slot__empty');
+    const filledEl = slot.querySelector('.stc-character-slot__filled');
+
+    emptyEl.style.display = 'none';
+    filledEl.style.display = 'block';
+    filledEl.innerHTML = '';
+    filledEl.appendChild(createCharacterCard(character));
+  }
+
+  // Create a character card element
+  function createCharacterCard(character) {
+    const card = document.createElement('div');
+    card.className = 'stc-character-card';
+    card.dataset.characterId = character.id;
+
+    const arcType = character.arc_type ? ARC_TYPES[character.arc_type] : null;
+
+    card.innerHTML = `
+      <div class="stc-character-card__header">
+        <h4 class="stc-character-card__name">${escapeHtml(character.name || 'Unnamed')}</h4>
+        <button class="stc-character-card__edit" title="Edit character">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+      </div>
+      ${character.want ? `<p class="stc-character-card__want"><strong>Want:</strong> ${escapeHtml(character.want)}</p>` : ''}
+      ${character.need ? `<p class="stc-character-card__need"><strong>Need:</strong> ${escapeHtml(character.need)}</p>` : ''}
+      ${arcType ? `<span class="stc-character-card__arc">${arcType.label}</span>` : ''}
+    `;
+
+    // Attach edit handler
+    card.querySelector('.stc-character-card__edit').addEventListener('click', () => {
+      openCharacterModal(character);
+    });
+
+    return card;
+  }
+
+  // Open character modal for new or existing character
+  function openCharacterModal(character = null, defaultRole = null) {
+    const modal = document.getElementById('character-modal');
+    const title = document.getElementById('character-modal-title');
+    const form = document.getElementById('character-form');
+    const deleteSection = document.getElementById('character-delete-section');
+
+    // Reset form
+    form.reset();
+
+    if (character) {
+      // Editing existing character
+      title.textContent = 'Edit Character';
+      document.getElementById('character-id').value = character.id;
+      document.getElementById('character-role').value = character.role || '';
+      document.getElementById('character-name').value = character.name || '';
+      document.getElementById('character-want').value = character.want || '';
+      document.getElementById('character-need').value = character.need || '';
+      document.getElementById('character-arc-type').value = character.arc_type || '';
+      document.getElementById('character-arc-desc').value = character.arc_description || '';
+      document.getElementById('character-connections').value = character.connections || '';
+      deleteSection.style.display = 'block';
+    } else {
+      // New character
+      title.textContent = 'New Character';
+      document.getElementById('character-id').value = '';
+      document.getElementById('character-role').value = defaultRole || '';
+      deleteSection.style.display = 'none';
+    }
+
+    modal.style.display = 'flex';
+    document.getElementById('character-name').focus();
+  }
+
+  // Close character modal
+  function closeCharacterModal() {
+    const modal = document.getElementById('character-modal');
+    modal.style.display = 'none';
+  }
+
+  // Save character (create or update)
+  async function saveCharacter() {
+    if (!currentProject) return;
+
+    const characterId = document.getElementById('character-id').value;
+    const characterData = {
+      project_id: currentProject.id,
+      user_id: currentUser.id,
+      role: document.getElementById('character-role').value || null,
+      name: document.getElementById('character-name').value.trim(),
+      want: document.getElementById('character-want').value.trim() || null,
+      need: document.getElementById('character-need').value.trim() || null,
+      arc_type: document.getElementById('character-arc-type').value || null,
+      arc_description: document.getElementById('character-arc-desc').value.trim() || null,
+      connections: document.getElementById('character-connections').value.trim() || null
+    };
+
+    if (!characterData.name) {
+      alert('Please enter a character name.');
+      return;
+    }
+
+    // Capture previous character state for cascade analysis
+    let previousCharacter = null;
+    if (characterId) {
+      previousCharacter = currentCharacters.find(c => c.id === characterId);
+      if (previousCharacter) {
+        previousCharacter = { ...previousCharacter }; // Clone it
+      }
+    }
+
+    const saveBtn = document.getElementById('btn-character-save');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    let savedCharacter = null;
+
+    try {
+      if (characterId) {
+        // Update existing
+        const { data, error } = await supabase
+          .from('characters')
+          .update(characterData)
+          .eq('id', characterId)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        savedCharacter = data;
+
+        // Update in local array
+        const index = currentCharacters.findIndex(c => c.id === characterId);
+        if (index !== -1) {
+          currentCharacters[index] = data;
+        }
+      } else {
+        // Create new
+        const { data, error } = await supabase
+          .from('characters')
+          .insert(characterData)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        savedCharacter = data;
+        currentCharacters.push(data);
+      }
+
+      renderAllCharacterSlots();
+      closeCharacterModal();
+
+      // Trigger project-wide cascade check after save
+      // This runs asynchronously - don't block the UI
+      if (savedCharacter) {
+        checkProjectWideCascade(savedCharacter, previousCharacter);
+      }
+    } catch (e) {
+      console.error('Failed to save character:', e);
+      alert('Failed to save character: ' + e.message);
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save Character';
+    }
+  }
+
+  // Delete character
+  async function deleteCharacter() {
+    const characterId = document.getElementById('character-id').value;
+    if (!characterId) return;
+
+    if (!confirm('Delete this character? This cannot be undone.')) return;
+
+    const deleteBtn = document.getElementById('btn-character-delete');
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = 'Deleting...';
+
+    try {
+      const { error } = await supabase
+        .from('characters')
+        .delete()
+        .eq('id', characterId);
+
+      if (error) throw error;
+
+      // Remove from local array
+      currentCharacters = currentCharacters.filter(c => c.id !== characterId);
+      renderAllCharacterSlots();
+      closeCharacterModal();
+    } catch (e) {
+      console.error('Failed to delete character:', e);
+      alert('Failed to delete character: ' + e.message);
+    } finally {
+      deleteBtn.disabled = false;
+      deleteBtn.textContent = 'Delete Character';
+    }
+  }
+
+  // Event listeners - Character modal
+  document.getElementById('character-modal-close').addEventListener('click', closeCharacterModal);
+  document.querySelector('.stc-modal__backdrop').addEventListener('click', closeCharacterModal);
+  document.getElementById('btn-character-cancel').addEventListener('click', closeCharacterModal);
+  document.getElementById('btn-character-save').addEventListener('click', saveCharacter);
+  document.getElementById('btn-character-delete').addEventListener('click', deleteCharacter);
+
+  // Event listener - Form submit (prevent default, use button click)
+  document.getElementById('character-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    saveCharacter();
+  });
+
+  // Event listeners - Add character buttons in slots
+  document.querySelectorAll('.stc-character-slot__add').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slot = btn.closest('.stc-character-slot');
+      const role = slot.dataset.role;
+      openCharacterModal(null, role);
+    });
+  });
+
+  // Event listener - Add another character button (no role)
+  document.getElementById('btn-add-character').addEventListener('click', () => {
+    openCharacterModal(null, null);
+  });
+
+  // Event listener - AI generate button
+  document.getElementById('btn-character-ai').addEventListener('click', generateCharacterWithAI);
+
+  // Event listeners - Re-roll buttons
+  document.querySelectorAll('.stc-character-form__reroll').forEach(btn => {
+    btn.addEventListener('click', () => rerollCharacterField(btn.dataset.field));
+  });
+
+  // Show/hide character form loading state
+  function setCharacterFormLoading(loading) {
+    const loadingEl = document.getElementById('character-form-loading');
+    const fields = document.querySelectorAll('.stc-character-form__field');
+    const buttons = document.querySelectorAll('.stc-character-form__actions button');
+
+    loadingEl.style.display = loading ? 'flex' : 'none';
+    fields.forEach(f => f.classList.toggle('stc-character-form__field--loading', loading));
+    buttons.forEach(b => b.disabled = loading);
+  }
+
+  // Generate character with AI
+  async function generateCharacterWithAI() {
+    if (!currentProject || !currentBraindump) {
+      alert('Missing project context.');
+      return;
+    }
+
+    const storyConcept = currentProject?.story_concept?.concept;
+    if (!storyConcept) {
+      alert('Generate a story concept first before creating AI characters.');
+      return;
+    }
+
+    setCharacterFormLoading(true);
+
+    try {
+      const role = document.getElementById('character-role').value || null;
+      const hydratedGenome = currentProject?.genome ? hydrateGenome(currentProject.genome) : null;
+
+      const response = await fetch('/.netlify/functions/generate-character', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          braindump: currentBraindump.raw_input,
+          genome: hydratedGenome,
+          storyConcept: storyConcept,
+          existingCharacters: currentCharacters,
+          role: role
+        })
+      });
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Netlify function not available. Run "netlify dev" locally or deploy to Netlify.');
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate character');
+      }
+
+      // Populate form fields with generated character
+      populateCharacterForm(data.character);
+
+    } catch (e) {
+      console.error('Character generation error:', e);
+      alert('Failed to generate character: ' + e.message);
+    } finally {
+      setCharacterFormLoading(false);
+    }
+  }
+
+  // Populate form from character object
+  function populateCharacterForm(char) {
+    document.getElementById('character-name').value = char.name || '';
+    document.getElementById('character-want').value = char.want || '';
+    document.getElementById('character-need').value = char.need || '';
+    document.getElementById('character-arc-type').value = char.arc_type || '';
+    document.getElementById('character-arc-desc').value = char.arc_description || '';
+    document.getElementById('character-connections').value = char.connections || '';
+  }
+
+  // Get current form values as character object
+  function getCharacterFormValues() {
+    return {
+      name: document.getElementById('character-name').value,
+      want: document.getElementById('character-want').value,
+      need: document.getElementById('character-need').value,
+      arc_type: document.getElementById('character-arc-type').value,
+      arc_description: document.getElementById('character-arc-desc').value,
+      connections: document.getElementById('character-connections').value
+    };
+  }
+
+  // Re-roll a single character field
+  async function rerollCharacterField(fieldName) {
+    if (!currentProject || !currentBraindump) {
+      alert('Missing project context.');
+      return;
+    }
+
+    const storyConcept = currentProject?.story_concept?.concept;
+    if (!storyConcept) {
+      alert('Generate a story concept first.');
+      return;
+    }
+
+    // Find the re-roll button and field
+    const btn = document.querySelector(`.stc-character-form__reroll[data-field="${fieldName}"]`);
+    const fieldEl = document.querySelector(`.stc-character-form__field[data-field="${fieldName}"]`);
+
+    // Show loading state on just this field
+    btn.classList.add('stc-character-form__reroll--loading');
+    btn.disabled = true;
+    fieldEl.classList.add('stc-character-form__field--loading');
+
+    try {
+      const role = document.getElementById('character-role').value || null;
+      const hydratedGenome = currentProject?.genome ? hydrateGenome(currentProject.genome) : null;
+      const currentValues = getCharacterFormValues();
+
+      const response = await fetch('/.netlify/functions/generate-character', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          braindump: currentBraindump.raw_input,
+          genome: hydratedGenome,
+          storyConcept: storyConcept,
+          existingCharacters: currentCharacters,
+          role: role,
+          currentCharacter: currentValues,
+          rerollField: fieldName
+        })
+      });
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Netlify function not available.');
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to regenerate field');
+      }
+
+      // Update just the one field
+      const char = data.character;
+      const fieldMap = {
+        name: 'character-name',
+        want: 'character-want',
+        need: 'character-need',
+        arc_type: 'character-arc-type',
+        arc_description: 'character-arc-desc',
+        connections: 'character-connections'
+      };
+
+      const inputId = fieldMap[fieldName];
+      const previousValue = currentValues[fieldName];
+      if (inputId && char[fieldName] !== undefined) {
+        document.getElementById(inputId).value = char[fieldName];
+      }
+
+      // Check for within-character cascade after updating the field
+      if (char[fieldName] !== previousValue) {
+        checkWithinCharacterCascade(fieldName, previousValue);
+      }
+
+    } catch (e) {
+      console.error('Field reroll error:', e);
+      alert('Failed to regenerate: ' + e.message);
+    } finally {
+      btn.classList.remove('stc-character-form__reroll--loading');
+      btn.disabled = false;
+      fieldEl.classList.remove('stc-character-form__field--loading');
+    }
+  }
+
+  // ========== CASCADE SYSTEM ==========
+
+  let pendingCascadeItems = []; // Stores cascade items for the modal
+
+  // Check within-character cascade after a field change
+  async function checkWithinCharacterCascade(changedField, previousValue) {
+    const currentValues = getCharacterFormValues();
+    const previousCharacter = { ...currentValues, [changedField]: previousValue };
+
+    // Show toast while checking
+    const toastId = showToast('Checking character consistency...', 'checking', 0);
+
+    try {
+      const response = await fetch('/.netlify/functions/cascade-character', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cascadeType: 'within-character',
+          character: currentValues,
+          previousCharacter: previousCharacter,
+          changedField: changedField
+        })
+      });
+
+      removeToast(toastId);
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      if (data.cascade?.hasImpact && data.cascade.affectedFields?.length > 0) {
+        // Show cascade modal with within-character updates
+        showCascadeModal('within-character', data.cascade.affectedFields);
+      }
+    } catch (e) {
+      removeToast(toastId);
+      console.error('Within-character cascade check failed:', e);
+      // Silently fail - cascade is a nice-to-have
+    }
+  }
+
+  // Check project-wide cascade after saving a character
+  async function checkProjectWideCascade(character, previousCharacter) {
+    const storyConcept = currentProject?.story_concept?.concept;
+    if (!storyConcept) return;
+
+    // Show toast while checking
+    const toastId = showToast('Checking for downstream impacts...', 'checking', 0);
+
+    try {
+      const response = await fetch('/.netlify/functions/cascade-character', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cascadeType: 'project-wide',
+          character: character,
+          previousCharacter: previousCharacter,
+          storyConcept: storyConcept,
+          allCharacters: currentCharacters,
+          genome: currentProject?.genome ? hydrateGenome(currentProject.genome) : null
+        })
+      });
+
+      removeToast(toastId);
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      if (data.cascade?.hasImpact) {
+        const items = [];
+
+        // Add story concept impact
+        if (data.cascade.storyConceptImpact?.needsUpdate) {
+          // Extract a meaningful excerpt from the story concept
+          const conceptExcerpt = storyConcept.length > 300
+            ? storyConcept.substring(0, 300) + '...'
+            : storyConcept;
+
+          items.push({
+            type: 'story-concept',
+            target: 'Story Concept',
+            field: 'concept',
+            reason: data.cascade.storyConceptImpact.reason,
+            currentValue: conceptExcerpt,
+            suggestedValue: data.cascade.storyConceptImpact.suggestedRevisions,
+            fullConcept: storyConcept
+          });
+        }
+
+        // Add character impacts
+        if (data.cascade.characterImpacts?.length > 0) {
+          data.cascade.characterImpacts.forEach(impact => {
+            items.push({
+              type: 'character',
+              characterId: impact.characterId,
+              target: impact.characterName,
+              field: impact.field,
+              reason: impact.reason,
+              currentValue: impact.currentValue,
+              suggestedValue: impact.suggestedValue
+            });
+          });
+        }
+
+        if (items.length > 0) {
+          showCascadeModal('project-wide', items);
+        }
+      }
+    } catch (e) {
+      removeToast(toastId);
+      console.error('Project-wide cascade check failed:', e);
+    }
+  }
+
+  // Show the cascade confirmation modal
+  function showCascadeModal(cascadeType, items) {
+    pendingCascadeItems = items.map((item, index) => ({ ...item, id: index, selected: true }));
+
+    const modal = document.getElementById('cascade-modal');
+    const intro = document.getElementById('cascade-intro');
+    const itemsContainer = document.getElementById('cascade-items');
+
+    // Set intro text based on type
+    if (cascadeType === 'within-character') {
+      intro.textContent = 'Your change may affect other fields in this character. Review the suggested updates below.';
+    } else {
+      intro.textContent = 'Your character change may affect other parts of your story. Review the suggested updates below.';
+    }
+
+    // Render items
+    itemsContainer.innerHTML = pendingCascadeItems.map(item => `
+      <div class="stc-cascade-item" data-cascade-id="${item.id}">
+        <div class="stc-cascade-item__header">
+          <input type="checkbox" class="stc-cascade-item__checkbox" ${item.selected ? 'checked' : ''} data-cascade-id="${item.id}">
+          <span class="stc-cascade-item__title">
+            Update <span class="stc-cascade-item__target">${escapeHtml(item.target)}</span> → ${escapeHtml(item.field)}
+          </span>
+        </div>
+        <p class="stc-cascade-item__reason">${escapeHtml(item.reason)}</p>
+        <div class="stc-cascade-item__diff">
+          <div class="stc-cascade-item__old">${escapeHtml(truncate(item.currentValue, 150))}</div>
+          <div class="stc-cascade-item__new">${escapeHtml(truncate(item.suggestedValue, 150))}</div>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach checkbox listeners
+    itemsContainer.querySelectorAll('.stc-cascade-item__checkbox').forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        const id = parseInt(e.target.dataset.cascadeId);
+        const item = pendingCascadeItems.find(i => i.id === id);
+        if (item) item.selected = e.target.checked;
+      });
+    });
+
+    modal.style.display = 'flex';
+  }
+
+  // Close cascade modal
+  function closeCascadeModal() {
+    document.getElementById('cascade-modal').style.display = 'none';
+    pendingCascadeItems = [];
+  }
+
+  // Apply selected cascade items
+  async function applyCascadeItems() {
+    const selectedItems = pendingCascadeItems.filter(item => item.selected);
+
+    for (const item of selectedItems) {
+      if (item.type === 'within-character' || !item.type) {
+        // Update form field
+        const fieldMap = {
+          name: 'character-name',
+          want: 'character-want',
+          need: 'character-need',
+          arc_type: 'character-arc-type',
+          arc_description: 'character-arc-desc',
+          connections: 'character-connections'
+        };
+        const inputId = fieldMap[item.field];
+        if (inputId) {
+          document.getElementById(inputId).value = item.suggestedValue;
+        }
+      } else if (item.type === 'character') {
+        // Update another character's field
+        const char = currentCharacters.find(c => c.id === item.characterId);
+        if (char) {
+          char[item.field] = item.suggestedValue;
+          // Save to database
+          await supabase
+            .from('characters')
+            .update({ [item.field]: item.suggestedValue })
+            .eq('id', item.characterId);
+        }
+      } else if (item.type === 'story-concept') {
+        // Show the in-context suggestions banner instead of alert
+        showConceptSuggestions(item);
+      }
+    }
+
+    closeCascadeModal();
+    renderAllCharacterSlots(); // Refresh display
+  }
+
+  // Show the story concept suggestions banner with diff view
+  let pendingConceptSuggestion = null; // Store the current suggestion item
+
+  function showConceptSuggestions(item) {
+    pendingConceptSuggestion = item;
+
+    const banner = document.getElementById('concept-suggestions');
+    const reasonEl = document.getElementById('suggestions-reason');
+    const currentEl = document.getElementById('suggestions-current');
+    const proposedEl = document.getElementById('suggestions-proposed');
+
+    // Populate the banner
+    reasonEl.textContent = item.reason || 'The AI detected that your story concept may need updates based on recent character changes.';
+    currentEl.textContent = item.currentValue || '(No current concept)';
+    proposedEl.value = item.suggestedValue || '(No specific suggestions)';
+
+    // Show the banner
+    banner.style.display = 'block';
+
+    // Scroll to the story concept section
+    const conceptSection = document.getElementById('concept-section');
+    if (conceptSection) {
+      conceptSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  // Hide the story concept suggestions banner
+  function hideConceptSuggestions() {
+    document.getElementById('concept-suggestions').style.display = 'none';
+    pendingConceptSuggestion = null;
+  }
+
+  // Apply the suggested changes to the story concept
+  async function applyConceptSuggestions() {
+    if (!pendingConceptSuggestion || !currentProject) return;
+
+    const applyBtn = document.getElementById('btn-suggestions-apply');
+    const btnText = applyBtn.querySelector('.btn-text');
+    const btnLoading = applyBtn.querySelector('.btn-loading');
+
+    // Get the (possibly edited) suggestions from the textarea
+    const editedSuggestions = document.getElementById('suggestions-proposed').value;
+    const currentConcept = currentProject?.story_concept?.concept || '';
+
+    // Show loading state
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline-flex';
+    applyBtn.disabled = true;
+
+    try {
+      // Call the refine-section function to apply the changes
+      // Format: sectionName, allSections (array of {name, content}), direction, genome, braindump
+      const response = await fetch('/.netlify/functions/refine-section', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sectionName: 'Story Concept',
+          allSections: [{ name: 'Story Concept', content: currentConcept }],
+          direction: `Apply these specific changes based on character updates:\n\n${editedSuggestions}\n\nReason for changes: ${pendingConceptSuggestion.reason}`,
+          braindump: currentProject.braindump,
+          genome: currentProject.genome ? hydrateGenome(currentProject.genome) : null
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to apply changes');
+      }
+
+      const data = await response.json();
+      const revisedConcept = data.revisedSection;
+
+      // Update the project in the database
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          story_concept: {
+            ...currentProject.story_concept,
+            concept: revisedConcept
+          }
+        })
+        .eq('id', currentProject.id);
+
+      if (error) throw error;
+
+      // Update local state
+      currentProject.story_concept.concept = revisedConcept;
+
+      // Update the UI using the same rendering as the rest of the app
+      currentSections = parseConcept(revisedConcept);
+      document.getElementById('concept-content').innerHTML = currentSections.map((section, i) => renderSection(section, i)).join('');
+
+      // Also update the combined view
+      document.getElementById('concept-combined-text').textContent = formatConceptForCopy();
+
+      // Show success toast
+      showToast('Story concept updated successfully!', 'success', 3000);
+
+      // Hide the suggestions banner
+      hideConceptSuggestions();
+
+    } catch (e) {
+      console.error('Failed to apply concept suggestions:', e);
+      showToast('Failed to apply changes: ' + e.message, 'info', 5000);
+    } finally {
+      // Reset button state
+      btnText.style.display = 'inline';
+      btnLoading.style.display = 'none';
+      applyBtn.disabled = false;
+    }
+  }
+
+  // Event listeners - Cascade modal
+  document.getElementById('cascade-modal-close').addEventListener('click', closeCascadeModal);
+  document.getElementById('btn-cascade-skip').addEventListener('click', closeCascadeModal);
+  document.getElementById('btn-cascade-apply').addEventListener('click', applyCascadeItems);
+
+  // Close cascade modal on backdrop click
+  document.querySelector('#cascade-modal .stc-modal__backdrop').addEventListener('click', closeCascadeModal);
+
+  // Close suggestions banner
+  document.getElementById('btn-close-suggestions').addEventListener('click', hideConceptSuggestions);
+  document.getElementById('btn-suggestions-dismiss').addEventListener('click', hideConceptSuggestions);
+  document.getElementById('btn-suggestions-apply').addEventListener('click', applyConceptSuggestions);
+
   diveIntoNew.addEventListener('click', (e) => {
     e.preventDefault();
     if (currentBraindump) {
@@ -2777,6 +3970,17 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 </script>
 
 <style>
+  /* ========== GLOBAL STC OVERRIDES ========== */
+  #stc-app {
+    color: var(--color-text-primary, #2C2416);
+  }
+
+  #stc-app input::placeholder,
+  #stc-app textarea::placeholder {
+    color: var(--color-text-muted, #8B7D6B);
+    opacity: 0.7;
+  }
+
   .stc-view {
     min-height: 60vh;
   }
@@ -3032,9 +4236,8 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   /* ========== DIVE VIEW ========== */
   .stc-dive__container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: var(--spacing-xl) var(--spacing-md);
+    /* Width controlled by .stc-main and .stc-narrow */
+    padding: var(--spacing-xl) 0;
   }
 
   .stc-dive__back {
@@ -3965,6 +5168,158 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     margin: 0 0 var(--spacing-md) 0;
   }
 
+  /* AI Suggestions Banner */
+  .stc-concept__suggestions {
+    background: linear-gradient(135deg, #FFF8E7 0%, #FFF3D6 100%);
+    border: 1px solid #E8D5A3;
+    border-left: 4px solid #D4A853;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    animation: slideDown 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .stc-concept__suggestions-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    color: #8B6914;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+  }
+
+  .stc-concept__suggestions-header svg {
+    stroke: #D4A853;
+    flex-shrink: 0;
+  }
+
+  .stc-concept__suggestions-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #8B6914;
+    cursor: pointer;
+    padding: 0 var(--spacing-xs);
+    line-height: 1;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+
+  .stc-concept__suggestions-close:hover {
+    opacity: 1;
+  }
+
+  .stc-concept__suggestions-content {
+    font-family: 'Source Sans 3', sans-serif;
+  }
+
+  .stc-concept__suggestions-reason {
+    font-size: var(--font-size-sm);
+    color: #5D4A1F;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm);
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius-sm);
+  }
+
+  .stc-concept__suggestions-diff {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .stc-concept__suggestions-old,
+  .stc-concept__suggestions-new {
+    background: white;
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm);
+    border: 1px solid #E8D5A3;
+  }
+
+  .stc-concept__suggestions-old {
+    border-left: 3px solid #C9A87C;
+  }
+
+  .stc-concept__suggestions-new {
+    border-left: 3px solid #7BA05B;
+  }
+
+  .stc-concept__suggestions-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted, #8B7D6B);
+    margin-bottom: var(--spacing-xs);
+    font-weight: 600;
+  }
+
+  .stc-concept__suggestions-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary, #2C2416);
+    line-height: 1.5;
+    max-height: 150px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+
+  .stc-concept__suggestions-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: var(--spacing-sm);
+    border: 1px solid #E8D5A3;
+    border-radius: var(--radius-sm);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary, #2C2416);
+    line-height: 1.5;
+    resize: vertical;
+    background: white;
+  }
+
+  .stc-concept__suggestions-textarea:focus {
+    outline: none;
+    border-color: #D4A853;
+    box-shadow: 0 0 0 2px rgba(212, 168, 83, 0.2);
+  }
+
+  .stc-concept__suggestions-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid #E8D5A3;
+  }
+
+  .stc-concept__suggestions-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: var(--spacing-xs);
+  }
+
+  #btn-suggestions-apply .btn-loading {
+    display: inline-flex;
+    align-items: center;
+  }
+
   /* Loading state */
   .stc-concept__loading {
     display: flex;
@@ -4700,5 +6055,733 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     font-family: 'Source Sans 3', sans-serif;
     font-size: var(--font-size-sm);
     color: #DC3545;
+  }
+
+  /* ========== CHARACTERS SECTION ========== */
+  .stc-characters {
+    margin-top: var(--spacing-xxl);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-characters__heading {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.5rem;
+    color: var(--color-text-primary, #2C2416);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-characters__coach {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
+    background: var(--color-background-secondary, #FAF7F2);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-xl);
+    line-height: 1.5;
+  }
+
+  /* Pyramid Layout */
+  .stc-characters__pyramid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .stc-characters__tier {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+  }
+
+  .stc-characters__tier--1 {
+    /* Tier 1: Drivers - 2 cards centered */
+    padding-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border-default, #D9CFC2);
+    position: relative;
+  }
+
+  .stc-characters__tier--1::after {
+    content: 'Drivers';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-background-secondary, #F5F0E8);
+    padding: 0 var(--spacing-sm);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted, #8B7D6B);
+  }
+
+  .stc-characters__tier--2 {
+    /* Tier 2: Supports - 4 cards in a row */
+    position: relative;
+    padding-top: var(--spacing-md);
+  }
+
+  .stc-characters__tier--2::before {
+    content: 'Supports';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-background-secondary, #F5F0E8);
+    padding: 0 var(--spacing-sm);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted, #8B7D6B);
+  }
+
+  .stc-characters__tier--2 .stc-character-slot {
+    width: 200px;
+    min-height: 160px;
+  }
+
+  /* Character Slot */
+  .stc-character-slot {
+    width: 280px;
+    min-height: 180px;
+    border: 2px dashed var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    background: var(--color-background-card, #FFFCF8);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .stc-character-slot:hover {
+    border-color: var(--color-accent-primary, #B85C38);
+  }
+
+  .stc-character-slot--filled {
+    border-style: solid;
+    border-color: var(--color-border-default, #D9CFC2);
+  }
+
+  /* Empty Slot */
+  .stc-character-slot__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    min-height: 150px;
+  }
+
+  .stc-character-slot__role {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-accent-primary, #B85C38);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-character-slot__desc {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted, #8B7D6B);
+    line-height: 1.4;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-character-slot__add {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  /* Filled Slot - Character Card */
+  .stc-character-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .stc-character-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-character-card__name {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #2C2416);
+    margin: 0;
+  }
+
+  .stc-character-card__role-badge {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: var(--color-accent-primary, #B85C38);
+    color: white;
+  }
+
+  .stc-character-card__field {
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-character-card__label {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted, #8B7D6B);
+  }
+
+  .stc-character-card__value {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-primary, #2C2416);
+    line-height: 1.4;
+  }
+
+  .stc-character-card__value--empty {
+    font-style: italic;
+    color: var(--color-text-muted, #8B7D6B);
+  }
+
+  .stc-character-card__edit {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--color-text-muted, #8B7D6B);
+    transition: color 0.2s ease;
+    border-radius: 4px;
+  }
+
+  .stc-character-card__edit:hover {
+    color: var(--color-accent-primary, #B85C38);
+    background: rgba(184, 92, 56, 0.1);
+  }
+
+  .stc-character-card__want,
+  .stc-character-card__need {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary, #5C4D3C);
+    line-height: 1.4;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-character-card__want strong,
+  .stc-character-card__need strong {
+    font-weight: 600;
+    color: var(--color-text-primary, #2C2416);
+  }
+
+  .stc-character-card__arc {
+    display: inline-block;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: var(--color-background-tertiary, #EDE4D9);
+    color: var(--color-text-secondary, #5C4D3C);
+    margin-top: auto;
+  }
+
+  .stc-character-card__actions {
+    display: flex;
+    gap: var(--spacing-xs);
+    margin-top: auto;
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-character-card__btn {
+    flex: 1;
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs);
+  }
+
+  /* Extra Characters Section */
+  .stc-characters__extra {
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-characters__extra-title {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-muted, #8B7D6B);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-characters__extra-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+  }
+
+  .stc-characters__add-more {
+    margin-top: var(--spacing-lg);
+    text-align: center;
+  }
+
+  /* Modal */
+  .stc-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stc-modal__backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .stc-modal__content {
+    position: relative;
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    max-width: 700px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  }
+
+  .stc-modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .stc-modal__title {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.25rem;
+    color: var(--color-text-primary, #2C2416);
+    margin: 0;
+  }
+
+  .stc-modal__close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-text-muted, #8B7D6B);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .stc-modal__close:hover {
+    color: var(--color-text-primary, #2C2416);
+  }
+
+  /* Character Form */
+  .stc-character-form {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md) var(--spacing-lg);
+  }
+
+  .stc-character-form__loading {
+    grid-column: 1 / -1;
+  }
+
+  .stc-character-form__field {
+    margin-bottom: 0;
+  }
+
+  /* Full width fields */
+  .stc-character-form__field[data-field="arc_description"],
+  .stc-character-form__field[data-field="connections"] {
+    grid-column: 1 / -1;
+  }
+
+  .stc-character-form__actions {
+    grid-column: 1 / -1;
+  }
+
+  .stc-character-form__delete {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 600px) {
+    .stc-character-form {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .stc-character-form__field label {
+    display: block;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-primary, #2C2416);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-character-form__field input,
+  .stc-character-form__field textarea,
+  .stc-character-form__field select {
+    width: 100%;
+    padding: var(--spacing-sm);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-sm);
+    background: white;
+  }
+
+  .stc-character-form__field input:focus,
+  .stc-character-form__field textarea:focus,
+  .stc-character-form__field select:focus {
+    outline: none;
+    border-color: var(--color-accent-primary, #B85C38);
+    box-shadow: 0 0 0 2px rgba(184, 92, 56, 0.2);
+  }
+
+  .stc-character-form__actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-character-form__actions .button {
+    flex: 1;
+  }
+
+  .stc-character-form__delete {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+    text-align: center;
+  }
+
+  .button--danger {
+    background: #DC3545;
+    color: white;
+    border-color: #DC3545;
+  }
+
+  .button--danger:hover {
+    background: #c82333;
+    border-color: #c82333;
+  }
+
+  /* Character Form Loading State */
+  .stc-character-form__loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 252, 248, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    z-index: 10;
+    border-radius: var(--radius-md);
+  }
+
+  .stc-character-form__loading span {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary, #5C4D3C);
+  }
+
+  .stc-character-form__label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-character-form__label-row label {
+    margin-bottom: 0;
+  }
+
+  .stc-character-form__reroll {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--color-text-muted, #8B7D6B);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    opacity: 0.6;
+  }
+
+  .stc-character-form__reroll:hover {
+    opacity: 1;
+    color: var(--color-accent-primary, #B85C38);
+    background: rgba(184, 92, 56, 0.1);
+  }
+
+  .stc-character-form__reroll:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .stc-character-form__reroll--loading {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .stc-character-form__field--loading input,
+  .stc-character-form__field--loading textarea,
+  .stc-character-form__field--loading select {
+    background: var(--color-background-tertiary, #EDE4D9);
+    color: var(--color-text-muted, #8B7D6B);
+  }
+
+  /* Cascade Modal */
+  .stc-cascade-modal__content {
+    max-width: 600px;
+  }
+
+  .stc-cascade-modal__intro {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary, #5C4D3C);
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-background-secondary, #FAF7F2);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--color-accent-primary, #B85C38);
+  }
+
+  .stc-cascade-modal__items {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .stc-cascade-item {
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    background: var(--color-background-card, #FFFCF8);
+  }
+
+  .stc-cascade-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .stc-cascade-item__header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-cascade-item__checkbox {
+    margin-top: 2px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-accent-primary, #B85C38);
+  }
+
+  .stc-cascade-item__title {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-primary, #2C2416);
+  }
+
+  .stc-cascade-item__target {
+    color: var(--color-accent-primary, #B85C38);
+  }
+
+  .stc-cascade-item__reason {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
+    margin-bottom: var(--spacing-sm);
+    padding-left: 26px;
+  }
+
+  .stc-cascade-item__diff {
+    padding-left: 26px;
+  }
+
+  .stc-cascade-item__old,
+  .stc-cascade-item__new {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-cascade-item__old {
+    background: #fce8e8;
+    color: #8b2525;
+    text-decoration: line-through;
+  }
+
+  .stc-cascade-item__new {
+    background: #e8f5e8;
+    color: #256b25;
+  }
+
+  .stc-cascade-modal__actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .stc-characters__tier--2 .stc-character-slot {
+      width: 170px;
+      min-height: 140px;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .stc-characters__tier--2 {
+      flex-wrap: wrap;
+    }
+
+    .stc-characters__tier--2 .stc-character-slot {
+      width: calc(50% - var(--spacing-sm));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .stc-character-slot {
+      width: 100%;
+    }
+
+    .stc-characters__tier {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stc-characters__tier--2 .stc-character-slot {
+      width: 100%;
+    }
+  }
+
+  /* Toast notifications */
+  .stc-toast-container {
+    position: fixed;
+    bottom: var(--spacing-lg);
+    right: var(--spacing-lg);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    pointer-events: none;
+  }
+
+  .stc-toast {
+    background: var(--color-text-primary, #2C2416);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: toastSlideIn 0.3s ease-out;
+    pointer-events: auto;
+    max-width: 320px;
+  }
+
+  .stc-toast--checking {
+    background: linear-gradient(135deg, #4A5568 0%, #2D3748 100%);
+  }
+
+  .stc-toast--success {
+    background: linear-gradient(135deg, #48BB78 0%, #38A169 100%);
+  }
+
+  .stc-toast--info {
+    background: linear-gradient(135deg, #4299E1 0%, #3182CE 100%);
+  }
+
+  .stc-toast__spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    flex-shrink: 0;
+  }
+
+  .stc-toast__icon {
+    flex-shrink: 0;
+  }
+
+  @keyframes toastSlideIn {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes toastSlideOut {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+  }
+
+  .stc-toast--exiting {
+    animation: toastSlideOut 0.3s ease-in forwards;
   }
 </style>
