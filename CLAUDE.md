@@ -264,7 +264,21 @@ This principle applies to any hierarchical/dependent data structure in the app. 
 
 ### Editor Persona
 
-The AI assistant uses a specific "editor persona" defined in `/apps/stc/core/logic/system-prompts.js`. This persona is warm, collaborative, and focused on helping writers discover their story - not writing it for them.
+The AI assistant uses a specific "editor persona" defined in `/netlify/functions/shared/system-prompts.js`. This persona is warm, collaborative, and focused on helping writers discover their story - not writing it for them.
+
+### Netlify Functions
+
+The STC app uses serverless functions for AI operations:
+
+| Function | Purpose |
+|----------|---------|
+| `generate-concept.js` | Generates story concept from braindump + genome |
+| `refine-section.js` | Refines a single concept section with context awareness |
+| `cascade-genome.js` | Analyzes genome changes for downstream impact |
+| `extract-brief.js` | Extracts core concept, premise, world/tone from braindump |
+| `generate-title.js` | Generates short memorable title (uses Haiku for speed) |
+
+All functions require `ANTHROPIC_API_KEY` environment variable set in Netlify dashboard.
 
 ## Adding a New View Framework
 

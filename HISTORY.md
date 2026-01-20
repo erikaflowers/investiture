@@ -4,6 +4,43 @@ A running log of changes to the scaffold.
 
 ---
 
+## 2025-01-19 (Evening) - Brief Extraction, Project Titles & Bug Fixes
+
+### Major Features
+- **Brief Extraction**: AI-powered extraction of core concept, premise, and world/tone from braindump
+  - "Extract Brief" button triggers Claude to analyze braindump
+  - Re-extract and Accept flow (similar to other sections)
+  - Inline editing for each brief field
+  - Brief locks to database once accepted, won't re-extract
+
+- **Project Titles**: AI-generated memorable titles for each braindump
+  - Auto-generates 2-5 word title after saving braindump
+  - Editable in both list view and dive view (click to edit)
+  - Regenerate button to get fresh AI title
+  - Saves to database, persists across sessions
+
+- **Genome Ready State**: Visual display after applying genome
+  - Shows all genome selections as pills/tags
+  - Big "Generate Story Concept" call-to-action button
+  - "Apply Genome" button text changes to "Apply Genome Changes" after first save
+
+### Bug Fixes
+- **Story concept not persisting**: Fixed key mismatch (was saving as `text`, reading as `concept`)
+- **Genome pills showing [object Object]**: Now properly extracts label from hydrated objects
+
+### UI Tweaks
+- Changed "Brief locked" to "Brief saved"
+- Fixed "Dive in" button wrapping to 2 lines (removed arrow)
+
+### New Netlify Functions
+- `extract-brief.js` - Extracts brief from braindump using Claude
+- `generate-title.js` - Generates short title using Claude Haiku
+
+### Commits
+- `fc76577` Add Brief extraction, project titles, and UI improvements
+
+---
+
 ## 2025-01-19 (Continued) - STC Concept View Toggle & Copy
 
 ### Changes
