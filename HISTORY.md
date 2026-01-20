@@ -4,6 +4,51 @@ A running log of changes to the scaffold.
 
 ---
 
+## 2025-01-20 (Morning) - Character Cards Implemented
+
+### Major Features
+- **Character Entity System**: Clickable character tokens in text content
+  - Character names auto-detected and rendered as styled tokens
+  - Click any token to open character sheet view
+  - Regex-based matching with word boundaries
+  - Longest-name-first matching to handle overlapping names
+
+- **Character Sheet View**: Read-only character display modal
+  - Full character details in clean, formatted layout
+  - View/Edit buttons on character cards
+  - Edit transitions seamlessly to edit modal
+
+- **AI Loading Overlay**: Prominent full-screen indicator for AI operations
+  - Backdrop blur with centered content
+  - Spinning icon and animated bouncing dots
+  - Custom title/message per operation type
+  - Body scroll lock while visible
+
+- **Dev Zone Enhancements**: UI testing tools
+  - Entity rendering test with sample text
+  - Buttons to test AI overlay and all toast types
+  - Auto-dismiss after 5 seconds for testing
+
+### UI Improvements
+- Toast notifications moved to top-center (more visible)
+- Larger toast styling with slide-down animation
+- Modal scroll lock on all modals (body doesn't scroll behind)
+- Character card buttons moved below name with text labels
+- AI regeneration confirmation dialog
+
+### Bug Fixes
+- Edit button in character sheet now opens correct character (not blank)
+- Dev zone character tokens now clickable
+
+### Technical
+- Source maps enabled for SCSS debugging
+- Local .env setup for multi-machine development
+
+### Commits
+- `d6ac3e3` Add character cards with entity system, sheet view, and AI overlay
+
+---
+
 ## 2025-01-19 (Night) - Character System, Cascade Detection & Architecture Docs
 
 ### Major Features

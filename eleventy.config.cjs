@@ -11,6 +11,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "views/vanilla/docs.js": "docs.js" });
   eleventyConfig.addPassthroughCopy({ "views/vanilla/nav.js": "nav.js" });
   eleventyConfig.addPassthroughCopy({ "views/vanilla/styles.css": "styles.css" });
+  eleventyConfig.addPassthroughCopy({ "views/vanilla/styles.css.map": "styles.css.map" });
   eleventyConfig.addPassthroughCopy({ "views/vanilla/favicon.svg": "favicon.svg" });
 
   // Pass through design system tokens

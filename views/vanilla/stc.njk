@@ -486,6 +486,40 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         </div>
       </div>
 
+      <!-- Dev Zone: Test area for UI components -->
+      <div class="stc-dev-zone" id="dev-zone" style="display: none;">
+        <div class="stc-dev-zone__header">
+          <button class="stc-dev-zone__toggle" id="dev-zone-toggle">
+            🔧 Dev Zone
+            <span class="stc-dev-zone__arrow">▼</span>
+          </button>
+        </div>
+        <div class="stc-dev-zone__content" id="dev-zone-content" style="display: none;">
+          <h4>Entity Rendering Test</h4>
+          <p class="stc-dev-zone__label">Sample text with character names (auto-populated from your characters):</p>
+          <div class="stc-dev-zone__output" id="dev-entity-test">
+            <em>Add characters to see entity rendering in action.</em>
+          </div>
+
+          <h4 style="margin-top: var(--spacing-lg);">UI Component Tests</h4>
+          <p class="stc-dev-zone__label">Test overlay and toast notifications (auto-dismiss after 5 seconds):</p>
+          <div class="stc-dev-zone__buttons" style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap; margin-top: var(--spacing-sm);">
+            <button type="button" class="stc-button stc-button--secondary" id="dev-test-overlay">
+              Test AI Overlay
+            </button>
+            <button type="button" class="stc-button stc-button--secondary" id="dev-test-toast-info">
+              Toast: Info
+            </button>
+            <button type="button" class="stc-button stc-button--secondary" id="dev-test-toast-success">
+              Toast: Success
+            </button>
+            <button type="button" class="stc-button stc-button--secondary" id="dev-test-toast-checking">
+              Toast: Checking
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Character Edit Modal -->
       <div class="stc-modal" id="character-modal" style="display: none;">
         <div class="stc-modal__backdrop"></div>
@@ -602,6 +636,44 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         </div>
       </div>
 
+      <!-- Character Sheet Modal (read-only view) -->
+      <div class="stc-modal" id="character-sheet-modal" style="display: none;">
+        <div class="stc-modal__backdrop"></div>
+        <div class="stc-modal__content stc-character-sheet">
+          <div class="stc-modal__header">
+            <h3 class="stc-modal__title" id="character-sheet-title">Character</h3>
+            <button class="stc-modal__close" id="character-sheet-close">&times;</button>
+          </div>
+          <div class="stc-character-sheet__content">
+            <div class="stc-character-sheet__role" id="sheet-role"></div>
+
+            <div class="stc-character-sheet__section">
+              <h4 class="stc-character-sheet__label">Want</h4>
+              <p class="stc-character-sheet__value" id="sheet-want"></p>
+            </div>
+
+            <div class="stc-character-sheet__section">
+              <h4 class="stc-character-sheet__label">Need</h4>
+              <p class="stc-character-sheet__value" id="sheet-need"></p>
+            </div>
+
+            <div class="stc-character-sheet__section">
+              <h4 class="stc-character-sheet__label">Character Arc</h4>
+              <p class="stc-character-sheet__arc-type" id="sheet-arc-type"></p>
+              <p class="stc-character-sheet__value" id="sheet-arc-desc"></p>
+            </div>
+
+            <div class="stc-character-sheet__section">
+              <h4 class="stc-character-sheet__label">Connections</h4>
+              <p class="stc-character-sheet__value" id="sheet-connections"></p>
+            </div>
+          </div>
+          <div class="stc-character-sheet__actions">
+            <button type="button" class="button button--primary" id="sheet-edit-btn">Edit Character</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Cascade Confirmation Modal -->
       <div class="stc-modal stc-cascade-modal" id="cascade-modal" style="display: none;">
         <div class="stc-modal__backdrop"></div>
@@ -630,6 +702,22 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   <!-- Toast notifications container -->
   <div class="stc-toast-container" id="toast-container"></div>
+
+  <!-- AI Loading Overlay -->
+  <div class="stc-ai-overlay" id="ai-overlay" style="display: none;">
+    <div class="stc-ai-overlay__content">
+      <div class="stc-ai-overlay__icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2v4m0 12v4m-8-10H0m24 0h-4m-2.93-6.36l-2.83 2.83m-5.66 5.66l-2.83 2.83m0-11.32l2.83 2.83m5.66 5.66l2.83 2.83"/>
+        </svg>
+      </div>
+      <h3 class="stc-ai-overlay__title" id="ai-overlay-title">Claude is thinking...</h3>
+      <p class="stc-ai-overlay__message" id="ai-overlay-message">This may take a moment</p>
+      <div class="stc-ai-overlay__dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script type="module">
@@ -1727,6 +1815,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     errorEl.style.display = 'none';
     readyEl.style.display = 'none';
     noteEl.style.display = 'none';
+    showAIOverlay('Generating Story Concept', 'Claude is crafting your story foundation...');
 
     try {
       // Hydrate genome with full definitions
@@ -1769,6 +1858,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       showConceptError(e.message);
     } finally {
       loadingEl.style.display = 'none';
+      hideAIOverlay();
     }
   }
 
@@ -1804,9 +1894,36 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     return sections;
   }
 
+  // === Character Entity Rendering ===
+
+  function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function renderContentWithEntities(content, characters) {
+    if (!content || !characters || !characters.length) return content;
+
+    let rendered = content;
+
+    // Sort by name length (longest first) to avoid partial matches
+    // e.g., "Sam" shouldn't match inside "Samantha"
+    const sortedChars = [...characters].sort((a, b) => b.name.length - a.name.length);
+
+    for (const char of sortedChars) {
+      if (!char.name) continue;
+      // Case-insensitive match, word boundaries
+      const regex = new RegExp(`\\b(${escapeRegex(char.name)})\\b`, 'gi');
+      rendered = rendered.replace(regex,
+        `<span class="character-token" data-character-id="${char.id}" data-character-name="${char.name}">$1</span>`
+      );
+    }
+
+    return rendered;
+  }
+
   function formatSectionContent(content) {
     // Format a section's content (bold, italic, paragraphs)
-    return content
+    let formatted = content
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .split('\n\n')
@@ -1814,6 +1931,9 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       .filter(p => p)
       .map(p => `<p>${p}</p>`)
       .join('\n');
+
+    // Apply character entity rendering
+    return renderContentWithEntities(formatted, currentCharacters);
   }
 
   function renderSection(section, index) {
@@ -2083,6 +2203,21 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         keepSuggestion(sectionEl, index);
       });
     });
+
+    // Character token click handler (event delegation)
+    // Only add once - check for marker to prevent duplicates
+    if (!container.dataset.characterTokensEnabled) {
+      container.dataset.characterTokensEnabled = 'true';
+      container.addEventListener('click', (e) => {
+        if (e.target.classList.contains('character-token')) {
+          const charId = e.target.dataset.characterId;
+          const character = currentCharacters.find(c => c.id === charId);
+          if (character) {
+            openCharacterSheet(character);
+          }
+        }
+      });
+    }
   }
 
   function enterEditMode(sectionEl, index) {
@@ -2134,6 +2269,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     const originalText = sendBtn.textContent;
     sendBtn.textContent = 'Thinking...';
     sendBtn.disabled = true;
+    showAIOverlay('Refining Section', `Claude is reworking "${section.name}"...`);
 
     try {
       const hydratedGenome = hydrateGenome(currentProject.genome);
@@ -2222,6 +2358,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     } finally {
       sendBtn.textContent = originalText;
       sendBtn.disabled = false;
+      hideAIOverlay();
     }
   }
 
@@ -2613,6 +2750,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
     emptyEl.style.display = 'none';
     loadingEl.style.display = 'flex';
+    showAIOverlay('Extracting Brief...', 'Claude is analyzing your braindump');
 
     try {
       const response = await fetch('/.netlify/functions/extract-brief', {
@@ -2644,6 +2782,8 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       emptyEl.style.display = 'block';
       loadingEl.style.display = 'none';
       showBriefStatus('Extraction failed - try again', 'error');
+    } finally {
+      hideAIOverlay();
     }
   }
 
@@ -3066,6 +3206,21 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     }
   }
 
+  // AI Loading Overlay
+  function showAIOverlay(title = 'Claude is thinking...', message = 'This may take a moment') {
+    const overlay = document.getElementById('ai-overlay');
+    document.getElementById('ai-overlay-title').textContent = title;
+    document.getElementById('ai-overlay-message').textContent = message;
+    document.body.style.overflow = 'hidden';
+    overlay.style.display = 'flex';
+  }
+
+  function hideAIOverlay() {
+    const overlay = document.getElementById('ai-overlay');
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
   // Event listeners - Auth
   btnGoogleSignin.addEventListener('click', signInWithGoogle);
   btnSignout.addEventListener('click', signOut);
@@ -3214,13 +3369,42 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   // Update visibility of characters section based on whether story concept exists
   function updateCharactersVisibility() {
     const section = document.getElementById('characters-section');
+    const devZone = document.getElementById('dev-zone');
     const hasConcept = currentProject?.story_concept?.concept;
 
     if (hasConcept) {
       section.style.display = 'block';
+      devZone.style.display = 'block';
+      updateDevZone();
     } else {
       section.style.display = 'none';
+      devZone.style.display = 'none';
     }
+  }
+
+  // Dev Zone functionality
+  function updateDevZone() {
+    const output = document.getElementById('dev-entity-test');
+    if (!output) return;
+
+    if (currentCharacters.length === 0) {
+      output.innerHTML = '<em>Add characters to see entity rendering in action.</em>';
+      return;
+    }
+
+    // Generate sample text using character names
+    const names = currentCharacters.map(c => c.name).filter(Boolean);
+    if (names.length === 0) {
+      output.innerHTML = '<em>Your characters need names to test entity rendering.</em>';
+      return;
+    }
+
+    const sampleText = `This is a test paragraph mentioning ${names[0]}. ` +
+      (names[1] ? `When ${names[1]} arrives, things get complicated. ` : '') +
+      (names[2] ? `Meanwhile, ${names[2]} has their own agenda. ` : '') +
+      `The relationship between ${names[0]} and ${names[1] || 'the others'} drives the story forward.`;
+
+    output.innerHTML = renderContentWithEntities(sampleText, currentCharacters);
   }
 
   // Render all character slots based on currentCharacters
@@ -3261,6 +3445,9 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         extraList.appendChild(createCharacterCard(char));
       });
     }
+
+    // Update dev zone with latest character data
+    updateDevZone();
   }
 
   // Render a character in its designated slot
@@ -3286,19 +3473,32 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     const arcType = character.arc_type ? ARC_TYPES[character.arc_type] : null;
 
     card.innerHTML = `
-      <div class="stc-character-card__header">
-        <h4 class="stc-character-card__name">${escapeHtml(character.name || 'Unnamed')}</h4>
-        <button class="stc-character-card__edit" title="Edit character">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-          </svg>
-        </button>
-      </div>
+      <h4 class="stc-character-card__name">${escapeHtml(character.name || 'Unnamed')}</h4>
       ${character.want ? `<p class="stc-character-card__want"><strong>Want:</strong> ${escapeHtml(character.want)}</p>` : ''}
       ${character.need ? `<p class="stc-character-card__need"><strong>Need:</strong> ${escapeHtml(character.need)}</p>` : ''}
       ${arcType ? `<span class="stc-character-card__arc">${arcType.label}</span>` : ''}
+      <div class="stc-character-card__actions">
+        <button class="stc-character-card__view" title="View character sheet">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          View
+        </button>
+        <button class="stc-character-card__edit" title="Edit character">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Edit
+        </button>
+      </div>
     `;
+
+    // Attach view handler
+    card.querySelector('.stc-character-card__view').addEventListener('click', () => {
+      openCharacterSheet(character);
+    });
 
     // Attach edit handler
     card.querySelector('.stc-character-card__edit').addEventListener('click', () => {
@@ -3338,6 +3538,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       deleteSection.style.display = 'none';
     }
 
+    document.body.style.overflow = 'hidden';
     modal.style.display = 'flex';
     document.getElementById('character-name').focus();
   }
@@ -3346,6 +3547,36 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   function closeCharacterModal() {
     const modal = document.getElementById('character-modal');
     modal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // Character sheet (read-only view)
+  let currentSheetCharacter = null;
+
+  function openCharacterSheet(character) {
+    currentSheetCharacter = character;
+    const modal = document.getElementById('character-sheet-modal');
+    const arcType = character.arc_type ? ARC_TYPES[character.arc_type] : null;
+    const roleLabel = CHARACTER_ROLES[character.role]?.label || character.role || 'Character';
+
+    // Populate sheet
+    document.getElementById('character-sheet-title').textContent = character.name || 'Unnamed';
+    document.getElementById('sheet-role').textContent = roleLabel;
+    document.getElementById('sheet-want').textContent = character.want || '—';
+    document.getElementById('sheet-need').textContent = character.need || '—';
+    document.getElementById('sheet-arc-type').textContent = arcType ? arcType.label : '—';
+    document.getElementById('sheet-arc-desc').textContent = character.arc_description || '—';
+    document.getElementById('sheet-connections').textContent = character.connections || '—';
+
+    document.body.style.overflow = 'hidden';
+    modal.style.display = 'flex';
+  }
+
+  function closeCharacterSheet() {
+    const modal = document.getElementById('character-sheet-modal');
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    currentSheetCharacter = null;
   }
 
   // Save character (create or update)
@@ -3469,10 +3700,59 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   // Event listeners - Character modal
   document.getElementById('character-modal-close').addEventListener('click', closeCharacterModal);
-  document.querySelector('.stc-modal__backdrop').addEventListener('click', closeCharacterModal);
+  document.querySelector('#character-modal .stc-modal__backdrop').addEventListener('click', closeCharacterModal);
   document.getElementById('btn-character-cancel').addEventListener('click', closeCharacterModal);
   document.getElementById('btn-character-save').addEventListener('click', saveCharacter);
   document.getElementById('btn-character-delete').addEventListener('click', deleteCharacter);
+
+  // Character sheet event listeners
+  document.getElementById('character-sheet-close').addEventListener('click', closeCharacterSheet);
+  document.querySelector('#character-sheet-modal .stc-modal__backdrop').addEventListener('click', closeCharacterSheet);
+  document.getElementById('sheet-edit-btn').addEventListener('click', () => {
+    if (currentSheetCharacter) {
+      const charToEdit = currentSheetCharacter;
+      closeCharacterSheet();
+      openCharacterModal(charToEdit);
+    }
+  });
+
+  // Dev Zone toggle
+  document.getElementById('dev-zone-toggle').addEventListener('click', () => {
+    const content = document.getElementById('dev-zone-content');
+    const arrow = document.querySelector('.stc-dev-zone__arrow');
+    const isOpen = content.style.display !== 'none';
+    content.style.display = isOpen ? 'none' : 'block';
+    arrow.textContent = isOpen ? '▼' : '▲';
+  });
+
+  // Dev zone character token click handler
+  document.getElementById('dev-entity-test').addEventListener('click', (e) => {
+    if (e.target.classList.contains('character-token')) {
+      const charId = e.target.dataset.characterId;
+      const character = currentCharacters.find(c => c.id === charId);
+      if (character) {
+        openCharacterSheet(character);
+      }
+    }
+  });
+
+  // Dev zone test buttons
+  document.getElementById('dev-test-overlay').addEventListener('click', () => {
+    showAIOverlay('Test AI Overlay', 'This will auto-dismiss in 5 seconds');
+    setTimeout(() => hideAIOverlay(), 5000);
+  });
+
+  document.getElementById('dev-test-toast-info').addEventListener('click', () => {
+    showToast('This is an info toast message', 'info', 5000);
+  });
+
+  document.getElementById('dev-test-toast-success').addEventListener('click', () => {
+    showToast('This is a success toast message', 'success', 5000);
+  });
+
+  document.getElementById('dev-test-toast-checking').addEventListener('click', () => {
+    showToast('Checking something...', 'checking', 5000);
+  });
 
   // Event listener - Form submit (prevent default, use button click)
   document.getElementById('character-form').addEventListener('submit', (e) => {
@@ -3526,7 +3806,23 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       return;
     }
 
+    // Check if editing an existing character with data
+    const existingId = document.getElementById('character-id').value;
+    const existingName = document.getElementById('character-name').value.trim();
+    const existingWant = document.getElementById('character-want').value.trim();
+    const existingNeed = document.getElementById('character-need').value.trim();
+
+    if (existingId || existingName || existingWant || existingNeed) {
+      const confirmed = confirm(
+        '⚠️ This will replace ALL fields for this character.\n\n' +
+        'If you only want to regenerate specific fields, use the 🎲 buttons next to each field instead.\n\n' +
+        'Continue with full character regeneration?'
+      );
+      if (!confirmed) return;
+    }
+
     setCharacterFormLoading(true);
+    showAIOverlay('Generating Character', 'Claude is bringing your character to life...');
 
     try {
       const role = document.getElementById('character-role').value || null;
@@ -3563,6 +3859,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       alert('Failed to generate character: ' + e.message);
     } finally {
       setCharacterFormLoading(false);
+      hideAIOverlay();
     }
   }
 
@@ -3828,12 +4125,14 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       });
     });
 
+    document.body.style.overflow = 'hidden';
     modal.style.display = 'flex';
   }
 
   // Close cascade modal
   function closeCascadeModal() {
     document.getElementById('cascade-modal').style.display = 'none';
+    document.body.style.overflow = '';
     pendingCascadeItems = [];
   }
 
@@ -5828,6 +6127,22 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     margin-bottom: 0;
   }
 
+  /* Character entity tokens */
+  .character-token {
+    background: rgba(184, 92, 56, 0.15);
+    color: #8B4513;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .character-token:hover {
+    background: rgba(184, 92, 56, 0.3);
+    color: #6B3410;
+  }
+
   /* Edit mode */
   .stc-section__edit-mode,
   .stc-section__refine-mode {
@@ -6283,13 +6598,6 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     height: 100%;
   }
 
-  .stc-character-card__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--spacing-sm);
-  }
-
   .stc-character-card__name {
     font-family: 'Lora', Georgia, serif;
     font-size: 1.1rem;
@@ -6335,19 +6643,36 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     color: var(--color-text-muted, #8B7D6B);
   }
 
+  .stc-character-card__actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--color-border-light, #E8E0D5);
+  }
+
+  .stc-character-card__view,
   .stc-character-card__edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     background: none;
-    border: none;
-    padding: 4px;
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    padding: 4px 10px;
     cursor: pointer;
     color: var(--color-text-muted, #8B7D6B);
-    transition: color 0.2s ease;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    transition: all 0.2s ease;
     border-radius: 4px;
   }
 
+  .stc-character-card__view:hover,
   .stc-character-card__edit:hover {
     color: var(--color-accent-primary, #B85C38);
-    background: rgba(184, 92, 56, 0.1);
+    border-color: var(--color-accent-primary, #B85C38);
+    background: rgba(184, 92, 56, 0.05);
   }
 
   .stc-character-card__want,
@@ -6479,6 +6804,66 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
   .stc-modal__close:hover {
     color: var(--color-text-primary, #2C2416);
+  }
+
+  /* Character Sheet (read-only view) */
+  .stc-character-sheet {
+    max-width: 550px;
+  }
+
+  .stc-character-sheet__content {
+    margin-top: var(--spacing-md);
+  }
+
+  .stc-character-sheet__role {
+    display: inline-block;
+    background: rgba(184, 92, 56, 0.15);
+    color: var(--color-accent-primary, #B85C38);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-character-sheet__section {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .stc-character-sheet__label {
+    font-family: 'Lora', Georgia, serif;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-text-muted, #8B7D6B);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .stc-character-sheet__value {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary, #2C2416);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .stc-character-sheet__arc-type {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-accent-primary, #B85C38);
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .stc-character-sheet__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
   }
 
   /* Character Form */
@@ -6781,14 +7166,85 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     }
   }
 
+  /* Dev Zone */
+  .stc-dev-zone {
+    margin-top: var(--spacing-xl);
+    border: 2px dashed var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    background: rgba(139, 125, 107, 0.05);
+  }
+
+  .stc-dev-zone__header {
+    padding: 0;
+  }
+
+  .stc-dev-zone__toggle {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: none;
+    border: none;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-muted, #8B7D6B);
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .stc-dev-zone__toggle:hover {
+    color: var(--color-text-secondary, #5C4D3C);
+  }
+
+  .stc-dev-zone__arrow {
+    font-size: 10px;
+  }
+
+  .stc-dev-zone__content {
+    padding: var(--spacing-md);
+    border-top: 1px dashed var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-dev-zone__content h4 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary, #5C4D3C);
+    margin: 0 0 var(--spacing-sm) 0;
+  }
+
+  .stc-dev-zone__label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted, #8B7D6B);
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .stc-dev-zone__output {
+    background: white;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--color-text-primary, #2C2416);
+  }
+
+  .stc-dev-zone__output em {
+    color: var(--color-text-muted, #8B7D6B);
+  }
+
   /* Toast notifications */
   .stc-toast-container {
     position: fixed;
-    bottom: var(--spacing-lg);
-    right: var(--spacing-lg);
+    top: var(--spacing-lg);
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 10000;
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: var(--spacing-sm);
     pointer-events: none;
   }
@@ -6796,17 +7252,17 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   .stc-toast {
     background: var(--color-text-primary, #2C2416);
     color: white;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
     border-radius: var(--radius-md);
     font-family: 'Source Sans 3', sans-serif;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    animation: toastSlideIn 0.3s ease-out;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    animation: toastSlideDown 0.3s ease-out;
     pointer-events: auto;
-    max-width: 320px;
+    max-width: 400px;
   }
 
   .stc-toast--checking {
@@ -6835,29 +7291,110 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     flex-shrink: 0;
   }
 
-  @keyframes toastSlideIn {
+  @keyframes toastSlideDown {
     from {
       opacity: 0;
-      transform: translateX(100%);
+      transform: translateY(-100%);
     }
     to {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateY(0);
     }
   }
 
   @keyframes toastSlideOut {
     from {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateY(0);
     }
     to {
       opacity: 0;
-      transform: translateX(100%);
+      transform: translateY(-100%);
     }
   }
 
   .stc-toast--exiting {
     animation: toastSlideOut 0.3s ease-in forwards;
+  }
+
+  /* AI Loading Overlay */
+  .stc-ai-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20000;
+    background: rgba(44, 36, 22, 0.85);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: overlayFadeIn 0.3s ease-out;
+  }
+
+  @keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .stc-ai-overlay__content {
+    text-align: center;
+    color: #FAF6F1;
+    max-width: 320px;
+    padding: var(--spacing-xl);
+  }
+
+  .stc-ai-overlay__icon {
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-accent-primary, #B85C38);
+    animation: iconSpin 2s linear infinite;
+  }
+
+  @keyframes iconSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .stc-ai-overlay__title {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 var(--spacing-sm) 0;
+    color: #FAF6F1;
+  }
+
+  .stc-ai-overlay__message {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    color: rgba(250, 246, 241, 0.7);
+    margin: 0 0 var(--spacing-lg) 0;
+  }
+
+  .stc-ai-overlay__dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .stc-ai-overlay__dots span {
+    width: 10px;
+    height: 10px;
+    background: var(--color-accent-primary, #B85C38);
+    border-radius: 50%;
+    animation: dotBounce 1.4s ease-in-out infinite;
+  }
+
+  .stc-ai-overlay__dots span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .stc-ai-overlay__dots span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes dotBounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
   }
 </style>
