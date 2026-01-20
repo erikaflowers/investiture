@@ -45,7 +45,7 @@ A running log of changes to the scaffold.
 - Local .env setup for multi-machine development
 
 ### Commits
-- `d6ac3e3` Add character cards with entity system, sheet view, and AI overlay
+- `b997596` Add character cards with entity system, sheet view, and AI overlay
 
 ---
 
