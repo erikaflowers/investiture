@@ -80,53 +80,144 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         ← Back to all ideas
       </button>
 
-      <div class="stc-dive__header">
-        <h2 class="stc-dive__title">Your Braindump</h2>
-        <span class="stc-dive__timestamp" id="dive-timestamp"></span>
-      </div>
-
-      <!-- Display mode -->
-      <div id="dive-display" class="stc-dive__content">
-        <div id="dive-content" class="stc-dive__text"></div>
-        <button id="btn-edit" class="button button--secondary stc-dive__edit">
-          Edit Braindump
+      <!-- Braindump Accordion -->
+      <div class="stc-braindump-accordion" id="braindump-accordion">
+        <button class="stc-braindump-accordion__toggle" id="braindump-toggle">
+          <div class="stc-braindump-accordion__header">
+            <h2 class="stc-dive__title">Your Braindump</h2>
+            <span class="stc-dive__timestamp" id="dive-timestamp"></span>
+          </div>
+          <span class="stc-braindump-accordion__preview" id="braindump-preview"></span>
+          <svg class="stc-braindump-accordion__chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
         </button>
-      </div>
 
-      <!-- Edit mode -->
-      <div id="dive-edit" class="stc-dive__content" style="display: none;">
-        <textarea id="dive-textarea" class="stc-dive__textarea"></textarea>
-        <div class="stc-dive__actions">
-          <button id="btn-cancel-edit" class="button button--secondary">Cancel</button>
-          <button id="btn-save-edit" class="button button--primary">Save Changes</button>
+        <div class="stc-braindump-accordion__body" id="braindump-body">
+          <!-- Display mode -->
+          <div id="dive-display" class="stc-dive__content">
+            <div id="dive-content" class="stc-dive__text"></div>
+            <button id="btn-edit" class="button button--secondary stc-dive__edit">
+              Edit Braindump
+            </button>
+          </div>
+
+          <!-- Edit mode -->
+          <div id="dive-edit" class="stc-dive__content" style="display: none;">
+            <textarea id="dive-textarea" class="stc-dive__textarea"></textarea>
+            <div class="stc-dive__actions">
+              <button id="btn-cancel-edit" class="button button--secondary">Cancel</button>
+              <button id="btn-save-edit" class="button button--primary">Save Changes</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Brief: AI-extracted summary (stubbed for now) -->
-      <div class="stc-brief">
-        <h3 class="stc-brief__heading">The Brief</h3>
-        <p class="stc-brief__note">Based on your braindump, here's what we're working with:</p>
+      <!-- Brief: AI-extracted summary -->
+      <div class="stc-brief" id="brief-section">
+        <!-- Project Title -->
+        <div class="stc-brief__title-row">
+          <h2 class="stc-brief__title"
+              id="brief-title"
+              contenteditable="true"
+              spellcheck="false"
+              data-placeholder="Untitled Story">Untitled Story</h2>
+          <button id="btn-regenerate-title" class="stc-brief__title-regen" title="Regenerate title with AI">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6M1 20v-6h6"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+          </button>
+        </div>
 
-        <div class="stc-brief__grid">
-          <div class="stc-brief__item">
-            <h4 class="stc-brief__label">Core Concept</h4>
-            <p class="stc-brief__content" id="brief-concept">
-              <span class="stc-brief__placeholder">AI will extract the central idea...</span>
-            </p>
+        <div class="stc-brief__header">
+          <h3 class="stc-brief__heading">The Brief</h3>
+          <span class="stc-brief__status" id="brief-status"></span>
+        </div>
+
+        <!-- Initial state: no brief yet -->
+        <div class="stc-brief__empty" id="brief-empty">
+          <p class="stc-brief__note">Let Claude extract the key elements from your braindump.</p>
+          <button id="btn-extract-brief" class="button button--primary">Extract Brief</button>
+        </div>
+
+        <!-- Loading state -->
+        <div class="stc-brief__loading-state" id="brief-loading" style="display: none;">
+          <div class="loading-spinner"></div>
+          <span>Claude is reading your braindump...</span>
+        </div>
+
+        <!-- Display state: brief extracted, pending acceptance or locked -->
+        <div class="stc-brief__display" id="brief-display" style="display: none;">
+          <p class="stc-brief__note" id="brief-note">Based on your braindump, here's what we're working with:</p>
+
+          <div class="stc-brief__grid">
+            <div class="stc-brief__item" data-field="coreConcept">
+              <div class="stc-brief__item-header">
+                <h4 class="stc-brief__label">Core Concept</h4>
+                <button class="stc-brief__item-edit" title="Edit">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+              </div>
+              <p class="stc-brief__content" id="brief-concept"></p>
+              <textarea class="stc-brief__textarea" id="brief-concept-edit" style="display: none;"></textarea>
+              <div class="stc-brief__item-actions" style="display: none;">
+                <button class="button button--secondary stc-brief__item-cancel">Cancel</button>
+                <button class="button button--primary stc-brief__item-save">Save</button>
+              </div>
+            </div>
+
+            <div class="stc-brief__item" data-field="premise">
+              <div class="stc-brief__item-header">
+                <h4 class="stc-brief__label">Premise</h4>
+                <button class="stc-brief__item-edit" title="Edit">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+              </div>
+              <p class="stc-brief__content" id="brief-premise"></p>
+              <textarea class="stc-brief__textarea" id="brief-premise-edit" style="display: none;"></textarea>
+              <div class="stc-brief__item-actions" style="display: none;">
+                <button class="button button--secondary stc-brief__item-cancel">Cancel</button>
+                <button class="button button--primary stc-brief__item-save">Save</button>
+              </div>
+            </div>
+
+            <div class="stc-brief__item" data-field="worldAndTone">
+              <div class="stc-brief__item-header">
+                <h4 class="stc-brief__label">World & Tone</h4>
+                <button class="stc-brief__item-edit" title="Edit">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+              </div>
+              <p class="stc-brief__content" id="brief-world"></p>
+              <textarea class="stc-brief__textarea" id="brief-worldAndTone-edit" style="display: none;"></textarea>
+              <div class="stc-brief__item-actions" style="display: none;">
+                <button class="button button--secondary stc-brief__item-cancel">Cancel</button>
+                <button class="button button--primary stc-brief__item-save">Save</button>
+              </div>
+            </div>
           </div>
 
-          <div class="stc-brief__item">
-            <h4 class="stc-brief__label">Premise</h4>
-            <p class="stc-brief__content" id="brief-premise">
-              <span class="stc-brief__placeholder">The "what if" driving the story...</span>
-            </p>
+          <!-- Actions for pending state -->
+          <div class="stc-brief__actions" id="brief-pending-actions">
+            <button id="btn-reextract-brief" class="button button--secondary">Re-extract</button>
+            <button id="btn-accept-brief" class="button button--primary">Accept Brief</button>
           </div>
 
-          <div class="stc-brief__item">
-            <h4 class="stc-brief__label">World & Tone</h4>
-            <p class="stc-brief__content" id="brief-world">
-              <span class="stc-brief__placeholder">The feel, setting, atmosphere...</span>
-            </p>
+          <!-- Locked indicator -->
+          <div class="stc-brief__locked" id="brief-locked-indicator" style="display: none;">
+            <span class="stc-brief__locked-icon">✓</span>
+            <span>Brief saved</span>
+            <button id="btn-unlock-brief" class="button button--small button--secondary">Unlock to edit</button>
           </div>
         </div>
       </div>
@@ -142,7 +233,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
         <div class="stc-spine__actions">
           <button id="btn-save-genome" class="button button--primary">
-            Apply Genome Changes
+            Apply Genome
           </button>
           <span id="genome-status" class="stc-spine__status"></span>
         </div>
@@ -157,6 +248,15 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
           </button>
         </div>
         <p class="stc-concept__note" id="concept-note">Apply your genome to unlock AI-powered story concept generation.</p>
+
+        <!-- Ready state: genome applied, ready to generate -->
+        <div id="concept-ready" class="stc-concept__ready" style="display: none;">
+          <p class="stc-concept__ready-label">Your Story DNA</p>
+          <div id="concept-ready-genome" class="stc-concept__ready-genome"></div>
+          <button id="btn-generate-concept-cta" class="button button--primary button--large stc-concept__cta">
+            Generate Story Concept
+          </button>
+        </div>
 
         <div id="concept-loading" class="stc-concept__loading" style="display: none;">
           <span class="stc-concept__spinner"></span>
@@ -1028,7 +1128,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       showGenomeStatus('Failed to apply: ' + e.message, 'error');
     } finally {
       btnSave.disabled = false;
-      btnSave.textContent = 'Apply Genome Changes';
+      btnSave.textContent = 'Apply Genome Changes'; // After first save, always show "Changes"
     }
   }
 
@@ -1291,6 +1391,8 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     const loadingEl = document.getElementById('concept-loading');
     const resultEl = document.getElementById('concept-result');
     const errorEl = document.getElementById('concept-error');
+    const readyEl = document.getElementById('concept-ready');
+    const noteEl = document.getElementById('concept-note');
 
     // Show loading state
     btnGenerate.style.display = 'none';
@@ -1298,6 +1400,8 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     loadingEl.style.display = 'flex';
     resultEl.style.display = 'none';
     errorEl.style.display = 'none';
+    readyEl.style.display = 'none';
+    noteEl.style.display = 'none';
 
     try {
       // Hydrate genome with full definitions
@@ -1894,7 +1998,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         .from('projects')
         .update({
           story_concept: {
-            text: conceptText,
+            concept: conceptText,
             generated_at: new Date().toISOString()
           }
         })
@@ -1904,7 +2008,7 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
 
       // Update local state
       currentProject.story_concept = {
-        text: conceptText,
+        concept: conceptText,
         generated_at: new Date().toISOString()
       };
 
@@ -1939,6 +2043,8 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   function updateConceptUI() {
     const btnGenerate = document.getElementById('btn-generate-concept');
     const noteEl = document.getElementById('concept-note');
+    const readyEl = document.getElementById('concept-ready');
+    const readyGenomeEl = document.getElementById('concept-ready-genome');
     const resultEl = document.getElementById('concept-result');
     const contentEl = document.getElementById('concept-content');
     const btnRegenerate = document.getElementById('btn-regenerate-concept');
@@ -1949,21 +2055,81 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         Array.isArray(v) ? v.length > 0 : (v && v !== 'none')
       );
 
-    if (hasGenome) {
-      btnGenerate.style.display = 'inline-block';
-      noteEl.textContent = 'Generate a story concept based on your braindump and genome.';
-    } else {
-      btnGenerate.style.display = 'none';
-      noteEl.textContent = 'Apply your genome to unlock AI-powered story concept generation.';
-    }
-
     // Check if we have an existing concept
-    if (currentProject?.story_concept?.concept) {
+    const hasConcept = currentProject?.story_concept?.concept;
+
+    if (hasConcept) {
+      // Has concept - show result, hide ready state
+      btnGenerate.style.display = 'inline-block';
+      noteEl.style.display = 'none';
+      readyEl.style.display = 'none';
       displayConcept(currentProject.story_concept.concept);
+    } else if (hasGenome) {
+      // Has genome but no concept - show ready state with genome pills
+      btnGenerate.style.display = 'none'; // Hide header button
+      noteEl.style.display = 'none';
+      readyEl.style.display = 'block';
+      resultEl.style.display = 'none';
+      btnRegenerate.style.display = 'none';
+
+      // Populate genome pills
+      populateGenomePills(readyGenomeEl, currentProject.genome);
     } else {
+      // No genome yet - show prompt
+      btnGenerate.style.display = 'none';
+      noteEl.style.display = 'block';
+      noteEl.textContent = 'Apply your genome to unlock AI-powered story concept generation.';
+      readyEl.style.display = 'none';
       resultEl.style.display = 'none';
       btnRegenerate.style.display = 'none';
     }
+  }
+
+  function populateGenomePills(container, genome) {
+    container.innerHTML = '';
+    const hydrated = hydrateGenome(genome);
+
+    // Helper to get display label from value (could be object or string)
+    const getLabel = (v) => {
+      if (typeof v === 'object' && v !== null) {
+        return v.label || v.name || String(v);
+      }
+      return String(v);
+    };
+
+    // Add pills for each genome category
+    const categories = [
+      { key: 'genres', label: 'Genre' },
+      { key: 'subgenres', label: 'Subgenre' },
+      { key: 'tones', label: 'Tone' },
+      { key: 'themes', label: 'Theme' },
+      { key: 'stakes', label: 'Stakes' },
+      { key: 'humorRole', label: 'Humor Role', isSingle: true },
+      { key: 'humorStyle', label: 'Humor Style' }
+    ];
+
+    categories.forEach(cat => {
+      const value = hydrated[cat.key];
+      if (cat.isSingle) {
+        if (value && value !== 'none' && value !== 'None') {
+          const displayVal = getLabel(value);
+          if (displayVal && displayVal !== 'none' && displayVal !== 'None') {
+            const pill = document.createElement('span');
+            pill.className = 'stc-concept__pill';
+            pill.innerHTML = `<span class="stc-concept__pill-label">${cat.label}:</span> ${displayVal}`;
+            container.appendChild(pill);
+          }
+        }
+      } else if (Array.isArray(value) && value.length > 0) {
+        value.forEach(v => {
+          const displayVal = getLabel(v);
+          const pill = document.createElement('span');
+          pill.className = 'stc-concept__pill';
+          pill.innerHTML = `<span class="stc-concept__pill-label">${cat.label}:</span> ${displayVal}`;
+          container.appendChild(pill);
+        });
+      }
+    });
   }
 
   // View switching
@@ -1996,6 +2162,22 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     diveContent.textContent = braindump.raw_input;
     diveTextarea.value = braindump.raw_input;
 
+    // Set accordion preview text (first ~80 chars)
+    const previewText = braindump.raw_input.substring(0, 80).replace(/\n/g, ' ');
+    document.getElementById('braindump-preview').textContent =
+      previewText + (braindump.raw_input.length > 80 ? '...' : '');
+
+    // Set project title
+    const briefTitleEl = document.getElementById('brief-title');
+    const projectTitle = project?.title || 'Untitled Story';
+    const isGenerating = projectTitle === 'Braindump Session';
+    briefTitleEl.textContent = isGenerating ? 'Generating title...' : projectTitle;
+    briefTitleEl.classList.toggle('stc-brief__title--generating', isGenerating);
+
+    // Start accordion collapsed
+    const accordion = document.getElementById('braindump-accordion');
+    accordion.classList.remove('stc-braindump-accordion--expanded');
+
     // Reset to display mode
     diveDisplay.style.display = 'block';
     diveEdit.style.display = 'none';
@@ -2006,15 +2188,290 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     // Load existing genome or reset to defaults
     if (project && project.genome) {
       loadGenomeIntoUI(project.genome);
+      // Update button text since genome has been saved before
+      document.getElementById('btn-save-genome').textContent = 'Apply Genome Changes';
     } else {
       resetSpineSelections();
     }
 
     // Update concept section UI
     updateConceptUI();
+
+    // Initialize brief section
+    initializeBriefSection(project);
+  }
+
+  // Brief state
+  let pendingBrief = null; // Holds extracted but not-yet-accepted brief
+
+  function initializeBriefSection(project) {
+    const emptyEl = document.getElementById('brief-empty');
+    const loadingEl = document.getElementById('brief-loading');
+    const displayEl = document.getElementById('brief-display');
+    const pendingActionsEl = document.getElementById('brief-pending-actions');
+    const lockedIndicatorEl = document.getElementById('brief-locked-indicator');
+
+    // Check if we have a locked brief
+    if (project?.brief?.locked) {
+      // Show locked state
+      showBriefLocked(project.brief);
+    } else if (project?.brief?.coreConcept) {
+      // Has brief but not locked - show pending state
+      pendingBrief = project.brief;
+      showBriefPending(project.brief);
+    } else {
+      // No brief yet - show extract button
+      emptyEl.style.display = 'block';
+      loadingEl.style.display = 'none';
+      displayEl.style.display = 'none';
+    }
+  }
+
+  function showBriefPending(brief) {
+    const emptyEl = document.getElementById('brief-empty');
+    const loadingEl = document.getElementById('brief-loading');
+    const displayEl = document.getElementById('brief-display');
+    const pendingActionsEl = document.getElementById('brief-pending-actions');
+    const lockedIndicatorEl = document.getElementById('brief-locked-indicator');
+
+    document.getElementById('brief-concept').textContent = brief.coreConcept || '';
+    document.getElementById('brief-premise').textContent = brief.premise || '';
+    document.getElementById('brief-world').textContent = brief.worldAndTone || '';
+
+    emptyEl.style.display = 'none';
+    loadingEl.style.display = 'none';
+    displayEl.style.display = 'block';
+    pendingActionsEl.style.display = 'flex';
+    lockedIndicatorEl.style.display = 'none';
+
+    // Enable edit buttons
+    displayEl.querySelectorAll('.stc-brief__item-edit').forEach(btn => {
+      btn.style.display = 'inline-flex';
+    });
+  }
+
+  function showBriefLocked(brief) {
+    const emptyEl = document.getElementById('brief-empty');
+    const loadingEl = document.getElementById('brief-loading');
+    const displayEl = document.getElementById('brief-display');
+    const pendingActionsEl = document.getElementById('brief-pending-actions');
+    const lockedIndicatorEl = document.getElementById('brief-locked-indicator');
+
+    document.getElementById('brief-concept').textContent = brief.coreConcept || '';
+    document.getElementById('brief-premise').textContent = brief.premise || '';
+    document.getElementById('brief-world').textContent = brief.worldAndTone || '';
+
+    emptyEl.style.display = 'none';
+    loadingEl.style.display = 'none';
+    displayEl.style.display = 'block';
+    pendingActionsEl.style.display = 'none';
+    lockedIndicatorEl.style.display = 'flex';
+
+    // Hide edit buttons when locked
+    displayEl.querySelectorAll('.stc-brief__item-edit').forEach(btn => {
+      btn.style.display = 'none';
+    });
+  }
+
+  async function extractBrief() {
+    const emptyEl = document.getElementById('brief-empty');
+    const loadingEl = document.getElementById('brief-loading');
+
+    emptyEl.style.display = 'none';
+    loadingEl.style.display = 'flex';
+
+    try {
+      const response = await fetch('/.netlify/functions/extract-brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ braindump: currentBraindump.raw_input })
+      });
+
+      if (!response.ok) {
+        throw new Error('Brief extraction failed');
+      }
+
+      const data = await response.json();
+
+      pendingBrief = {
+        coreConcept: data.coreConcept,
+        premise: data.premise,
+        worldAndTone: data.worldAndTone,
+        locked: false
+      };
+
+      showBriefPending(pendingBrief);
+
+      // Save pending brief to database (not locked yet)
+      await saveBriefToDatabase(pendingBrief);
+
+    } catch (err) {
+      console.error('Brief extraction error:', err);
+      emptyEl.style.display = 'block';
+      loadingEl.style.display = 'none';
+      showBriefStatus('Extraction failed - try again', 'error');
+    }
+  }
+
+  async function acceptBrief() {
+    if (!pendingBrief) return;
+
+    pendingBrief.locked = true;
+    await saveBriefToDatabase(pendingBrief);
+    currentProject.brief = pendingBrief;
+
+    showBriefLocked(pendingBrief);
+    showBriefStatus('Brief locked!', 'success');
+  }
+
+  async function unlockBrief() {
+    if (!currentProject?.brief) return;
+
+    currentProject.brief.locked = false;
+    pendingBrief = currentProject.brief;
+    await saveBriefToDatabase(pendingBrief);
+
+    showBriefPending(pendingBrief);
+  }
+
+  async function saveBriefToDatabase(brief) {
+    if (!currentProject) return;
+
+    const { error } = await supabase
+      .from('projects')
+      .update({ brief: brief })
+      .eq('id', currentProject.id);
+
+    if (error) {
+      console.error('Failed to save brief:', error);
+    } else {
+      currentProject.brief = brief;
+    }
+  }
+
+  function showBriefStatus(message, type) {
+    const statusEl = document.getElementById('brief-status');
+    statusEl.textContent = message;
+    statusEl.className = `stc-brief__status stc-brief__status--${type}`;
+
+    setTimeout(() => {
+      statusEl.textContent = '';
+      statusEl.className = 'stc-brief__status';
+    }, 3000);
+  }
+
+  function setupBriefItemEditing() {
+    document.querySelectorAll('.stc-brief__item').forEach(item => {
+      const field = item.dataset.field;
+      const contentEl = item.querySelector('.stc-brief__content');
+      const textareaEl = item.querySelector('.stc-brief__textarea');
+      const actionsEl = item.querySelector('.stc-brief__item-actions');
+      const editBtn = item.querySelector('.stc-brief__item-edit');
+      const cancelBtn = item.querySelector('.stc-brief__item-cancel');
+      const saveBtn = item.querySelector('.stc-brief__item-save');
+
+      editBtn?.addEventListener('click', () => {
+        textareaEl.value = contentEl.textContent;
+        contentEl.style.display = 'none';
+        textareaEl.style.display = 'block';
+        actionsEl.style.display = 'flex';
+        editBtn.style.display = 'none';
+        textareaEl.focus();
+      });
+
+      cancelBtn?.addEventListener('click', () => {
+        contentEl.style.display = 'block';
+        textareaEl.style.display = 'none';
+        actionsEl.style.display = 'none';
+        editBtn.style.display = 'inline-flex';
+      });
+
+      saveBtn?.addEventListener('click', async () => {
+        const newValue = textareaEl.value.trim();
+        contentEl.textContent = newValue;
+
+        // Update pending brief
+        if (pendingBrief) {
+          pendingBrief[field] = newValue;
+          await saveBriefToDatabase(pendingBrief);
+        }
+
+        contentEl.style.display = 'block';
+        textareaEl.style.display = 'none';
+        actionsEl.style.display = 'none';
+        editBtn.style.display = 'inline-flex';
+      });
+    });
   }
 
   // Save new braindump
+  // Generate AI title for a project (runs in background)
+  async function generateProjectTitle(projectId, braindumpContent) {
+    try {
+      const response = await fetch('/.netlify/functions/generate-title', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ braindump: braindumpContent })
+      });
+
+      if (!response.ok) {
+        console.error('Title generation failed');
+        return;
+      }
+
+      const data = await response.json();
+      const title = data.title || 'Untitled Story';
+
+      // Save to database
+      const { error } = await supabase
+        .from('projects')
+        .update({ title: title })
+        .eq('id', projectId);
+
+      if (error) {
+        console.error('Failed to save title:', error);
+        return;
+      }
+
+      // Update current project if it's the same one
+      if (currentProject && currentProject.id === projectId) {
+        currentProject.title = title;
+      }
+
+      // Refresh the list to show new title
+      await loadBraindumps();
+
+    } catch (err) {
+      console.error('Title generation error:', err);
+    }
+  }
+
+  // Save project title to database
+  async function saveProjectTitle(projectId, title) {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ title: title })
+        .eq('id', projectId);
+
+      if (error) {
+        console.error('Failed to save title:', error);
+      }
+
+      // Update current project if it matches
+      if (currentProject && currentProject.id === projectId) {
+        currentProject.title = title;
+        // Update title display in brief section if visible
+        const briefTitleEl = document.getElementById('brief-title');
+        if (briefTitleEl) {
+          briefTitleEl.textContent = title;
+        }
+      }
+    } catch (err) {
+      console.error('Save title error:', err);
+    }
+  }
+
   async function saveBraindump() {
     const content = textarea.value.trim();
 
@@ -2061,6 +2518,9 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
       resultPanel.style.display = 'block';
       textarea.value = '';
 
+      // Generate title in background (don't block)
+      generateProjectTitle(project.id, content);
+
       // Refresh table
       await loadBraindumps();
 
@@ -2088,10 +2548,10 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     }
 
     try {
-      // Join with projects to filter by user_id
+      // Join with projects to filter by user_id and get title
       const { data, error } = await supabase
         .from('braindumps')
-        .select('id, raw_input, created_at, project_id, projects!inner(user_id)')
+        .select('id, raw_input, created_at, project_id, projects!inner(user_id, title)')
         .eq('projects.user_id', currentUser.id)
         .order('created_at', { ascending: false })
         .limit(10);
@@ -2106,21 +2566,44 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
         return;
       }
 
-      tbody.innerHTML = data.map(row => `
+      tbody.innerHTML = data.map(row => {
+        const title = row.projects?.title || 'Untitled';
+        const isGenerating = title === 'Braindump Session';
+        return `
         <tr>
-          <td class="timestamp">${new Date(row.created_at).toLocaleString()}</td>
-          <td class="content">${escapeHtml(truncate(row.raw_input, 80))}</td>
+          <td class="title-cell">
+            <span class="project-title ${isGenerating ? 'project-title--generating' : ''}"
+                  data-project-id="${row.project_id}"
+                  contenteditable="true"
+                  spellcheck="false">${escapeHtml(isGenerating ? 'Generating title...' : title)}</span>
+          </td>
+          <td class="content">${escapeHtml(truncate(row.raw_input, 60))}</td>
           <td class="action">
-            <button class="button button--small button--primary dive-btn" data-id="${row.id}" data-project="${row.project_id}">
-              Dive in →
-            </button>
+            <button class="button button--small button--primary dive-btn" data-id="${row.id}" data-project="${row.project_id}">Dive in</button>
           </td>
         </tr>
-      `).join('');
+      `}).join('');
 
-      // Attach click handlers
+      // Attach click handlers for dive buttons
       tbody.querySelectorAll('.dive-btn').forEach(btn => {
         btn.addEventListener('click', () => diveIntoBraindump(btn.dataset.id));
+      });
+
+      // Attach blur handlers for title editing
+      tbody.querySelectorAll('.project-title').forEach(titleEl => {
+        titleEl.addEventListener('blur', async () => {
+          const projectId = titleEl.dataset.projectId;
+          const newTitle = titleEl.textContent.trim();
+          if (newTitle && newTitle !== 'Generating title...') {
+            await saveProjectTitle(projectId, newTitle);
+          }
+        });
+        titleEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            titleEl.blur();
+          }
+        });
       });
 
     } catch (e) {
@@ -2211,12 +2694,65 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   btnCancelEdit.addEventListener('click', exitBraindumpEditMode);
   btnSaveEdit.addEventListener('click', saveBraindumpEdit);
 
+  // Event listener - Braindump accordion toggle
+  document.getElementById('braindump-toggle').addEventListener('click', () => {
+    const accordion = document.getElementById('braindump-accordion');
+    accordion.classList.toggle('stc-braindump-accordion--expanded');
+  });
+
   // Event listener - Genome
   document.getElementById('btn-save-genome').addEventListener('click', saveGenome);
 
   // Event listeners - Story Concept
   document.getElementById('btn-generate-concept').addEventListener('click', generateStoryConcept);
+  document.getElementById('btn-generate-concept-cta').addEventListener('click', generateStoryConcept);
   document.getElementById('btn-regenerate-concept').addEventListener('click', generateStoryConcept);
+
+  // Event listeners - Brief
+  document.getElementById('btn-extract-brief').addEventListener('click', extractBrief);
+  document.getElementById('btn-reextract-brief').addEventListener('click', extractBrief);
+  document.getElementById('btn-accept-brief').addEventListener('click', acceptBrief);
+  document.getElementById('btn-unlock-brief').addEventListener('click', unlockBrief);
+
+  // Event listener - Project title editing
+  const briefTitleEl = document.getElementById('brief-title');
+  briefTitleEl.addEventListener('blur', async () => {
+    if (!currentProject) return;
+    const newTitle = briefTitleEl.textContent.trim();
+    if (newTitle && newTitle !== 'Generating title...') {
+      await saveProjectTitle(currentProject.id, newTitle);
+    }
+  });
+  briefTitleEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      briefTitleEl.blur();
+    }
+  });
+
+  // Event listener - Regenerate title button
+  document.getElementById('btn-regenerate-title').addEventListener('click', async () => {
+    if (!currentProject || !currentBraindump) return;
+
+    const btn = document.getElementById('btn-regenerate-title');
+    const titleEl = document.getElementById('brief-title');
+
+    btn.disabled = true;
+    btn.classList.add('stc-brief__title-regen--loading');
+    titleEl.textContent = 'Generating...';
+    titleEl.classList.add('stc-brief__title--generating');
+
+    await generateProjectTitle(currentProject.id, currentBraindump.raw_input);
+
+    // Update the title display (generateProjectTitle updates currentProject.title)
+    titleEl.textContent = currentProject.title || 'Untitled Story';
+    titleEl.classList.remove('stc-brief__title--generating');
+    btn.disabled = false;
+    btn.classList.remove('stc-brief__title-regen--loading');
+  });
+
+  // Setup brief item editing (inline edit buttons)
+  setupBriefItemEditing();
 
   diveIntoNew.addEventListener('click', (e) => {
     e.preventDefault();
@@ -2527,6 +3063,87 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     color: var(--color-text-muted, #8B7D6B);
   }
 
+  /* ========== BRAINDUMP ACCORDION ========== */
+  .stc-braindump-accordion {
+    background: var(--color-background-card, #FFFCF8);
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-xl);
+    overflow: hidden;
+  }
+
+  .stc-braindump-accordion__toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-background-secondary, #F5EEE6);
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+  }
+
+  .stc-braindump-accordion__toggle:hover {
+    background: var(--color-background-tertiary, #EDE6DC);
+  }
+
+  .stc-braindump-accordion__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-shrink: 0;
+  }
+
+  .stc-braindump-accordion__header .stc-dive__title {
+    font-size: 1.25rem;
+    margin: 0;
+  }
+
+  .stc-braindump-accordion__preview {
+    flex: 1;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted, #8B7D6B);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-style: italic;
+  }
+
+  .stc-braindump-accordion__chevron {
+    flex-shrink: 0;
+    color: var(--color-text-muted, #8B7D6B);
+    transition: transform 0.2s ease;
+  }
+
+  .stc-braindump-accordion--expanded .stc-braindump-accordion__chevron {
+    transform: rotate(180deg);
+  }
+
+  .stc-braindump-accordion__body {
+    display: none;
+    padding: var(--spacing-lg);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-braindump-accordion--expanded .stc-braindump-accordion__body {
+    display: block;
+  }
+
+  .stc-braindump-accordion__body .stc-dive__text {
+    margin-bottom: var(--spacing-md);
+    border: none;
+    padding: 0;
+    background: transparent;
+  }
+
+  .stc-braindump-accordion__body .stc-dive__content {
+    margin-bottom: 0;
+  }
+
   .stc-dive__content {
     margin-bottom: var(--spacing-xl);
   }
@@ -2578,6 +3195,108 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
     margin-top: var(--spacing-xxl);
     padding-top: var(--spacing-xl);
     border-top: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-brief__title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .stc-brief__title-regen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted, #8B7D6B);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .stc-brief__title-regen:hover {
+    background: var(--color-background-secondary, #FAF7F2);
+    border-color: var(--color-accent-primary, #7C5E4A);
+    color: var(--color-accent-primary, #7C5E4A);
+  }
+
+  .stc-brief__title-regen:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .stc-brief__title-regen--loading svg {
+    animation: spin 1s linear infinite;
+  }
+
+  .stc-brief__title {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-primary, #2C2416);
+    margin: 0;
+    padding: 4px 8px;
+    margin-left: -8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    outline: none;
+    cursor: text;
+  }
+
+  .stc-brief__title:hover {
+    background: var(--color-background-secondary, #FAF7F2);
+  }
+
+  .stc-brief__title:focus {
+    border-color: var(--color-accent-primary, #B85C38);
+    background: white;
+  }
+
+  .stc-brief__title--generating {
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
+  }
+
+  /* Project title in list view */
+  .title-cell {
+    font-weight: 600;
+  }
+
+  .project-title {
+    display: inline-block;
+    padding: 2px 6px;
+    margin-left: -6px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-text-primary, #2C2416);
+    cursor: text;
+    outline: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .project-title:hover {
+    background: var(--color-background-secondary, #FAF7F2);
+  }
+
+  .project-title:focus {
+    border-color: var(--color-accent-primary, #B85C38);
+    background: white;
+  }
+
+  .project-title--generating {
+    color: var(--color-text-muted, #8B7D6B);
+    font-style: italic;
+    font-weight: 400;
   }
 
   .stc-brief__heading {
@@ -2634,6 +3353,168 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   .stc-brief__placeholder {
     color: var(--color-text-muted, #8B7D6B);
     font-style: italic;
+  }
+
+  .stc-brief__loading {
+    color: var(--color-accent-primary, #7C5E4A);
+    font-style: italic;
+  }
+
+  .stc-brief__loading::after {
+    content: '';
+    animation: briefPulse 1.5s infinite;
+  }
+
+  @keyframes briefPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .stc-brief__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stc-brief__status {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    transition: opacity 0.2s ease;
+  }
+
+  .stc-brief__status--success {
+    color: #28A745;
+  }
+
+  .stc-brief__status--error {
+    color: #DC3545;
+  }
+
+  .stc-brief__empty {
+    text-align: center;
+    padding: var(--spacing-lg);
+    background: var(--color-background-secondary, #FAF7F2);
+    border-radius: var(--radius-md);
+  }
+
+  .stc-brief__loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    text-align: center;
+    background: var(--color-background-secondary, #FAF7F2);
+    border-radius: var(--radius-md);
+  }
+
+  .stc-brief__loading-state .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--color-border-default, #D9CFC2);
+    border-top-color: var(--color-accent-primary, #B85C38);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-brief__item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stc-brief__item-edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+  }
+
+  .stc-brief__item-edit:hover {
+    opacity: 1;
+  }
+
+  .stc-brief__item-edit svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .stc-brief__textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: var(--spacing-sm);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    border: 1px solid var(--color-accent-primary, #B85C38);
+    border-radius: var(--radius-sm);
+    resize: vertical;
+    background: white;
+  }
+
+  .stc-brief__textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(184, 92, 56, 0.2);
+  }
+
+  .stc-brief__item-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    justify-content: flex-end;
+  }
+
+  .stc-brief__item-actions .button {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .stc-brief__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+  }
+
+  .stc-brief__locked {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border-default, #D9CFC2);
+    color: #28A745;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+  }
+
+  .stc-brief__locked-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: #28A745;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .stc-brief__locked-text {
+    flex: 1;
   }
 
   /* ========== SPINE BUILDER ========== */
@@ -3189,6 +4070,60 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   .stc-concept__genome-tag--tone { background: #7C6A5C; }
   .stc-concept__genome-tag--stakes { background: #8B5C5C; }
   .stc-concept__genome-tag--humor { background: #5C768B; }
+
+  /* Ready state - genome applied, ready to generate */
+  .stc-concept__ready {
+    text-align: center;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    background: var(--color-background-secondary, #FAF7F2);
+    border: 1px dashed var(--color-border-default, #D9CFC2);
+    border-radius: var(--radius-md);
+    margin-top: var(--spacing-md);
+  }
+
+  .stc-concept__ready-label {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted, #8B7D6B);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stc-concept__ready-genome {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .stc-concept__pill {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: var(--font-size-sm);
+    background: white;
+    border: 1px solid var(--color-border-default, #D9CFC2);
+    color: var(--color-text-primary, #2C2416);
+  }
+
+  .stc-concept__pill-label {
+    font-weight: 600;
+    color: var(--color-accent-primary, #7C5E4A);
+  }
+
+  .stc-concept__cta {
+    font-size: var(--font-size-lg);
+    padding: var(--spacing-md) var(--spacing-xxl);
+  }
+
+  .button--large {
+    font-size: var(--font-size-lg);
+    padding: var(--spacing-md) var(--spacing-xxl);
+  }
 
   .stc-concept__content {
     /* Container for section cards - no background since sections have their own */
