@@ -4,6 +4,49 @@ A running log of changes to the scaffold.
 
 ---
 
+## 2025-01-19 (Night) - Character System, Cascade Detection & Architecture Docs
+
+### Major Features
+- **Character System**: Full CRUD with 6 role-based slots
+  - Pyramid layout: 2 Drivers (protagonist, antagonist), 4 Supports (mirror, ally, skeptic, wildcard)
+  - Character edit modal with 2-column form layout
+  - AI-powered character generation from story context
+  - Per-field re-roll buttons with loading animations
+
+- **Cascade System**: Downstream coherence checking
+  - Within-character cascade: checks field consistency after re-rolls
+  - Project-wide cascade: checks story concept and other characters after save
+  - Toast notifications for cascade check status
+  - Unified cascade confirmation modal with checkbox selection
+  - Story concept suggestions banner with editable diff view and "Apply Changes"
+
+- **Loading Screen**: Thematic splash screen on page load
+  - "Every story begins somewhere" with quill icon
+  - Hides ugly progressive CSS/HTML loading
+  - Smooth fade-out transition when app ready
+
+### Documentation
+- **ARCHITECTURE.md**: Comprehensive 600+ line technical document
+  - System overview and user journey
+  - Data model with all tables and relationships
+  - All 7 AI functions with triggers, inputs, outputs
+  - Cascade system flows and UI components
+  - Design decisions and rationale
+
+### New Netlify Functions
+- `generate-character.js` - AI character generation and field re-roll
+- `cascade-character.js` - Within-character and project-wide impact analysis
+
+### UI Improvements
+- Two-width layout system (.stc-narrow for focused content, wider for characters)
+- Toast notification system in bottom-right corner
+- Global STC text color fix for placeholder visibility
+
+### Commits
+- `3af3f0b` Add character system with AI generation and cascade impact detection
+
+---
+
 ## 2025-01-19 (Evening) - Brief Extraction, Project Titles & Bug Fixes
 
 ### Major Features

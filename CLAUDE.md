@@ -277,8 +277,18 @@ The STC app uses serverless functions for AI operations:
 | `cascade-genome.js` | Analyzes genome changes for downstream impact |
 | `extract-brief.js` | Extracts core concept, premise, world/tone from braindump |
 | `generate-title.js` | Generates short memorable title (uses Haiku for speed) |
+| `generate-character.js` | AI character generation and single-field re-roll |
+| `cascade-character.js` | Within-character and project-wide impact analysis |
 
 All functions require `ANTHROPIC_API_KEY` environment variable set in Netlify dashboard.
+
+### Architecture Documentation
+
+For a comprehensive technical overview of the system, see `/ARCHITECTURE.md`. This document covers:
+- Data model and database schema
+- All AI functions with triggers, inputs, outputs
+- The cascade system for downstream coherence
+- Design decisions and rationale
 
 ## Adding a New View Framework
 

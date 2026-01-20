@@ -4,6 +4,61 @@ title: Beat Sheet
 description: Beat sheet builder for novelists using Blake Snyder's Save the Cat method
 ---
 
+<!-- Loading Screen - inline styles load immediately -->
+<div id="stc-loading" style="
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99999;
+  background: linear-gradient(145deg, #F5EEE6 0%, #EDE4D8 50%, #E8DFD1 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Lora', Georgia, serif;
+  color: #2C2416;
+  transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
+">
+  <!-- Quill/pen icon -->
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#B85C38" stroke-width="1.5" style="margin-bottom: 24px; animation: pulse 2s ease-in-out infinite;">
+    <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/>
+    <line x1="16" y1="8" x2="2" y2="22"/>
+    <line x1="17.5" y1="15" x2="9" y2="15"/>
+  </svg>
+
+  <div style="font-size: 1.5rem; font-weight: 500; margin-bottom: 8px;">
+    Every story begins somewhere
+  </div>
+
+  <div style="font-size: 0.9rem; color: #8B7D6B; font-family: 'Source Sans 3', sans-serif;">
+    Loading your workspace...
+  </div>
+
+  <!-- Subtle animated dots -->
+  <div style="margin-top: 24px; display: flex; gap: 6px;">
+    <span style="width: 6px; height: 6px; background: #B85C38; border-radius: 50%; animation: bounce 1.4s ease-in-out infinite;"></span>
+    <span style="width: 6px; height: 6px; background: #B85C38; border-radius: 50%; animation: bounce 1.4s ease-in-out 0.2s infinite;"></span>
+    <span style="width: 6px; height: 6px; background: #B85C38; border-radius: 50%; animation: bounce 1.4s ease-in-out 0.4s infinite;"></span>
+  </div>
+</div>
+
+<style>
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(0.95); }
+  }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+  }
+  #stc-loading.loaded {
+    opacity: 0;
+    visibility: hidden;
+  }
+</style>
+
 <div id="stc-app">
   <!-- AUTH VIEW: Sign in prompt when logged out -->
   <div id="auth-view" class="stc-view" style="display: none;">
@@ -3964,7 +4019,28 @@ description: Beat sheet builder for novelists using Blake Snyder's Save the Cat 
   async function init() {
     const { data: { session } } = await supabase.auth.getSession();
     updateAuthUI(session?.user || null);
+
+    // Hide loading screen once app is ready
+    hideLoadingScreen();
   }
+
+  // Hide the loading screen with a smooth transition
+  function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('stc-loading');
+    if (loadingScreen) {
+      // Small delay to ensure styles are applied
+      requestAnimationFrame(() => {
+        loadingScreen.classList.add('loaded');
+        // Remove from DOM after transition
+        setTimeout(() => loadingScreen.remove(), 500);
+      });
+    }
+  }
+
+  // Also hide on window load as fallback (in case init fails)
+  window.addEventListener('load', () => {
+    setTimeout(hideLoadingScreen, 100);
+  });
 
   init();
 </script>
