@@ -5,3 +5,10 @@
 
 [functions]
   node_bundler = "esbuild"
+
+[dev]
+  command = "npm run dev"
+  targetPort = 8080
+  port = 8888
+  autoLaunch = false
+  envFiles = [".env"]

@@ -1,6 +1,7 @@
 // Netlify serverless function for generating a terse title from a braindump
 // Environment variable ANTHROPIC_API_KEY must be set in Netlify dashboard
 
+import './shared/load-env.js'; // Load .env for local development
 import Anthropic from '@anthropic-ai/sdk';
 
 export async function handler(event) {

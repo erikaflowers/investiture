@@ -17,7 +17,10 @@
     "deploy:preview": "npm run build:netlify && npx netlify-cli deploy --dir=docs",
     "build:tokens": "node scripts/build-tokens.js",
     "serve": "eleventy --serve --config=eleventy.config.cjs",
-    "start": "npm run dev"
+    "start": "npm run dev",
+    "stc:react:dev": "vite --config apps/stc/views/react/vite.config.js",
+    "stc:react:build": "vite build --config apps/stc/views/react/vite.config.js",
+    "stc:react:preview": "vite preview --config apps/stc/views/react/vite.config.js"
   },
   "keywords": [
     "scaffold",
@@ -31,11 +34,17 @@
   "license": "MIT",
   "devDependencies": {
     "@11ty/eleventy": "^3.1.2",
+    "@vitejs/plugin-react": "^5.1.2",
     "npm-run-all": "^4.1.5",
-    "sass": "^1.77.0"
+    "sass": "^1.77.0",
+    "vite": "^7.3.1"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
-    "@supabase/supabase-js": "^2.90.1"
+    "@supabase/supabase-js": "^2.90.1",
+    "dotenv": "^17.2.3",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-router-dom": "^7.12.0"
   }
 }

@@ -1,6 +1,7 @@
 // Netlify serverless function for analyzing character change cascades
 // Handles both within-character field updates and project-wide impact
 
+import './shared/load-env.js'; // Load .env for local development
 import Anthropic from '@anthropic-ai/sdk';
 import { editorPersona } from './shared/system-prompts.js';
 

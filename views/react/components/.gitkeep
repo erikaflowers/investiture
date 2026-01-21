@@ -1,0 +1,3 @@
+# Investiture-level shared React components
+# Reusable across all apps (STC, future apps, etc.)
+# Examples: Modal, Toast, CharacterToken, LoadingOverlay

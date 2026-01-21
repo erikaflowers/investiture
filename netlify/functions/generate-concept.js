@@ -1,6 +1,7 @@
 // Netlify serverless function for calling Claude API
 // Environment variable ANTHROPIC_API_KEY must be set in Netlify dashboard
 
+import './shared/load-env.js'; // Load .env for local development
 import Anthropic from '@anthropic-ai/sdk';
 import { editorPersona } from './shared/system-prompts.js';
 

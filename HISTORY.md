@@ -4,6 +4,46 @@ A running log of changes to the scaffold.
 
 ---
 
+## 2025-01-20 (Afternoon) - React Migration Phase 1 Complete
+
+### Major Achievement
+**Full React 19 + Vite 7 implementation of STC app** with feature parity to vanilla version.
+
+### React View Layer (`apps/stc/views/react/`)
+- **Vite + React 19**: Modern build tooling with HMR
+- **React Router**: Client-side routing for Dashboard and ProjectView
+- **Supabase Integration**: Real-time auth and database hooks
+- **Component Library**: Full set of reusable components
+  - CharacterModal, CharacterSheet, CharacterCard, CharacterPyramid
+  - ConceptSection, GenomeSelector, BraindumpEditor, BriefDisplay
+  - CascadeModal (full-screen portal-based takeover)
+  - CharacterToken (clickable entity tokens in text)
+  - DevZone (dev-only testing area)
+
+### Shared Component Package (`views/react/`)
+- **Toast System**: Top-center notifications with success/error/checking states
+- **AI Overlay**: Full-screen loading indicator for AI operations
+- **Modal System**: Portal-based modals with scroll lock
+
+### New Netlify Function
+- `cascade-section.js` - Checks downstream impacts when manually editing concept sections
+
+### Bug Fixes
+- Fixed 401 auth errors caused by Netlify AI integration overriding API keys
+- Fixed stuck "checking" toasts not dismissing (use `removeToast(id)` pattern)
+- Fixed refine-section API parameter mismatch
+- Fixed genome hydration for API calls (IDs → labels)
+
+### Technical
+- Path aliases configured: `@investiture/components`, `@investiture/hooks`, `@stc/components`
+- `load-env.js` with `override: true` to handle Netlify env conflicts
+- Portal-based CascadeModal with z-index 10000 to prevent burial
+
+### What's Next
+- Beat Sheet implementation (the core STC feature)
+
+---
+
 ## 2025-01-20 (Morning) - Character Cards Implemented
 
 ### Major Features

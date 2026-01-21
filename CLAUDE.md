@@ -275,12 +275,15 @@ The STC app uses serverless functions for AI operations:
 | `generate-concept.js` | Generates story concept from braindump + genome |
 | `refine-section.js` | Refines a single concept section with context awareness |
 | `cascade-genome.js` | Analyzes genome changes for downstream impact |
+| `cascade-section.js` | Analyzes manual section edits for impact on other sections |
 | `extract-brief.js` | Extracts core concept, premise, world/tone from braindump |
 | `generate-title.js` | Generates short memorable title (uses Haiku for speed) |
 | `generate-character.js` | AI character generation and single-field re-roll |
 | `cascade-character.js` | Within-character and project-wide impact analysis |
 
 All functions require `ANTHROPIC_API_KEY` environment variable set in Netlify dashboard.
+
+**Important**: Local development requires `netlify/functions/shared/load-env.js` which loads `.env` with `override: true` to handle conflicts with Netlify AI integration environment variables.
 
 ### Architecture Documentation
 
@@ -289,6 +292,52 @@ For a comprehensive technical overview of the system, see `/ARCHITECTURE.md`. Th
 - All AI functions with triggers, inputs, outputs
 - The cascade system for downstream coherence
 - Design decisions and rationale
+
+### React View (Phase 1 Complete)
+
+The STC app has a fully functional React implementation at `apps/stc/views/react/`:
+
+```
+apps/stc/views/react/
+├── main.jsx              ← React entry point
+├── App.jsx               ← Router setup with auth guard
+├── index.html            ← Vite HTML template
+├── vite.config.js        ← Vite config with path aliases
+├── pages/
+│   ├── Dashboard.jsx     ← Project list with create/delete
+│   └── ProjectView.jsx   ← Full project editor (braindump → concept → characters)
+└── components/
+    ├── index.js          ← Component exports
+    ├── CharacterModal.jsx
+    ├── CharacterSheet.jsx
+    ├── CharacterCard.jsx
+    ├── CharacterToken.jsx
+    ├── ConceptSection.jsx
+    ├── GenomeSelector.jsx
+    ├── BraindumpEditor.jsx
+    ├── BriefDisplay.jsx
+    ├── CascadeModal.jsx  ← Portal-based full-screen takeover
+    └── DevZone.jsx       ← Dev-only testing area
+```
+
+**Shared Components** (`views/react/`):
+- `ToastProvider` + `useToast` - Notification system
+- `AIOverlayProvider` + `useAIOverlay` - Loading overlay
+- `Modal` - Portal-based modal with scroll lock
+- `useProject`, `useProjects` - Supabase data hooks
+
+**Running the React View**:
+```bash
+cd apps/stc/views/react
+npm install
+npm run dev
+# Opens at http://localhost:3000
+```
+
+**Path Aliases** (configured in vite.config.js):
+- `@investiture/components` → `views/react/components`
+- `@investiture/hooks` → `views/react/hooks`
+- `@stc/components` → `apps/stc/views/react/components`
 
 ## Adding a New View Framework
 

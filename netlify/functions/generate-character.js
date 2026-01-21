@@ -1,6 +1,7 @@
 // Netlify serverless function for generating characters with Claude
 // Environment variable ANTHROPIC_API_KEY must be set in Netlify dashboard
 
+import './shared/load-env.js'; // Load .env for local development
 import Anthropic from '@anthropic-ai/sdk';
 import { editorPersona } from './shared/system-prompts.js';
 
@@ -15,6 +16,12 @@ export async function handler(event) {
 
   // Check for API key
   const apiKey = process.env.ANTHROPIC_API_KEY;
+  console.log('[generate-character] API key check:', {
+    hasKey: !!apiKey,
+    keyPrefix: apiKey ? apiKey.substring(0, 15) + '...' : 'none',
+    envKeys: Object.keys(process.env).filter(k => k.includes('ANTHROPIC'))
+  });
+
   if (!apiKey) {
     return {
       statusCode: 500,
