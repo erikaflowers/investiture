@@ -4,6 +4,35 @@ A running log of changes to the scaffold.
 
 ---
 
+## 2025-01-20 (Evening) - Beat Sheet & Character Aliases
+
+### Beat Sheet System (Save the Cat)
+- **19-beat structure** across 4 acts defined in `beats.js`
+- **BeatCard**: Grid cards showing beat name, preview, and character chips
+- **BeatModal**: Full editing modal with AI generation, character token preview
+- **BeatSheet**: 4-row grid layout organized by act with progress counter
+- **useBeats hook**: Supabase CRUD with beat definition merging
+- **generate-beat.js**: AI function for context-aware beat content generation
+
+### Character Aliases
+- **Auto-extraction**: Parse names like `Marcus 'Tank' Chen` into aliases (Marcus, Tank, Chen, Marcus Chen, Tank Chen)
+- **Honorific filtering**: Skip Dr., Professor, Captain, etc. from aliases and display names
+- **Token detection**: Updated ConceptSection, BeatModal, DevZone to match against all aliases
+- **CharacterSheet**: Added aliases display ("Also known as: ...")
+- **BeatCard chips**: Smart display names that skip honorifics
+
+### Layout Improvements
+- **Section-based widths**: ProjectView uses `sectionNarrow` (900px) and `sectionWide` (1400px)
+- Each major section wrapped independently for flexible layout control
+- Beat sheet uses wide layout to prevent wrapping
+
+### Database
+- Added `aliases TEXT[]` column to characters table
+
+**Commit:** `57d4433`
+
+---
+
 ## 2025-01-20 (Afternoon) - React Migration Phase 1 Complete
 
 ### Major Achievement
