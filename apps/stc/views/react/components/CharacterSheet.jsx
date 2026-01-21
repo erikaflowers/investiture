@@ -33,6 +33,16 @@ function CharacterSheet({ isOpen, onClose, character, onEdit }) {
           <div style={styles.roleBadge}>{roleLabel}</div>
         )}
 
+        {/* Aliases */}
+        {character.aliases && character.aliases.length > 0 && (
+          <div style={styles.aliases}>
+            <span style={styles.aliasLabel}>Also known as:</span>
+            <span style={styles.aliasList}>
+              {character.aliases.join(', ')}
+            </span>
+          </div>
+        )}
+
         {/* Fields */}
         <div style={styles.fields}>
           {character.want && (
@@ -103,6 +113,22 @@ const styles = {
     letterSpacing: '0.5px',
     borderRadius: '4px',
     alignSelf: 'flex-start'
+  },
+  aliases: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '6px',
+    flexWrap: 'wrap'
+  },
+  aliasLabel: {
+    fontSize: '12px',
+    fontWeight: 500,
+    color: '#8B7D6B',
+    fontStyle: 'italic'
+  },
+  aliasList: {
+    fontSize: '13px',
+    color: '#5C5346'
   },
   fields: {
     display: 'flex',

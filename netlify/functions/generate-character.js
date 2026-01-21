@@ -157,12 +157,15 @@ Respond with ONLY a JSON object (no markdown, no explanation):
 
 {
   "name": "Character's full name",
+  "aliases": ["First name", "Last name", "Nickname", "Common variations"],
   "want": "What they consciously pursue (external goal) - 1-2 sentences",
   "need": "What they must learn/become (internal growth) - 1-2 sentences",
   "arc_type": "positive-change" | "negative-change" | "steadfast",
   "arc_description": "How they change (or hold steady) through the story - 2-3 sentences",
   "connections": "Key relationships to other characters - 1-2 sentences"
 }
+
+For aliases: Include first name, last name, any nicknames, and common variations that might be used to refer to this character in the story. For example, "Marcus 'Tank' Chen" should have aliases: ["Marcus", "Tank", "Chen", "Marcus Chen"].
 
 Generate a character now:`;
 }

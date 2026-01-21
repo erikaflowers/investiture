@@ -66,14 +66,45 @@ function DevZone({
     return renderWithCharacterTokens(testText, characters, onCharacterClick);
   };
 
+  // Build lookup map including aliases
+  const buildCharacterMatcher = (characters) => {
+    const nameToCharMap = new Map();
+    const allNames = [];
+
+    for (const char of characters) {
+      if (!char.name) continue;
+
+      // Add primary name
+      nameToCharMap.set(char.name.toLowerCase(), char);
+      allNames.push(char.name);
+
+      // Add aliases
+      if (Array.isArray(char.aliases)) {
+        for (const alias of char.aliases) {
+          if (alias && alias.trim()) {
+            const aliasLower = alias.trim().toLowerCase();
+            if (!nameToCharMap.has(aliasLower)) {
+              nameToCharMap.set(aliasLower, char);
+            }
+            allNames.push(alias.trim());
+          }
+        }
+      }
+    }
+
+    // Sort by length (longest first)
+    allNames.sort((a, b) => b.length - a.length);
+    return { nameToCharMap, allNames };
+  };
+
   const renderWithCharacterTokens = (text, chars, onClick) => {
-    const sortedChars = [...chars]
-      .filter(c => c.name)
-      .sort((a, b) => b.name.length - a.name.length);
+    const filteredChars = chars.filter(c => c.name);
+    if (filteredChars.length === 0) return text;
 
-    if (sortedChars.length === 0) return text;
+    const { nameToCharMap, allNames } = buildCharacterMatcher(filteredChars);
+    if (allNames.length === 0) return text;
 
-    const escapedNames = sortedChars.map(c => c.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const escapedNames = allNames.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
     const pattern = new RegExp(`\\b(${escapedNames.join('|')})\\b`, 'gi');
 
     const parts = [];
@@ -85,9 +116,7 @@ function DevZone({
         parts.push({ type: 'text', value: text.slice(lastIndex, match.index) });
       }
 
-      const matchedChar = sortedChars.find(
-        c => c.name.toLowerCase() === match[1].toLowerCase()
-      );
+      const matchedChar = nameToCharMap.get(match[1].toLowerCase());
 
       if (matchedChar) {
         parts.push({ type: 'character', value: match[1], character: matchedChar });

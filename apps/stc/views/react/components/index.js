@@ -8,3 +8,6 @@ export { default as CascadeModal } from './CascadeModal.jsx';
 export { default as BraindumpEditor } from './BraindumpEditor.jsx';
 export { default as BriefDisplay } from './BriefDisplay.jsx';
 export { default as DevZone } from './DevZone.jsx';
+export { default as BeatSheet } from './BeatSheet.jsx';
+export { default as BeatCard } from './BeatCard.jsx';
+export { default as BeatModal } from './BeatModal.jsx';

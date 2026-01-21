@@ -11,7 +11,99 @@ const ARC_TYPES = [
   { value: 'steadfast', label: 'Steadfast – Holds their ground' }
 ];
 
-const FIELDS = ['name', 'want', 'need', 'arc_type', 'arc_description', 'connections'];
+const FIELDS = ['name', 'aliases', 'want', 'need', 'arc_type', 'arc_description', 'connections'];
+
+/**
+ * Common honorifics and titles to exclude from aliases
+ */
+const HONORIFICS = new Set([
+  // With periods
+  'dr.', 'mr.', 'mrs.', 'ms.', 'prof.', 'capt.', 'lt.', 'sgt.', 'gen.', 'col.',
+  'rev.', 'fr.', 'sr.', 'jr.', 'esq.', 'hon.', 'pres.', 'gov.', 'sen.', 'rep.',
+  // Without periods
+  'dr', 'mr', 'mrs', 'ms', 'prof', 'capt', 'lt', 'sgt', 'gen', 'col',
+  'rev', 'fr', 'sr', 'jr', 'esq', 'hon', 'pres', 'gov', 'sen', 'rep',
+  // Full words
+  'doctor', 'mister', 'miss', 'professor', 'captain', 'lieutenant', 'sergeant',
+  'general', 'colonel', 'reverend', 'father', 'sister', 'brother', 'senior',
+  'junior', 'esquire', 'honorable', 'president', 'governor', 'senator',
+  'representative', 'sir', 'dame', 'lady', 'lord', 'king', 'queen', 'prince',
+  'princess', 'duke', 'duchess', 'baron', 'baroness', 'count', 'countess',
+  'chief', 'officer', 'detective', 'agent', 'admiral', 'commander', 'major',
+  'corporal', 'private', 'ensign', 'marshal'
+]);
+
+/**
+ * Check if a string is an honorific/title
+ */
+function isHonorific(str) {
+  return HONORIFICS.has(str.toLowerCase());
+}
+
+/**
+ * Extract aliases from a character name
+ * e.g., "Marcus 'Tank' Chen" -> ["Marcus", "Tank", "Chen", "Marcus Chen", "Tank Chen"]
+ * e.g., "Dr. Zara Okonkwo" -> ["Zara", "Okonkwo"] (filters out "Dr.")
+ */
+function extractAliasesFromName(name) {
+  if (!name || typeof name !== 'string') return [];
+
+  const aliases = new Set();
+
+  // Extract quoted nicknames (both single and double quotes)
+  const nicknamePatterns = [
+    /'([^']+)'/g,   // 'Tank'
+    /"([^"]+)"/g,   // "Tank"
+    /'([^']+)'/g,   // 'Tank' (curly quotes)
+    /"([^"]+)"/g    // "Tank" (curly quotes)
+  ];
+
+  const nicknames = [];
+  for (const pattern of nicknamePatterns) {
+    let match;
+    while ((match = pattern.exec(name)) !== null) {
+      nicknames.push(match[1].trim());
+    }
+  }
+
+  // Remove nicknames from name to get clean parts
+  let cleanName = name;
+  for (const pattern of nicknamePatterns) {
+    cleanName = cleanName.replace(pattern, ' ');
+  }
+
+  // Split remaining name into parts (first, middle, last names)
+  const nameParts = cleanName
+    .split(/\s+/)
+    .map(p => p.trim())
+    .filter(p => p.length > 0 && !isHonorific(p));
+
+  // Add individual name parts as aliases (skip honorifics)
+  for (const part of nameParts) {
+    aliases.add(part);
+  }
+
+  // Add nicknames (these are intentional, so don't filter)
+  for (const nick of nicknames) {
+    aliases.add(nick);
+  }
+
+  // Add combinations: FirstName LastName, Nickname LastName
+  if (nameParts.length >= 2) {
+    // First + Last
+    aliases.add(`${nameParts[0]} ${nameParts[nameParts.length - 1]}`);
+
+    // If there are nicknames, add Nickname + LastName
+    for (const nick of nicknames) {
+      aliases.add(`${nick} ${nameParts[nameParts.length - 1]}`);
+    }
+  }
+
+  // Remove the full name itself if it ended up in aliases
+  aliases.delete(name);
+
+  return Array.from(aliases);
+}
 
 /**
  * CharacterModal - Full character editing modal
@@ -35,6 +127,7 @@ function CharacterModal({
 
   const [formData, setFormData] = useState({
     name: '',
+    aliases: '',
     want: '',
     need: '',
     arc_type: '',
@@ -47,8 +140,14 @@ function CharacterModal({
   // Populate form when character changes
   useEffect(() => {
     if (character) {
+      // Convert aliases array to comma-separated string for editing
+      const aliasesStr = Array.isArray(character.aliases)
+        ? character.aliases.join(', ')
+        : (character.aliases || '');
+
       setFormData({
         name: character.name || '',
+        aliases: aliasesStr,
         want: character.want || '',
         need: character.need || '',
         arc_type: character.arc_type || '',
@@ -58,6 +157,7 @@ function CharacterModal({
     } else {
       setFormData({
         name: '',
+        aliases: '',
         want: '',
         need: '',
         arc_type: '',
@@ -76,8 +176,21 @@ function CharacterModal({
     setLoading(true);
 
     try {
+      // Auto-extract aliases from name
+      const extractedAliases = extractAliasesFromName(formData.name);
+
+      // Parse any manually entered aliases
+      const manualAliases = formData.aliases
+        ? formData.aliases.split(',').map(a => a.trim()).filter(a => a)
+        : [];
+
+      // Merge, dedupe, and filter out any honorifics that snuck in
+      const allAliases = [...new Set([...extractedAliases, ...manualAliases])]
+        .filter(alias => !isHonorific(alias));
+
       const characterData = {
         ...formData,
+        aliases: allAliases,
         project_id: projectId,
         role: character?.role || role || null
       };
@@ -184,8 +297,14 @@ function CharacterModal({
       const data = await response.json();
       const generated = data.character;
 
+      // Convert aliases array to comma-separated string
+      const aliasesStr = Array.isArray(generated.aliases)
+        ? generated.aliases.join(', ')
+        : '';
+
       setFormData({
         name: generated.name || '',
+        aliases: aliasesStr,
         want: generated.want || '',
         need: generated.need || '',
         arc_type: generated.arc_type || '',
@@ -269,6 +388,22 @@ function CharacterModal({
             style={styles.input}
             required
           />
+        </div>
+
+        {/* Aliases field */}
+        <div style={styles.field}>
+          <div style={styles.labelRow}>
+            <label style={styles.label}>Also Known As</label>
+            <span style={styles.autoTag}>auto-populated</span>
+          </div>
+          <input
+            type="text"
+            value={formData.aliases}
+            onChange={(e) => handleChange('aliases', e.target.value)}
+            placeholder="Additional nicknames or variations (comma-separated)"
+            style={styles.input}
+          />
+          <p style={styles.fieldHint}>Auto-extracted from name on save. Add extras here if needed.</p>
         </div>
 
         {/* Want field */}
@@ -542,6 +677,22 @@ const styles = {
     borderRadius: '4px',
     cursor: 'pointer',
     fontFamily: "'Source Sans 3', sans-serif"
+  },
+  fieldHint: {
+    fontSize: '12px',
+    color: '#8B7D6B',
+    fontStyle: 'italic',
+    margin: '4px 0 0 0'
+  },
+  autoTag: {
+    fontSize: '10px',
+    fontWeight: 500,
+    color: '#8B7D6B',
+    background: '#F5EEE6',
+    padding: '2px 6px',
+    borderRadius: '3px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.03em'
   }
 };
 

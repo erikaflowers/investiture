@@ -181,22 +181,59 @@ function FormattedContent({ content }) {
 }
 
 /**
+ * Build a lookup map and pattern that includes both names and aliases
+ */
+function buildCharacterMatcher(characters) {
+  const nameToCharMap = new Map();
+  const allNames = [];
+
+  for (const char of characters) {
+    if (!char.name) continue;
+
+    // Add primary name
+    const primaryLower = char.name.toLowerCase();
+    nameToCharMap.set(primaryLower, char);
+    allNames.push(char.name);
+
+    // Add aliases
+    if (Array.isArray(char.aliases)) {
+      for (const alias of char.aliases) {
+        if (alias && alias.trim()) {
+          const aliasLower = alias.trim().toLowerCase();
+          if (!nameToCharMap.has(aliasLower)) {
+            nameToCharMap.set(aliasLower, char);
+          }
+          allNames.push(alias.trim());
+        }
+      }
+    }
+  }
+
+  // Sort by length (longest first) to match longest names first
+  allNames.sort((a, b) => b.length - a.length);
+
+  return { nameToCharMap, allNames };
+}
+
+/**
  * Render content with character tokens
  */
 function RenderContentWithEntities({ content, characters, onCharacterClick }) {
   if (!content) return <em style={{ color: '#8B7D6B' }}>No content</em>;
 
-  // Sort by name length (longest first)
-  const sortedChars = [...characters]
-    .filter(c => c.name)
-    .sort((a, b) => b.name.length - a.name.length);
+  const filteredChars = characters.filter(c => c.name);
+  if (filteredChars.length === 0) {
+    return <FormattedContent content={content} />;
+  }
 
-  if (sortedChars.length === 0) {
+  const { nameToCharMap, allNames } = buildCharacterMatcher(filteredChars);
+
+  if (allNames.length === 0) {
     return <FormattedContent content={content} />;
   }
 
   // Build regex
-  const escapedNames = sortedChars.map(c => c.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const escapedNames = allNames.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   const pattern = new RegExp(`\\b(${escapedNames.join('|')})\\b`, 'gi');
 
   // Split and render
@@ -209,9 +246,7 @@ function RenderContentWithEntities({ content, characters, onCharacterClick }) {
       parts.push({ type: 'text', value: content.slice(lastIndex, match.index) });
     }
 
-    const matchedChar = sortedChars.find(
-      c => c.name.toLowerCase() === match[1].toLowerCase()
-    );
+    const matchedChar = nameToCharMap.get(match[1].toLowerCase());
 
     if (matchedChar) {
       parts.push({ type: 'character', value: match[1], character: matchedChar });

@@ -11,7 +11,8 @@ import {
   CascadeModal,
   BraindumpEditor,
   BriefDisplay,
-  DevZone
+  DevZone,
+  BeatSheet
 } from '@stc/components';
 import { vertebrae } from '../../../core/logic/vertebrae.js';
 
@@ -528,56 +529,60 @@ function ProjectView() {
   const conceptSections = parseConceptSections(localProject.story_concept?.concept || '');
 
   return (
-    <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header}>
-        <Link to="/" style={styles.backLink}>&larr; Back to Dashboard</Link>
-        <div style={styles.titleRow}>
-          <h1 style={styles.title}>{localProject.title || 'Untitled Project'}</h1>
-          <button
-            style={{
-              ...styles.rerollBtn,
-              opacity: regeneratingTitle ? 0.6 : 1
-            }}
-            onClick={handleRegenerateTitle}
-            disabled={regeneratingTitle}
-            title="Regenerate title"
-          >
-            {regeneratingTitle ? (
-              <span style={styles.spinner}>↻</span>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M1 4v6h6" />
-                <path d="M23 20v-6h-6" />
-                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
-              </svg>
-            )}
-          </button>
+    <div style={styles.page}>
+      {/* Header - narrow */}
+      <section style={styles.sectionNarrow}>
+        <div style={styles.header}>
+          <Link to="/" style={styles.backLink}>&larr; Back to Dashboard</Link>
+          <div style={styles.titleRow}>
+            <h1 style={styles.title}>{localProject.title || 'Untitled Project'}</h1>
+            <button
+              style={{
+                ...styles.rerollBtn,
+                opacity: regeneratingTitle ? 0.6 : 1
+              }}
+              onClick={handleRegenerateTitle}
+              disabled={regeneratingTitle}
+              title="Regenerate title"
+            >
+              {regeneratingTitle ? (
+                <span style={styles.spinner}>↻</span>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M1 4v6h6" />
+                  <path d="M23 20v-6h-6" />
+                  <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
+                </svg>
+              )}
+            </button>
+          </div>
+          <p style={styles.meta}>
+            Status: {localProject.status} | Created: {new Date(localProject.created_at).toLocaleDateString()}
+          </p>
         </div>
-        <p style={styles.meta}>
-          Status: {localProject.status} | Created: {new Date(localProject.created_at).toLocaleDateString()}
-        </p>
-      </div>
+      </section>
 
-      {/* Braindump */}
-      <BraindumpEditor
-        projectId={projectId}
-        braindump={localBraindump}
-        onUpdate={handleBraindumpUpdate}
-      />
+      {/* Braindump - narrow */}
+      <section style={styles.sectionNarrow}>
+        <BraindumpEditor
+          projectId={projectId}
+          braindump={localBraindump}
+          onUpdate={handleBraindumpUpdate}
+        />
+      </section>
 
-      {/* Brief */}
-      <div style={styles.section}>
+      {/* Brief - narrow */}
+      <section style={styles.sectionNarrow}>
         <BriefDisplay
           projectId={projectId}
           brief={localProject.brief}
           braindump={localBraindump?.raw_input}
           onUpdate={handleBriefUpdate}
         />
-      </div>
+      </section>
 
-      {/* Genome */}
-      <div style={styles.section}>
+      {/* Genome - narrow */}
+      <section style={styles.sectionNarrow}>
         <div style={styles.sectionHeader}>
           <h2 style={styles.sectionTitle}>Story Genome</h2>
         </div>
@@ -586,10 +591,10 @@ function ProjectView() {
           onChange={handleGenomeChange}
           onSave={handleSaveGenome}
         />
-      </div>
+      </section>
 
-      {/* Story Concept */}
-      <div style={styles.section}>
+      {/* Story Concept - narrow */}
+      <section style={styles.sectionNarrow}>
         <div style={styles.sectionHeader}>
           <h2 style={styles.sectionTitle}>Story Concept</h2>
         </div>
@@ -661,10 +666,10 @@ function ProjectView() {
             )}
           </>
         )}
-      </div>
+      </section>
 
-      {/* Characters */}
-      <div style={styles.section}>
+      {/* Characters - wide */}
+      <section style={styles.sectionWide}>
         <div style={styles.sectionHeader}>
           <h2 style={styles.sectionTitle}>Characters</h2>
         </div>
@@ -674,16 +679,33 @@ function ProjectView() {
           onView={handleViewCharacter}
           onEdit={handleEditCharacter}
         />
-      </div>
+      </section>
 
-      {/* Dev Zone - only renders in development */}
-      <DevZone
-        characters={localCharacters}
-        onCharacterClick={handleViewCharacter}
-        onTriggerGenomeCascade={handleDevTriggerGenomeCascade}
-        onTriggerCharacterCascade={handleDevTriggerCharacterCascade}
-        onTriggerCascadeModal={handleTestCascadeModal}
-      />
+      {/* Beat Sheet - wide */}
+      <section style={styles.sectionWide}>
+        <div style={styles.sectionHeader}>
+          <h2 style={styles.sectionTitle}>Beat Sheet</h2>
+        </div>
+        <BeatSheet
+          projectId={projectId}
+          characters={localCharacters}
+          braindump={localBraindump?.raw_input}
+          genome={hydrateGenome(localProject?.genome)}
+          storyConcept={localProject?.story_concept?.concept}
+          onCharacterClick={handleViewCharacter}
+        />
+      </section>
+
+      {/* Dev Zone - narrow */}
+      <section style={styles.sectionNarrow}>
+        <DevZone
+          characters={localCharacters}
+          onCharacterClick={handleViewCharacter}
+          onTriggerGenomeCascade={handleDevTriggerGenomeCascade}
+          onTriggerCharacterCascade={handleDevTriggerCharacterCascade}
+          onTriggerCascadeModal={handleTestCascadeModal}
+        />
+      </section>
 
       {/* Character Modal */}
       <CharacterModal
@@ -1050,10 +1072,18 @@ function hydrateGenome(genome) {
 // ========== STYLES ==========
 
 const styles = {
-  container: {
+  page: {
+    padding: '24px 0'
+  },
+  sectionNarrow: {
     maxWidth: '900px',
-    margin: '0 auto',
-    padding: '24px'
+    margin: '0 auto 32px',
+    padding: '0 24px'
+  },
+  sectionWide: {
+    maxWidth: '1400px',
+    margin: '0 auto 32px',
+    padding: '0 24px'
   },
   loading: {
     padding: '48px',
@@ -1064,7 +1094,7 @@ const styles = {
     textAlign: 'center'
   },
   header: {
-    marginBottom: '32px'
+    marginBottom: '0'
   },
   backLink: {
     color: '#8B7D6B',
