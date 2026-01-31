@@ -1,0 +1,165 @@
+---
+layout: base.njk
+title: Demo
+description: Interactive React demo - see Investiture patterns in action
+headerTagline: Demo
+---
+
+<style>
+  .demo-intro {
+    text-align: center;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    max-width: 640px;
+    margin: 0 auto var(--spacing-xl);
+  }
+
+  .demo-intro__title {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .demo-intro__description {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-relaxed);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .demo-intro__hint {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    font-family: var(--font-family-mono);
+  }
+
+  .demo-frame {
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin: 0 auto var(--spacing-xl);
+    max-width: 800px;
+  }
+
+  .demo-frame__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-background-tertiary);
+    border-bottom: 1px solid var(--color-border-default);
+  }
+
+  .demo-frame__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--color-border-default);
+  }
+
+  .demo-frame__dot--red { background: #ff5f57; }
+  .demo-frame__dot--yellow { background: #febc2e; }
+  .demo-frame__dot--green { background: #28c840; }
+
+  .demo-frame__content {
+    height: 600px;
+  }
+
+  .demo-frame__content iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .demo-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    max-width: 800px;
+    margin: 0 auto var(--spacing-xl);
+  }
+
+  .demo-feature {
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    text-align: center;
+  }
+
+  .demo-feature__icon {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .demo-feature__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .demo-feature__description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+  }
+
+  .demo-cta {
+    text-align: center;
+    padding: var(--spacing-xl);
+  }
+
+  .demo-cta__prompt {
+    display: inline-block;
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    color: var(--color-accent-primary);
+  }
+</style>
+
+<div class="demo-intro">
+  <h2 class="demo-intro__title">See It In Action</h2>
+  <p class="demo-intro__description">
+    A minimal React app built with Investiture patterns.
+    Counter, theme toggle, animated reveal — just enough to show the structure.
+  </p>
+  <p class="demo-intro__hint">demo/App.jsx + demo/App.css</p>
+</div>
+
+<div class="demo-frame">
+  <div class="demo-frame__header">
+    <span class="demo-frame__dot demo-frame__dot--red"></span>
+    <span class="demo-frame__dot demo-frame__dot--yellow"></span>
+    <span class="demo-frame__dot demo-frame__dot--green"></span>
+  </div>
+  <div class="demo-frame__content">
+    <iframe src="/react-demo/" title="Investiture React Demo"></iframe>
+  </div>
+</div>
+
+<div class="demo-features">
+  <div class="demo-feature">
+    <div class="demo-feature__icon">🔢</div>
+    <h3 class="demo-feature__title">Counter</h3>
+    <p class="demo-feature__description">useState hook, click handler</p>
+  </div>
+  <div class="demo-feature">
+    <div class="demo-feature__icon">🌓</div>
+    <h3 class="demo-feature__title">Theme Toggle</h3>
+    <p class="demo-feature__description">CSS variables, state-driven classes</p>
+  </div>
+  <div class="demo-feature">
+    <div class="demo-feature__icon">✨</div>
+    <h3 class="demo-feature__title">Reveal Card</h3>
+    <p class="demo-feature__description">CSS transitions, conditional rendering</p>
+  </div>
+</div>
+
+<div class="demo-cta">
+  <p class="demo-cta__prompt">"Add a color picker that changes the background."</p>
+</div>

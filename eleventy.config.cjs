@@ -2,34 +2,23 @@
  * Eleventy Configuration
  *
  * Builds static HTML from Nunjucks templates.
- * Run from project root: npx eleventy
+ * Run from project root: npm run dev
  */
 
 module.exports = function(eleventyConfig) {
-  // Pass through static assets from views/vanilla to output root
-  eleventyConfig.addPassthroughCopy({ "views/vanilla/app.js": "app.js" });
-  eleventyConfig.addPassthroughCopy({ "views/vanilla/docs.js": "docs.js" });
-  eleventyConfig.addPassthroughCopy({ "views/vanilla/nav.js": "nav.js" });
-  eleventyConfig.addPassthroughCopy({ "views/vanilla/styles.css": "styles.css" });
-  eleventyConfig.addPassthroughCopy({ "views/vanilla/styles.css.map": "styles.css.map" });
-  eleventyConfig.addPassthroughCopy({ "views/vanilla/favicon.svg": "favicon.svg" });
+  // Pass through static assets
+  eleventyConfig.addPassthroughCopy("app.js");
+  eleventyConfig.addPassthroughCopy("docs.js");
+  eleventyConfig.addPassthroughCopy("nav.js");
+  eleventyConfig.addPassthroughCopy("styles.css");
+  eleventyConfig.addPassthroughCopy("favicon.svg");
 
-  // Pass through design system tokens
-  eleventyConfig.addPassthroughCopy("design-system");
+  // Watch for CSS changes
+  eleventyConfig.addWatchTarget("*.css");
+  eleventyConfig.addWatchTarget("*.scss");
 
-  // Pass through CLAUDE.md for docs page
-  eleventyConfig.addPassthroughCopy("CLAUDE.md");
-
-  // Pass through STC app assets
-  eleventyConfig.addPassthroughCopy({ "apps/stc/core": "stc/core" });
-  eleventyConfig.addPassthroughCopy({ "apps/stc/content": "stc/content" });
-  eleventyConfig.addPassthroughCopy({ "apps/stc/design": "stc/design" });
-  eleventyConfig.addPassthroughCopy({ "apps/stc/views/vanilla/stc.css": "stc/stc.css" });
-
-  // Watch for SCSS changes (triggers rebuild)
-  eleventyConfig.addWatchTarget("views/vanilla/*.scss");
-  eleventyConfig.addWatchTarget("views/vanilla/*.css");
-  eleventyConfig.addWatchTarget("apps/stc/**/*");
+  // Ignore the React demo folder (built separately)
+  eleventyConfig.ignores.add("demo/**");
 
   // Set Nunjucks options
   eleventyConfig.setNunjucksEnvironmentOptions({
@@ -45,15 +34,15 @@ module.exports = function(eleventyConfig) {
     htmlTemplateEngine: "njk",
     markdownTemplateEngine: "njk",
 
-    // Directory configuration
+    // Directory configuration - flat structure
     dir: {
-      input: "views/vanilla",
+      input: ".",
       includes: "_includes",
       data: "_data",
       output: "docs"
     },
 
-    // Path prefix - use ELEVENTY_ENV=production for GitHub Pages
+    // Path prefix for GitHub Pages
     pathPrefix: process.env.ELEVENTY_ENV === 'production' ? "/investiture/" : "/"
   };
 };

@@ -1,16 +1,14 @@
 # Investiture
 
-A minimal React scaffold designed for AI-assisted development with Claude Code.
+A learning scaffold for designers who want to use Claude Code to build real applications.
 
 ---
 
 ## What is this?
 
-Investiture is a clean starting point for building React apps with AI. No complexity, no boilerplate maze — just a well-structured foundation that Claude Code can read, understand, and extend.
+Investiture is engineering knowledge pre-loaded into a scaffold your AI can read. Work inside a system with guardrails built in. You don't have to become an engineer — just build inside structure that already knows the rules.
 
 The name comes from Brandon Sanderson's Cosmere: Investiture is the underlying magical energy that manifests differently on each world. Same power source, different expressions.
-
-That's this scaffold. The structure stays clean. What you build with it is up to you.
 
 ---
 
@@ -29,22 +27,12 @@ npm install
 npm run dev
 ```
 
-Your app is now running at `http://localhost:3000`.
+The documentation site runs at `http://localhost:8080`.
 
----
-
-## The Magic
-
-Open this project in **Claude Code** and try this prompt:
-
-> **"Add a color picker that changes the background."**
-
-Watch Claude:
-1. Read the existing code structure
-2. Understand the component patterns
-3. Add a new feature that fits seamlessly
-
-That's it. That's the whole point.
+For the React demo:
+```bash
+npm run dev:demo
+```
 
 ---
 
@@ -52,35 +40,54 @@ That's it. That's the whole point.
 
 ```
 investiture/
-├── index.html          # Entry point
+├── _data/              # Site data (nav, config)
+├── _includes/          # Nunjucks templates
+├── demo/               # React demo app
+│   ├── App.jsx         # Demo component
+│   ├── App.css         # Styles with CSS variables
+│   ├── main.jsx        # React mount
+│   └── index.html      # Entry point
+├── index.njk           # Home page
+├── demo.njk            # Demo showcase page
+├── docs.njk            # Documentation
+├── getting-started.njk # Setup guide
+├── eleventy.config.cjs # Eleventy config
 ├── package.json        # Dependencies
-├── vite.config.js      # Build config
-└── src/
-    ├── main.jsx        # React mount
-    ├── App.jsx         # Demo component
-    └── App.css         # Styles
+└── styles.css          # Site styles
 ```
 
 ---
 
-## What's Included
+## The React Demo
 
-The demo page showcases:
+The demo showcases minimal React patterns:
 
-- **Animated hero** — CSS keyframe animations on load
-- **Counter button** — Basic state with `useState`
-- **Theme toggle** — Dark/light mode switching
-- **Reveal card** — Show/hide with transitions
+- **Counter** — useState hook, click handler
+- **Theme toggle** — CSS variables, state-driven classes
+- **Reveal card** — CSS transitions, conditional rendering
 
-Nothing fancy. Just enough to demonstrate the patterns.
+Open the demo in Claude Code and try:
+
+> **"Add a color picker that changes the background."**
+
+---
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the documentation site |
+| `npm run dev:demo` | Start the React demo in dev mode |
+| `npm run build` | Build everything for production |
+| `npm run build:demo` | Build just the React demo |
 
 ---
 
 ## Philosophy
 
-- **Minimal by design** — No auth, no database, no state management library
-- **Readable code** — Comments where they help, silence where they don't
-- **AI-friendly** — Clean structure that Claude can navigate and extend
+- **Learn by doing** — Not tutorials, actual building
+- **AI-readable** — Clean structure Claude can navigate
+- **Minimal by design** — No auth, no database, no complexity
 - **Taste matters** — Dark theme, subtle animations, considered spacing
 
 ---
