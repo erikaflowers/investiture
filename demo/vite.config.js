@@ -1,10 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
   root: 'demo',
-  base: '/investiture/react-demo/',
+  base: mode === 'production' ? '/investiture/react-demo/' : '/',
   build: {
     outDir: '../docs/react-demo',
     emptyOutDir: true
@@ -13,4 +13,4 @@ export default defineConfig({
     port: 3000,
     open: true
   }
-});
+}));

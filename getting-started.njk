@@ -151,7 +151,7 @@ headerTagline: Get Started
 <div class="intro">
   <h2 class="intro__title">Up and Running in 5 Minutes</h2>
   <p class="intro__description">
-    Clone the repo, install dependencies, and start building your app with a clean, decoupled architecture.
+    Clone the repo, run the install script, and start building with Claude Code.
   </p>
 </div>
 
@@ -161,127 +161,106 @@ headerTagline: Get Started
     <div class="step__number">1</div>
     <h3 class="step__title">Clone the Repository</h3>
     <p class="step__description">
-      Grab the scaffold from GitHub. You can clone it directly or use it as a template for your own repo.
+      Open Terminal (find it in Applications > Utilities) and run these commands:
     </p>
     <div class="step__code">
-      <code>git clone git@github.com:erikaflowers/investiture.git my-app
-cd my-app</code>
-    </div>
-    <div class="step__note">
-      Replace <code>my-app</code> with your project name.
+      <code>git clone https://github.com/erikaflowers/investiture.git
+cd investiture</code>
     </div>
   </div>
 
   <!-- Step 2 -->
   <div class="step">
     <div class="step__number">2</div>
-    <h3 class="step__title">Install Dependencies</h3>
+    <h3 class="step__title">Run the Install Script</h3>
     <p class="step__description">
-      Install the minimal dependencies. Right now it's just Sass for compiling SCSS.
+      This single command installs everything you need: Homebrew, Node.js, project dependencies, and creates your CLAUDE.md file.
     </p>
     <div class="step__code">
-      <code>npm install</code>
+      <code>./install.sh</code>
+    </div>
+    <div class="step__note">
+      If you see "Permission denied," run <code>chmod +x install.sh</code> first, then try again.
     </div>
   </div>
 
   <!-- Step 3 -->
   <div class="step">
     <div class="step__number">3</div>
-    <h3 class="step__title">Start the Dev Server</h3>
+    <h3 class="step__title">Start Your App</h3>
     <p class="step__description">
-      Run the development server with live reload.
+      Launch the development server. Your app will open automatically in your browser.
     </p>
     <div class="step__code">
-      <code>npm run dev</code>
+      <code>npm start</code>
     </div>
     <div class="step__note">
-      Opens at <a href="http://localhost:8080" target="_blank">http://localhost:8080</a>. Changes to templates and SCSS auto-reload.
+      Opens at <a href="http://localhost:3000" target="_blank">http://localhost:3000</a>. When you edit files, the browser updates automatically.
     </div>
   </div>
 
   <!-- Step 4 -->
   <div class="step">
     <div class="step__number">4</div>
-    <h3 class="step__title">Customize Your Brand</h3>
+    <h3 class="step__title">Open Claude Code</h3>
     <p class="step__description">
-      Update the design tokens to match your brand. Edit <code>design-system/tokens/tokens.json</code> with your colors, typography, and spacing.
+      Open Claude Code in your project folder. It will read the CLAUDE.md file automatically and understand your project structure.
     </p>
     <div class="step__code">
-      <code>{
-  "color": {
-    "accent": {
-      "primary": "#your-brand-color",
-      "secondary": "#your-secondary-color"
-    }
-  }
-}</code>
+      <code>claude</code>
     </div>
     <div class="step__note">
-      Run <code>npm run build:tokens</code> to regenerate the SCSS and CSS files.
+      Make sure you're still in the investiture directory when you launch Claude Code.
     </div>
   </div>
 
   <!-- Step 5 -->
   <div class="step">
     <div class="step__number">5</div>
-    <h3 class="step__title">Update Your Content</h3>
+    <h3 class="step__title">Start Building</h3>
     <p class="step__description">
-      Edit the content files in <code>content/en/</code> to replace placeholder text with your app's copy.
+      Try one of these prompts in Claude Code. Your app updates in real time as Claude makes changes.
     </p>
     <div class="step__code">
-      <code>content/
-├── en/
-│   ├── common.json    # Button labels, states, auth text
-│   └── errors.json    # Error messages</code>
-    </div>
-  </div>
+      <code>"Add a color picker that changes the page background"
 
-  <!-- Step 6 -->
-  <div class="step">
-    <div class="step__number">6</div>
-    <h3 class="step__title">Build Your App</h3>
-    <p class="step__description">
-      Start building! Use the <a href="{{ '/starter/' | url }}">Starter Page</a> as your blank canvas, or modify the existing views.
-    </p>
-    <div class="step__code">
-      <code># Your app structure
-core/          # Add your business logic here
-views/vanilla/ # Build your UI here (or add React, Svelte, etc.)</code>
+"Add a todo list with add and delete"
+
+"Add a dark/light mode toggle that remembers my preference"</code>
     </div>
   </div>
 </div>
 
 <!-- Next Steps -->
 <div class="next-steps">
-  <h3 class="next-steps__title">What's Next?</h3>
+  <h3 class="next-steps__title">Your Key Files</h3>
   <div class="next-steps__grid">
     <div class="next-step-card">
-      <h4 class="next-step-card__title">Connect Real Services</h4>
+      <h4 class="next-step-card__title">demo/App.jsx</h4>
       <p class="next-step-card__description">
-        Wire up Supabase, Firebase, or your own backend in the service wrappers.
+        Your React component. This is where your UI lives. Claude Code will edit this file when you ask for features.
       </p>
-      <a href="{{ '/docs/' | url }}#working-with-layers" class="next-step-card__link">Services Documentation →</a>
+      <a href="https://github.com/erikaflowers/investiture/blob/main/demo/App.jsx" target="_blank" class="next-step-card__link">View on GitHub →</a>
     </div>
     <div class="next-step-card">
-      <h4 class="next-step-card__title">Add a Framework</h4>
+      <h4 class="next-step-card__title">demo/App.css</h4>
       <p class="next-step-card__description">
-        Create a React, Svelte, or Vue view alongside the vanilla implementation.
+        Your styles. Uses CSS variables for theming. Dark and light modes are already built in.
       </p>
-      <a href="{{ '/docs/' | url }}#integration" class="next-step-card__link">Adding Frameworks →</a>
+      <a href="https://github.com/erikaflowers/investiture/blob/main/demo/App.css" target="_blank" class="next-step-card__link">View on GitHub →</a>
     </div>
     <div class="next-step-card">
-      <h4 class="next-step-card__title">Add i18n Support</h4>
+      <h4 class="next-step-card__title">CLAUDE.md</h4>
       <p class="next-step-card__description">
-        Copy the <code>content/en/</code> folder to add new languages.
+        Your AI briefing document. Customize this to give Claude rules, a persona, or architecture guidance.
       </p>
-      <a href="{{ '/docs/' | url }}#working-with-layers" class="next-step-card__link">Content Layer Docs →</a>
     </div>
     <div class="next-step-card">
-      <h4 class="next-step-card__title">Client Theming</h4>
+      <h4 class="next-step-card__title">package.json</h4>
       <p class="next-step-card__description">
-        Create custom themes for different clients or white-label deployments.
+        Your project's dependencies and scripts. <code>npm start</code> runs the dev server.
       </p>
-      <a href="{{ '/docs/' | url }}#integration" class="next-step-card__link">Theming Guide →</a>
+      <a href="https://github.com/erikaflowers/investiture/blob/main/package.json" target="_blank" class="next-step-card__link">View on GitHub →</a>
     </div>
   </div>
 </div>

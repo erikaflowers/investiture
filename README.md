@@ -1,102 +1,106 @@
 # Investiture
 
-A learning scaffold for designers who want to use Claude Code to build real applications.
-
----
-
-## What This Is
-
-Investiture is an architecture scaffold — folders, separation of concerns, and a CLAUDE.md that teaches your AI assistant how to write clean code. It's a spaghetti-free zone for vibe coding. Clone it, open it in Claude Code, and start building. The structure keeps you from painting yourself into corners.
-
-The name comes from Brandon Sanderson's Cosmere: Investiture is the underlying magical energy that manifests differently on each world. Same power source, different expressions.
-
----
-
-## What This Is Not
-
-This is not Tailwind. This is not Bootstrap. Investiture gives you **zero styles, zero layouts, zero components**. Run it and you get a blank screen. That's the point.
-
-It's unopinionated about your UI — it only cares about where your code lives. Bring your own design system, or ask Claude to build one.
+A starter React app for learning to build with Claude Code.
 
 ---
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) 18 or higher
+- A Mac
+- An internet connection
+
+That's it. The install script handles everything else.
 
 ---
 
-## Quick Start
+## Setup
 
 ```bash
 git clone https://github.com/erikaflowers/investiture.git
 cd investiture
-npm install
-npm run dev
+./install.sh
 ```
 
-The documentation site runs at `http://localhost:8080`.
-
-For the React demo:
-```bash
-npm run dev:demo
-```
+This installs Homebrew (if needed), Node.js (if needed), project dependencies,
+and creates a CLAUDE.md file that tells Claude Code about your project.
 
 ---
 
-## Project Structure
+## Run
+
+```bash
+npm start
+```
+
+Your app opens at http://localhost:3000
+
+---
+
+## What just happened?
+
+When you ran `install.sh`, it:
+
+1. **Checked for Homebrew** — a Mac package manager that installs developer tools
+2. **Checked for Node.js** — the JavaScript runtime that runs your app
+3. **Installed dependencies** — React and Vite (a fast dev server)
+4. **Created CLAUDE.md** — a file that briefs Claude Code on your project
+
+Your app is a React component in `demo/App.jsx` with styles in `demo/App.css`.
+When you edit these files, the browser updates automatically.
+
+---
+
+## What to do next
+
+Open this project in Claude Code and try these prompts:
+
+1. **"Add a color picker that changes the page background"**
+   Teaches: state, event handlers, CSS variables
+
+2. **"Add a todo list with add and delete"**
+   Teaches: arrays in state, list rendering, forms
+
+3. **"Add a dark/light mode toggle that remembers my preference"**
+   Teaches: localStorage, useEffect, conditional styling
+
+---
+
+## The CLAUDE.md file
+
+CLAUDE.md is your AI assistant's briefing document. Claude Code reads it
+automatically when it opens your project. Customize it to:
+
+- Describe your architecture
+- Set coding rules
+- Give Claude a persona
+- List things to avoid
+
+The starter CLAUDE.md has examples. Make it yours.
+
+---
+
+## Project structure
 
 ```
 investiture/
-├── _data/              # Site data (nav, config)
-├── _includes/          # Nunjucks templates
-├── demo/               # React demo app
-│   ├── App.jsx         # Demo component
-│   ├── App.css         # Styles with CSS variables
-│   ├── main.jsx        # React mount
-│   └── index.html      # Entry point
-├── index.njk           # Home page
-├── demo.njk            # Demo showcase page
-├── docs.njk            # Documentation
-├── getting-started.njk # Setup guide
-├── eleventy.config.cjs # Eleventy config
-├── package.json        # Dependencies
-└── styles.css          # Site styles
+├── demo/
+│   ├── App.jsx       ← Your React component (start here)
+│   ├── App.css       ← Your styles
+│   ├── main.jsx      ← React mount point
+│   └── index.html    ← HTML shell
+├── CLAUDE.md         ← Claude Code reads this (created by install.sh)
+├── install.sh        ← One-time setup
+├── package.json      ← Dependencies and scripts
+└── README.md         ← You are here
 ```
 
 ---
 
-## The React Demo
+## Links
 
-The demo showcases minimal React patterns:
-
-- **Counter** — useState hook, click handler
-- **Theme toggle** — CSS variables, state-driven classes
-- **Reveal card** — CSS transitions, conditional rendering
-
-Open the demo in Claude Code and try:
-
-> **"Add a color picker that changes the background."**
-
----
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start the documentation site |
-| `npm run dev:demo` | Start the React demo in dev mode |
-| `npm run build` | Build everything for production |
-| `npm run build:demo` | Build just the React demo |
-
----
-
-## Philosophy
-
-- **Learn by doing** — Not tutorials, actual building
-- **AI-readable** — Clean structure Claude can navigate
-- **Minimal by design** — No auth, no database, no complexity
-- **Taste matters** — Dark theme, subtle animations, considered spacing
+- [Friday livestream recording](TODO_LIVESTREAM_URL)
+- [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code)
+- [Investiture documentation site](https://erikaflowers.github.io/investiture/)
 
 ---
 
