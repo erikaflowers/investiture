@@ -104,12 +104,30 @@ Try these in Claude Code:
 1. "Add a todo list that saves to localStorage"
 2. "Add a dark mode toggle using the design tokens"
 3. "Fetch data from an API and display it"
+
+## Version Control
+
+This project uses Git. Claude Code can handle Git commands for you:
+
+- "Commit my work" — saves a checkpoint you can return to
+- "Create a branch called experiment" — try ideas without risk
+- "Undo my last changes" — roll back if something breaks
 CLAUDEMD
   echo "  Created CLAUDE.md — this is your AI assistant's guide to your project"
 fi
 
-# 5. Success
+# 5. Check for Git config
 echo ""
+if ! git config user.name &> /dev/null || ! git config user.email &> /dev/null; then
+  echo "  ⚠  Git is not configured with your name/email."
+  echo "  Run these two commands (use your info):"
+  echo ""
+  echo "    git config --global user.name \"Your Name\""
+  echo "    git config --global user.email \"you@example.com\""
+  echo ""
+fi
+
+# 6. Success
 echo "  Setup complete!"
 echo ""
 echo "  Your app is in the src/ folder:"
@@ -126,6 +144,12 @@ echo "  Next steps:"
 echo "    1. Run:  npm start"
 echo "    2. Open Claude Code in this folder"
 echo "    3. Try:  \"Add a todo list that saves to localStorage\""
+echo ""
+echo "  Version control (important!):"
+echo "    Save your work anytime:  git add . && git commit -m \"describe what changed\""
+echo "    Undo a mistake:          git checkout ."
+echo "    Push to GitHub:          git push"
+echo "    Or just ask Claude Code: \"commit my work\""
 echo ""
 echo "  Run 'npm run examples' to see interactive demos."
 echo ""

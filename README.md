@@ -8,8 +8,10 @@ A React scaffold with clean architecture for learning to build with Claude Code.
 
 - A Mac
 - An internet connection
+- **[VS Code](https://code.visualstudio.com/)** — Free code editor. You'll use this to see what Claude Code is doing and to browse your project files. Download and install it before the workshop.
+- **[GitHub account](https://github.com/signup)** — Free. This is how you'll save your work, undo mistakes, and experiment safely. Think of it as version control for your code — unlimited undo, branches to try ideas without breaking what works, and a backup of everything you build. If you don't have an account, create one now. It takes 2 minutes.
 
-That's it. The install script handles everything else.
+The install script handles everything else.
 
 ---
 
@@ -49,6 +51,21 @@ When you ran `install.sh`, it:
 
 Your app is a React component in `src/App.jsx` with styles in `src/App.css`.
 When you edit these files, the browser updates automatically.
+
+---
+
+## Why Git and GitHub matter
+
+Git is version control — it tracks every change to your code so you can undo mistakes, save checkpoints, and try things without risk. GitHub is where your code lives online.
+
+You don't need to be a Git expert. Here's what matters:
+
+- **Save your work:** `git add . && git commit -m "describe what changed"` — takes a snapshot you can return to
+- **Undo a mistake:** `git checkout .` — throws away changes since your last commit
+- **Try something risky:** `git checkout -b experiment` — creates a branch (a parallel copy). If it works, merge it back. If not, delete it.
+- **Push to GitHub:** `git push` — backs up your code online
+
+Claude Code can run Git commands for you. Ask it: *"commit my work"* or *"create a branch called dark-mode"* — it knows how.
 
 ---
 

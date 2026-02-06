@@ -7,7 +7,6 @@
 
 module.exports = function(eleventyConfig) {
   // Pass through static assets
-  eleventyConfig.addPassthroughCopy("app.js");
   eleventyConfig.addPassthroughCopy("docs.js");
   eleventyConfig.addPassthroughCopy("nav.js");
   eleventyConfig.addPassthroughCopy("styles.css");
