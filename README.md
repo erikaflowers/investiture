@@ -11,7 +11,7 @@ A React scaffold with clean architecture for learning to build with Claude Code.
 - **[VS Code](https://code.visualstudio.com/)** — Free code editor. You'll use this to see what Claude Code is doing and to browse your project files. Download and install it before the workshop.
 - **[GitHub account](https://github.com/signup)** — Free. This is how you'll save your work, undo mistakes, and experiment safely. Think of it as version control for your code — unlimited undo, branches to try ideas without breaking what works, and a backup of everything you build. If you don't have an account, create one now. It takes 2 minutes.
 
-The install script handles everything else.
+The install script handles everything else — including Claude Code itself.
 
 ---
 
@@ -44,10 +44,12 @@ To see the interactive examples: `npm run examples` (opens at :3001)
 
 When you ran `install.sh`, it:
 
-1. **Checked for Homebrew** — a Mac package manager that installs developer tools
-2. **Checked for Node.js** — the JavaScript runtime that runs your app
-3. **Installed dependencies** — React and Vite (a fast dev server)
-4. **Created CLAUDE.md** — a file that briefs Claude Code on your project structure and rules
+1. **Checked for command line tools** — Xcode CLT, which includes Git
+2. **Checked for Homebrew** — a Mac package manager that installs developer tools
+3. **Checked for Node.js** — the JavaScript runtime that runs your app
+4. **Installed dependencies** — React and Vite (a fast dev server)
+5. **Installed Claude Code** — the AI coding assistant (if not already installed)
+6. **Created CLAUDE.md** — a file that briefs Claude Code on your project structure and rules
 
 Your app is a React component in `src/App.jsx` with styles in `src/App.css`.
 When you edit these files, the browser updates automatically.

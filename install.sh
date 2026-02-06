@@ -8,7 +8,20 @@ echo "  Investiture Setup"
 echo "  Getting your development environment ready..."
 echo ""
 
-# 1. Check for Homebrew
+# 1. Check for Xcode Command Line Tools (includes Git)
+if ! xcode-select -p &> /dev/null; then
+  echo "  Installing command line tools (includes Git)..."
+  echo "  A system dialog may appear — click Install and wait for it to finish."
+  xcode-select --install
+  echo ""
+  echo "  ⚠  After the install finishes, run ./install.sh again."
+  echo ""
+  exit 0
+else
+  echo "  Command line tools found (includes Git)"
+fi
+
+# 2. Check for Homebrew (skipped if already installed)
 if ! command -v brew &> /dev/null; then
   echo "  Installing Homebrew (Mac package manager)..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -20,7 +33,7 @@ else
   echo "  Homebrew found"
 fi
 
-# 2. Check for Node.js
+# 3. Check for Node.js
 if ! command -v node &> /dev/null; then
   echo "  Installing Node.js..."
   brew install node
@@ -28,11 +41,25 @@ else
   echo "  Node.js found ($(node --version))"
 fi
 
-# 3. Install project dependencies
+# 4. Install project dependencies
 echo "  Installing dependencies..."
 npm install --silent
 
-# 4. Create CLAUDE.md if it doesn't exist
+# 5. Check for Claude Code
+if ! command -v claude &> /dev/null; then
+  echo "  Installing Claude Code..."
+  npm install -g @anthropic-ai/claude-code
+  if command -v claude &> /dev/null; then
+    echo "  Claude Code installed"
+  else
+    echo "  ⚠  Claude Code install may need a terminal restart."
+    echo "  If 'claude' doesn't work, run: npm install -g @anthropic-ai/claude-code"
+  fi
+else
+  echo "  Claude Code found"
+fi
+
+# 6. Create CLAUDE.md if it doesn't exist
 if [ ! -f CLAUDE.md ]; then
   echo "  Creating CLAUDE.md..."
   cat > CLAUDE.md << 'CLAUDEMD'
@@ -116,7 +143,7 @@ CLAUDEMD
   echo "  Created CLAUDE.md — this is your AI assistant's guide to your project"
 fi
 
-# 5. Check for Git config
+# 7. Check for Git config
 echo ""
 if ! git config user.name &> /dev/null || ! git config user.email &> /dev/null; then
   echo "  ⚠  Git is not configured with your name/email."
@@ -127,7 +154,7 @@ if ! git config user.name &> /dev/null || ! git config user.email &> /dev/null; 
   echo ""
 fi
 
-# 6. Success
+# 8. Success
 echo "  Setup complete!"
 echo ""
 echo "  Your app is in the src/ folder:"

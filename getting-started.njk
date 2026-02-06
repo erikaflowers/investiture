@@ -161,7 +161,7 @@ headerTagline: Get Started
     <div class="step__number">0</div>
     <h3 class="step__title">Before You Start</h3>
     <p class="step__description">
-      You'll need two free tools installed before the workshop. Both take a couple minutes.
+      Get these two free tools installed before the workshop. Both take a couple minutes.
     </p>
     <p class="step__description">
       <strong><a href="https://code.visualstudio.com/" target="_blank" rel="noopener">VS Code</a></strong> — A free code editor. You'll use this to see your project files and watch what Claude Code is building. Download, install, done.
@@ -170,7 +170,7 @@ headerTagline: Get Started
       <strong><a href="https://github.com/signup" target="_blank" rel="noopener">GitHub account</a></strong> — Free. GitHub is where your code lives online. More importantly, it gives you version control: unlimited undo, branches to try ideas safely, and a backup of everything you build. Create an account if you don't have one.
     </p>
     <div class="step__note">
-      You don't need to know Git commands — Claude Code can handle them for you. Just ask it to "commit my work" or "create a branch."
+      The install script (Step 2) will install Claude Code for you automatically. If you already have it, it skips that step. You don't need to know Git commands either — Claude Code handles them for you.
     </div>
   </div>
 
@@ -185,6 +185,9 @@ headerTagline: Get Started
       <code>git clone https://github.com/erikaflowers/investiture.git
 cd investiture</code>
     </div>
+    <div class="step__note">
+      If you see a popup asking to install "command line developer tools" — click Install. That's normal on a fresh Mac. It gives you Git. Once it finishes, run the commands above again.
+    </div>
   </div>
 
   <!-- Step 2 -->
@@ -192,7 +195,7 @@ cd investiture</code>
     <div class="step__number">2</div>
     <h3 class="step__title">Run the Install Script</h3>
     <p class="step__description">
-      This single command installs everything you need: Homebrew, Node.js, project dependencies, and creates your CLAUDE.md file.
+      This single command installs everything you need: Homebrew, Node.js, Claude Code, project dependencies, and creates your CLAUDE.md file.
     </p>
     <div class="step__code">
       <code>./install.sh</code>
@@ -222,13 +225,13 @@ cd investiture</code>
     <div class="step__number">4</div>
     <h3 class="step__title">Open Claude Code</h3>
     <p class="step__description">
-      Open Claude Code in your project folder. It will read the CLAUDE.md file automatically and understand your project structure.
+      The install script already installed Claude Code for you. Launch it in your project folder — it reads the CLAUDE.md file automatically and understands your project structure.
     </p>
     <div class="step__code">
       <code>claude</code>
     </div>
     <div class="step__note">
-      Make sure you're still in the investiture directory when you launch Claude Code.
+      Make sure you're still in the investiture directory when you launch Claude Code. The first time you run it, you'll need to log in with your Anthropic account.
     </div>
   </div>
 
