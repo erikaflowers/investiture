@@ -6,10 +6,11 @@ A React scaffold with clean architecture for learning to build with Claude Code.
 
 ## Prerequisites
 
-- A Mac
+- A Mac, Linux machine, or Windows PC
 - An internet connection
 - **[VS Code](https://code.visualstudio.com/)** — Free code editor. You'll use this to see what Claude Code is doing and to browse your project files. Download and install it before the workshop.
 - **[GitHub account](https://github.com/signup)** — Free. This is how you'll save your work, undo mistakes, and experiment safely. Think of it as version control for your code — unlimited undo, branches to try ideas without breaking what works, and a backup of everything you build. If you don't have an account, create one now. It takes 2 minutes.
+- **Windows users:** Run the install script from [Git Bash](https://git-scm.com/download/win) or [WSL](https://learn.microsoft.com/en-us/windows/wsl/install).
 
 The install script handles everything else — including Claude Code itself.
 
@@ -23,8 +24,13 @@ cd investiture
 ./install.sh
 ```
 
-This installs Homebrew (if needed), Node.js (if needed), project dependencies,
-and creates a CLAUDE.md file that tells Claude Code about your project.
+The script detects your platform and installs the right dependencies:
+- **Mac:** Homebrew and Node.js via brew
+- **Linux/WSL:** Git and Node.js via your package manager (apt, dnf, pacman, zypper)
+- **Windows (Git Bash):** Node.js via winget or choco
+
+It also installs project dependencies and creates a CLAUDE.md file that tells
+Claude Code about your project.
 
 ---
 
@@ -44,9 +50,9 @@ To see the interactive examples: `npm run examples` (opens at :3001)
 
 When you ran `install.sh`, it:
 
-1. **Checked for command line tools** — Xcode CLT, which includes Git
-2. **Checked for Homebrew** — a Mac package manager that installs developer tools
-3. **Checked for Node.js** — the JavaScript runtime that runs your app
+1. **Detected your platform** — Mac, Linux, WSL, or Windows (Git Bash)
+2. **Ensured Git is available** — Xcode CLT on Mac, package manager on Linux, or checked for it on Windows
+3. **Ensured Node.js is available** — via Homebrew, your Linux package manager, or winget/choco on Windows
 4. **Installed dependencies** — React and Vite (a fast dev server)
 5. **Installed Claude Code** — the AI coding assistant (if not already installed)
 6. **Created CLAUDE.md** — a file that briefs Claude Code on your project structure and rules
