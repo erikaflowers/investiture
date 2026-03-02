@@ -36,43 +36,14 @@ if [ -f package.json ]; then
   echo "  Updated package.json name to: $SLUG"
 fi
 
-# 2. Update content/en.json title
-if [ -f content/en.json ]; then
-  node -e "
-    const fs = require('fs');
-    const content = JSON.parse(fs.readFileSync('content/en.json', 'utf8'));
-    content.app.title = '$PROJECT_NAME';
-    content.app.tagline = 'Built with Investiture';
-    fs.writeFileSync('content/en.json', JSON.stringify(content, null, 2) + '\n');
-  "
-  echo "  Updated content/en.json title to: $PROJECT_NAME"
-fi
-
-# 3. Regenerate CLAUDE.md if install.sh exists
+# 2. Regenerate CLAUDE.md if install.sh exists
 if [ -f install.sh ]; then
   rm -f CLAUDE.md
   bash install.sh 2>/dev/null | grep -q "CLAUDE.md" && true
   echo "  Regenerated CLAUDE.md"
 fi
 
-# 4. Ask about removing examples
-echo ""
-read -p "  Remove the examples/ folder? (y/N): " REMOVE_EXAMPLES
-
-if [ "$REMOVE_EXAMPLES" = "y" ] || [ "$REMOVE_EXAMPLES" = "Y" ]; then
-  rm -rf examples/
-  # Remove examples script from package.json
-  node -e "
-    const fs = require('fs');
-    const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-    delete pkg.scripts.examples;
-    delete pkg.scripts['build:examples'];
-    fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-  "
-  echo "  Removed examples/"
-fi
-
-# 5. Ask about fresh git history
+# 3. Ask about fresh git history
 echo ""
 read -p "  Reset git history? This gives you a clean start. (y/N): " RESET_GIT
 
@@ -84,7 +55,7 @@ if [ "$RESET_GIT" = "y" ] || [ "$RESET_GIT" = "Y" ]; then
   echo "  Fresh git history created"
 fi
 
-# 6. Ask about creating a GitHub repo
+# 4. Ask about creating a GitHub repo
 echo ""
 if command -v gh &> /dev/null; then
   read -p "  Create a GitHub repo for $SLUG? (y/N): " CREATE_REPO

@@ -1,5 +1,4 @@
 import { Routes, Route, Link } from 'react-router-dom';
-import content from '../content/en.json';
 import Home from './components/Home.jsx';
 import About from './components/About.jsx';
 import './App.css';
@@ -9,10 +8,10 @@ function App() {
     <div className="app">
       <nav className="nav">
         <div className="nav-inner">
-          <Link to="/" className="nav-brand">{content.app.title}</Link>
+          <Link to="/" className="nav-brand">My App</Link>
           <div className="nav-links">
-            <Link to="/">{content.nav.home}</Link>
-            <Link to="/about">{content.nav.about}</Link>
+            <Link to="/">Home</Link>
+            <Link to="/about">About</Link>
           </div>
         </div>
       </nav>

@@ -1,15 +1,10 @@
 {
   "name": "investiture",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "examples": "vite --config examples/vite.config.js",
-    "build:examples": "vite build --config examples/vite.config.js",
-    "docs": "ELEVENTY_ENV=production npx @11ty/eleventy",
-    "docs:dev": "npx @11ty/eleventy --serve",
-    "build:all": "npm run docs && npm run build:examples",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -19,9 +14,7 @@
     "react-router-dom": "^7.13.0"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^3.0.0",
     "@vitejs/plugin-react": "^4.3.0",
-    "sass": "^1.77.0",
     "vite": "^6.0.0",
     "vitest": "^4.0.18"
   }

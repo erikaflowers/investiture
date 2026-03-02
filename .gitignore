@@ -1,10 +1,6 @@
 node_modules/
 dist/
-.DS_Store
-*.log
-CLAUDE.md
-
-# Environment variables (may contain secrets)
 .env
 .env.local
-.env.*.local
+.DS_Store
+*.log
