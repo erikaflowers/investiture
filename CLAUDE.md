@@ -1,83 +1,60 @@
-# [Agent Name] — [Role]
+# [Project Name] — Contributor Onboarding
 
-**Pronouns:** [he/him | she/her | they/them]
-
----
-
-## Who You Are
-
-You are **[Agent Name]**, the [role] for [project name].
-
-[2-3 sentences describing your domain, your responsibilities, and your relationship to the project. This is not a job description. It is an identity.]
-
-**Your domain:**
-- [Primary responsibility]
-- [Secondary responsibility]
-- [What you own that no other agent owns]
+This file is for anyone — human or AI — who is about to work in this codebase. Read it after VECTOR.md, before ARCHITECTURE.md.
 
 ---
 
-## Voice
+## Reading Order
 
-[How do you speak? What is your energy? Are you warm and reassuring? Clinical and precise? Direct and action-oriented? Pick a consistent personality and describe it in 3-5 sentences.]
+1. **VECTOR.md** — Project doctrine. Why this project exists, who it serves, what the constraints are.
+2. **CLAUDE.md** — This file. What you need to know before touching code.
+3. **ARCHITECTURE.md** — Technical specification. Layers, stack, conventions, structure, import rules.
 
-**Signature phrases:**
-- "[A phrase this agent uses often]"
-- "[Another characteristic expression]"
-
-**Never:**
-- [Something this agent would never do or say]
-- [A behavior that would break character]
+Read ARCHITECTURE.md and follow it. It is the single technical authority. When in doubt about where a file goes or how to name it, ARCHITECTURE.md decides.
 
 ---
 
-## The Operator
+## Stack Summary
 
-You work with **[Operator Name]** — [brief description of who they are and how they work].
+[OPERATOR: List the technologies your project uses. One row per concern. This gives any contributor a snapshot of the stack without reading ARCHITECTURE.md in full.]
 
-**How to work with them:**
-- [Communication preference]
-- [What they value]
-- [What frustrates them]
+| Layer | Technology |
+|-------|-----------|
+| Frontend | [framework + version] |
+| Styling | [approach] |
+| State | [library or pattern] |
+| Backend | [framework, serverless, or "none"] |
+| Deployment | [platform] |
 
 ---
 
-## Working Style
+## Key Context
 
-### How You Approach Tasks
-- [Pattern — e.g., "Verify before assuming"]
-- [Pattern — e.g., "Ship working code, not explanations"]
-- [Pattern — e.g., "Ask if stuck, do not spin"]
+Things that aren't obvious from the code but will cause wrong assumptions if you don't know them:
 
-### Technical Patterns
-- [Stack or tool preference]
-- [Code style convention]
-- [Testing expectation]
+[OPERATOR: Write 3-6 bullets. Each one should be something a new contributor would get wrong without being told. Examples: "All content lives in src/content/ — do not put copy in JSX." "The CSS file is 15,000 lines and that is intentional." "There is no persistent server — all backend logic runs in serverless functions."]
 
-### When You Commit
+- [Non-obvious architectural decision and why it matters]
+- [Deployment or runtime constraint that affects development]
+- [Content, data, or state convention that would be easy to violate]
+
+---
+
+## What Not to Do
+
+[OPERATOR: Surface the 3-5 most important prohibitions from ARCHITECTURE.md here, so they are seen early. These should be the mistakes most likely to happen.]
+
+1. [Most important prohibition — the one that causes the most damage if violated]
+2. [Second most important]
+3. [Third]
+
+---
+
+## Commit Format
+
 ```
-Co-Authored-By: [Model] <noreply@anthropic.com>
+Co-Authored-By: [Agent or Model Name] <noreply@anthropic.com>
 ```
-
----
-
-## Architecture
-
-**Read ARCHITECTURE.md and follow it.** All layer rules, naming conventions, import direction, and structural patterns are defined there. Do not duplicate them here — ARCHITECTURE.md is the single technical authority.
-
-When in doubt about where a file goes or how to name it, ARCHITECTURE.md decides.
-
-After every change, state which files you touched and which layer they belong to.
-
----
-
-## Context
-
-**Read VECTOR.md first** — it contains the project doctrine, the Seven Principles, the Core Relationship, and your constraints.
-
-**Read CLAUDE.md second** — this file. Your identity and voice.
-
-**Read ARCHITECTURE.md third** — it contains the technical specification: layers, stack, conventions, structure. The rules you follow when writing code.
 
 ---
 
@@ -91,3 +68,12 @@ What is working: [current stable state]
 Concerns: [anything requiring attention]
 Blockers: [anything stopping progress]
 ```
+
+---
+
+## Agent Identity (Optional)
+
+[OPERATOR: If your agent has a defined persona (name, pronouns, voice,
+working style), add it here. If your agents are managed externally,
+or you want this file to serve any contributor regardless of whether
+they are human or AI, the sections above are sufficient.]

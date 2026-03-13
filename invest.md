@@ -138,7 +138,19 @@ Backfill generates drafts. Review the `[OPERATOR: ...]` sections and fill in wha
 
 The skills themselves (`.claude/skills/`) and the doctrine files (`VECTOR.md`, `CLAUDE.md`, `ARCHITECTURE.md`) should be committed to your repo. They are part of your project now. Future contributors and agents will discover them automatically.
 
-The `/vector/` directory (research artifacts, schemas, decision records) is optional. Backfill does not create it — add it when you begin structured research.
+The `/vector/` directory (research artifacts, schemas, decision records) is created by backfill with `.gitkeep` files and a README. Commit the structure — it gives the doctrine files' `knowledge:` references somewhere to resolve, and gives audit reports a home. If you prefer to defer directory creation, pass `--no-vector` during backfill.
+
+### Audit reports
+
+Each skill saves its report to `/vector/audits/`:
+
+| Skill | Report |
+|-------|--------|
+| `invest-backfill` | `/vector/audits/invest-backfill.md` |
+| `invest-doctrine` | `/vector/audits/invest-doctrine.md` |
+| `invest-architecture` | `/vector/audits/invest-architecture.md` |
+
+Reports are overwritten on each run — the current state is what matters, git has the history. The `/vector/audits/` directory is created automatically if it does not exist.
 
 ## How Skills Work
 

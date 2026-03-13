@@ -109,6 +109,23 @@ examples/               — Reference implementations
 
 ---
 
+## Skills
+
+Investiture includes a skill chain that reads your doctrine at runtime and enforces it. Skills are Claude Code agent skills — copy them into any project's `.claude/skills/` directory.
+
+| Skill | Purpose |
+|-------|---------|
+| `/invest-backfill` | Bootstrap VECTOR.md, CLAUDE.md, and ARCHITECTURE.md from an existing codebase |
+| `/invest-doctrine` | Validate doctrine files for completeness, consistency, and drift |
+| `/invest-architecture` | Audit codebase against declared conventions — layers, imports, naming, tokens |
+
+**Existing projects:** Run `/invest-backfill` first. It surveys your code and generates starter doctrine.
+**Greenfield projects:** Fill in the three doctrine files, then run `/invest-doctrine` to validate.
+
+See [invest.md](invest.md) for the full skill chain reference.
+
+---
+
 ## What to do next
 
 Open this project in Claude Code (`claude` in terminal) and try these prompts — each one teaches a different architecture layer:
@@ -178,7 +195,7 @@ investiture/
 ## Links
 
 - [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code)
-- [Investiture documentation site](https://erikaflowers.github.io/investiture/)
+- [Investiture on Zero Vector](https://zerovector.design/investiture)
 
 ---
 
