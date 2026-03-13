@@ -1,6 +1,6 @@
 # Investiture
 
-A React scaffold with clean architecture for learning to build with Claude Code.
+A project scaffold with clean architecture, structured doctrine, and a skill chain that enforces it. Built for Claude Code.
 
 ---
 
@@ -8,20 +8,19 @@ A React scaffold with clean architecture for learning to build with Claude Code.
 
 - A Mac, Linux machine, or Windows PC
 - An internet connection
-- **[VS Code](https://code.visualstudio.com/)** — Free code editor. You'll use this to see what Claude Code is doing and to browse your project files. Download and install it before the workshop.
-- **[GitHub account](https://github.com/signup)** — Free. This is how you'll save your work, undo mistakes, and experiment safely. Think of it as version control for your code — unlimited undo, branches to try ideas without breaking what works, and a backup of everything you build. If you don't have an account, create one now. It takes 2 minutes.
+- **[VS Code](https://code.visualstudio.com/)** -- Free code editor. You'll use this to see what Claude Code is doing and to browse your project files.
+- **[GitHub account](https://github.com/signup)** -- Free. Version control for your code: unlimited undo, branches to try ideas, and a backup of everything you build.
 - **Windows users:** Run the install script from [Git Bash](https://git-scm.com/download/win) or [WSL](https://learn.microsoft.com/en-us/windows/wsl/install).
 
-The install script handles everything else — including Claude Code itself.
+The install script handles everything else, including Claude Code itself.
 
 ---
 
 ## Setup
 
 ```bash
-git clone https://github.com/erikaflowers/investiture.git
-cd investiture
-bash install.sh
+git clone https://github.com/erikaflowers/investiture.git my-project
+cd my-project && bash install.sh
 ```
 
 The script detects your platform and installs the right dependencies:
@@ -42,85 +41,65 @@ npm start
 
 Your app opens at http://localhost:3000
 
-To see the interactive examples: `npm run examples` (opens at :3001)
-
 ---
 
-## What just happened?
+## What you get
 
-When you ran `install.sh`, it:
+### Doctrine
 
-1. **Detected your platform** — Mac, Linux, WSL, or Windows (Git Bash)
-2. **Ensured Git is available** — Xcode CLT on Mac, package manager on Linux, or checked for it on Windows
-3. **Ensured Node.js is available** — via Homebrew, your Linux package manager, or winget/choco on Windows
-4. **Installed dependencies** — React and Vite (a fast dev server)
-5. **Installed Claude Code** — the AI coding assistant (if not already installed)
-6. **Created CLAUDE.md** — a file that briefs Claude Code on your project structure and rules
+Three files that define your project before a line of code is written:
 
-Your app is a React component in `src/App.jsx` with styles in `src/App.css`.
-When you edit these files, the browser updates automatically.
+1. **VECTOR.md** -- Project doctrine. Why this project exists, who it serves, what you know, what you still need to learn.
+2. **CLAUDE.md** -- Contributor onboarding. What any human or AI needs to know before touching code.
+3. **ARCHITECTURE.md** -- Technical specification. Layers, stack, conventions, naming, import rules.
 
----
+### Architecture
 
-## Why Git and GitHub matter
-
-Git is version control — it tracks every change to your code so you can undo mistakes, save checkpoints, and try things without risk. GitHub is where your code lives online.
-
-You don't need to be a Git expert. Here's what matters:
-
-- **Save your work:** `git add . && git commit -m "describe what changed"` — takes a snapshot you can return to
-- **Undo a mistake:** `git checkout .` — throws away changes since your last commit
-- **Try something risky:** `git checkout -b experiment` — creates a branch (a parallel copy). If it works, merge it back. If not, delete it.
-- **Push to GitHub:** `git push` — backs up your code online
-
-Claude Code can run Git commands for you. Ask it: *"commit my work"* or *"create a branch called dark-mode"* — it knows how.
-
----
-
-## Architecture
-
-Investiture has four layers. Claude knows to use them:
+Four layers. Claude knows to use them:
 
 ```
-src/                    — YOUR APP (start here)
-  App.jsx               — App shell (layout, routing)
-  App.css               — Global styles
-  components/           — Reusable UI components
-    Home.jsx            — Home page
-    About.jsx           — About page
-    ErrorBoundary.jsx   — Error handling wrapper
+src/                    Your app (start here)
+  App.jsx               App shell (layout, routing)
+  App.css               Global styles
+  components/           Reusable UI components
 
-design-system/          — Visual foundation
-  tokens.css            — Colors, spacing, typography as CSS variables
+design-system/          Visual foundation
+  tokens.css            Colors, spacing, typography as CSS variables
 
-content/                — User-facing strings
-  en.json               — All text in one place (no hardcoded strings)
+core/                   Pure business logic
+  utils.js              Helper functions (no side effects)
+  store.jsx             App state management (React Context)
 
-core/                   — Pure business logic
-  utils.js              — Helper functions (no side effects)
-  store.jsx             — App state management (React Context)
-
-services/               — External integrations
-  api.js                — API client (swap for your backend)
-
-examples/               — Reference implementations
-  App.jsx               — Demos using all four architecture layers
+services/               External integrations
+  api.js                API client (swap for your backend)
 ```
 
----
+### Research
 
-## Skills
+The `/vector` directory holds structured research artifacts in machine-readable schemas:
 
-Investiture includes a skill chain that reads your doctrine at runtime and enforces it. Skills are Claude Code agent skills — copy them into any project's `.claude/skills/` directory.
+```
+vector/
+  schemas/              6 JSON schemas (persona, JTBD, assumption, interview, competitive, blue ocean)
+  research/             Your structured findings
+  decisions/            Architecture Decision Records
+  audits/               Skill chain audit reports
+```
+
+### Skills
+
+The skill chain reads your doctrine at runtime and enforces it. Skills live in `.claude/skills/` and are auto-discovered by Claude Code.
 
 | Skill | Purpose |
 |-------|---------|
-| `/invest-backfill` | Bootstrap VECTOR.md, CLAUDE.md, and ARCHITECTURE.md from an existing codebase |
-| `/invest-doctrine` | Validate doctrine files for completeness, consistency, and drift |
-| `/invest-architecture` | Audit codebase against declared conventions — layers, imports, naming, tokens |
+| `/invest-backfill` | Survey an existing codebase and generate starter doctrine |
+| `/invest-doctrine` | Validate doctrine for completeness, consistency, and drift |
+| `/invest-architecture` | Audit code against declared layers, imports, naming, tokens |
 
-**Existing projects:** Run `/invest-backfill` first. It surveys your code and generates starter doctrine.
+**Existing projects:** Run `/invest-backfill` first. It surveys your code and generates VECTOR.md, CLAUDE.md, and ARCHITECTURE.md.
 **Greenfield projects:** Fill in the three doctrine files, then run `/invest-doctrine` to validate.
+
+The chain runs in order: backfill creates the doctrine, doctrine validates it, architecture enforces it.
 
 See [invest.md](invest.md) for the full skill chain reference.
 
@@ -128,7 +107,7 @@ See [invest.md](invest.md) for the full skill chain reference.
 
 ## What to do next
 
-Open this project in Claude Code (`claude` in terminal) and try these prompts — each one teaches a different architecture layer:
+Open this project in Claude Code (`claude` in terminal) and try these prompts, each one teaches a different architecture layer:
 
 1. **"Change the app title and tagline using content/en.json"**
    Teaches: the content layer
@@ -144,17 +123,11 @@ Open this project in Claude Code (`claude` in terminal) and try these prompts �
 
 ---
 
-## The CLAUDE.md file
+## The reading order
 
-CLAUDE.md is your AI assistant's briefing document. Claude Code reads it
-automatically when it opens your project. It contains:
+VECTOR.md, CLAUDE.md, ARCHITECTURE.md. Read them in that order. This is onboarding for both humans and agents.
 
-- Architecture rules (where to put what)
-- Do-not rules (patterns to avoid)
-- Project structure
-- Starter prompts
-
-The starter CLAUDE.md enforces clean architecture. Customize it as you learn.
+CLAUDE.md is generated by `install.sh` and read automatically by Claude Code when it opens your project. It contains architecture rules, constraints, project structure, and starter prompts.
 
 ---
 
@@ -162,32 +135,35 @@ The starter CLAUDE.md enforces clean architecture. Customize it as you learn.
 
 ```
 investiture/
-├── src/                  ← Your app (start here)
-│   ├── App.jsx           ← App shell with routing
+├── VECTOR.md              Project doctrine (read first)
+├── CLAUDE.md              Contributor onboarding (read second)
+├── ARCHITECTURE.md        Technical guide (read third)
+├── .claude/skills/        Skill chain (backfill, doctrine, architecture)
+├── src/                   Your app (start here)
+│   ├── App.jsx            App shell with routing
 │   ├── App.css
 │   ├── main.jsx
 │   ├── index.html
-│   └── components/       ← Your UI components
-│       ├── Home.jsx
-│       ├── About.jsx
+│   └── components/        Your UI components
 │       └── ErrorBoundary.jsx
-├── design-system/        ← CSS variables and tokens
+├── design-system/         CSS variables and tokens
 │   └── tokens.css
-├── content/              ← User-facing strings
-│   └── en.json
-├── core/                 ← Pure business logic
+├── core/                  Pure business logic
 │   ├── utils.js
-│   ├── utils.test.js     ← Example tests
-│   └── store.jsx         ← State management
-├── services/             ← External integrations
+│   ├── utils.test.js      Example tests
+│   └── store.jsx          State management
+├── services/              External integrations
 │   └── api.js
-├── examples/             ← Reference demos
-│   └── App.jsx
-├── .env.example          ← Environment variable template
-├── CLAUDE.md             ← Created by install.sh
-├── install.sh            ← One-time setup
-├── package.json          ← Dependencies and scripts
-└── README.md             ← You are here
+├── vector/                Research and decisions
+│   ├── schemas/           6 research schemas
+│   ├── research/          Your structured findings
+│   ├── decisions/         Architecture Decision Records
+│   └── audits/            Skill audit reports
+├── .env.example           Environment variable template
+├── invest.md              Skill chain reference
+├── install.sh             One-time setup
+├── package.json           Dependencies and scripts
+└── README.md              You are here
 ```
 
 ---
@@ -196,6 +172,7 @@ investiture/
 
 - [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code)
 - [Investiture on Zero Vector](https://zerovector.design/investiture)
+- [Changelog](https://zerovector.design/investiture/changelog)
 
 ---
 
