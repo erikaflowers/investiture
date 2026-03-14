@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Vector — Competitive Analysis",
+  "description": "Captures a competitive analysis entry: who the competitor is, what they do well, where they fall short, and what differentiates them.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "description": "Unique identifier (e.g., COMP-001)" },
+    "version": { "type": "string", "default": "0.1" },
+    "created": { "type": "string", "format": "date" },
+    "status": { "type": "string", "enum": ["draft", "confirmed", "invalidated"] },
+    "competitor_name": { "type": "string", "description": "Name of the competitor product or service" },
+    "category": { "type": "string", "description": "Market category or segment (e.g., 'Writing Tools', 'Project Management')" },
+    "strengths": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "What this competitor does well"
+    },
+    "weaknesses": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Where this competitor falls short"
+    },
+    "differentiator": { "type": "string", "description": "Their primary unique selling point" },
+    "threat_level": { "type": "string", "enum": ["low", "medium", "high"], "description": "How much of a competitive threat they represent" }
+  },
+  "required": ["id", "version", "status"]
+}

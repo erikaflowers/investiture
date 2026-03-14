@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Vector — Job to Be Done",
+  "description": "Captures a job to be done: what the user is trying to accomplish, in what context, and how well current solutions serve them.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "description": "Unique identifier (e.g., JTBD-001)" },
+    "version": { "type": "string", "default": "0.1" },
+    "created": { "type": "string", "format": "date" },
+    "status": { "type": "string", "enum": ["draft", "confirmed", "invalidated"] },
+    "job_statement": { "type": "string", "description": "The job statement in JTBD format: When [situation], I want to [motivation], so I can [outcome]" },
+    "context": { "type": "string", "description": "The situation or trigger that creates this job" },
+    "current_solutions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tools, workarounds, or methods users currently employ for this job"
+    },
+    "desired_outcome": { "type": "string", "description": "What success looks like when this job is done well" },
+    "importance": { "type": "string", "enum": ["low", "medium", "high", "critical"], "description": "How important this job is to the user" },
+    "satisfaction": { "type": "string", "enum": ["unmet", "underserved", "met", "overserved"], "description": "How well current solutions satisfy this job" }
+  },
+  "required": ["id", "version", "status"]
+}

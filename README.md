@@ -4,7 +4,46 @@ A project scaffold with clean architecture, structured doctrine, and a skill cha
 
 ---
 
-## Prerequisites
+## Add to an existing project
+
+Already have a codebase? Inject the skill chain and research schemas without touching your code:
+
+```bash
+npx investiture init
+```
+
+This adds:
+- `.claude/skills/` -- Three skills that read and enforce your doctrine
+- `vector/schemas/` -- Six research schemas (persona, JTBD, assumption, interview, competitive, blue ocean)
+- `vector/research/`, `vector/decisions/`, `vector/audits/` -- Directory structure for structured findings
+
+Then open Claude Code and run `/invest-backfill`. It surveys your codebase and generates VECTOR.md, CLAUDE.md, and ARCHITECTURE.md.
+
+**Alternative (no npm):**
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/erikaflowers/investiture/main/inject.sh)
+```
+
+---
+
+## Start a new project
+
+Use the GitHub template for a full scaffold with React, Vite, and the doctrine system built in:
+
+```bash
+git clone https://github.com/erikaflowers/investiture.git my-project
+cd my-project && bash install.sh
+```
+
+Or use `--fresh` to get starter doctrine templates without the app scaffold:
+
+```bash
+mkdir my-project && cd my-project && git init
+npx investiture init --fresh
+```
+
+### Prerequisites
 
 - A Mac, Linux machine, or Windows PC
 - An internet connection
@@ -14,22 +53,10 @@ A project scaffold with clean architecture, structured doctrine, and a skill cha
 
 The install script handles everything else, including Claude Code itself.
 
----
-
-## Setup
-
-```bash
-git clone https://github.com/erikaflowers/investiture.git my-project
-cd my-project && bash install.sh
-```
-
 The script detects your platform and installs the right dependencies:
 - **Mac:** Homebrew and Node.js via brew
 - **Linux/WSL:** Git and Node.js via your package manager (apt, dnf, pacman, zypper)
 - **Windows (Git Bash):** Node.js via winget or choco
-
-It also installs project dependencies and creates a CLAUDE.md file that tells
-Claude Code about your project.
 
 ---
 

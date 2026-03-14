@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Vector — Persona",
+  "description": "Captures a user persona: a composite archetype representing a segment of your target audience.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "description": "Unique identifier (e.g., PER-001)" },
+    "version": { "type": "string", "default": "0.1" },
+    "created": { "type": "string", "format": "date" },
+    "status": { "type": "string", "enum": ["draft", "confirmed", "invalidated"] },
+    "name": { "type": "string", "description": "Persona name (e.g., 'Alex the Indie Author')" },
+    "role": { "type": "string", "description": "Their professional role or primary identity" },
+    "goals": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "What this persona is trying to achieve"
+    },
+    "frustrations": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "What blocks or annoys this persona in their current workflow"
+    },
+    "behaviors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Observable habits, patterns, or tendencies"
+    },
+    "tools_used": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Software, services, or methods they currently use"
+    },
+    "quote": { "type": "string", "description": "A representative quote that captures this persona's voice" }
+  },
+  "required": ["id", "version", "status"]
+}

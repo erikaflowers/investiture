@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Vector — Assumption",
+  "description": "Captures a project assumption: what you believe to be true, how confident you are, and how you plan to validate it.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "description": "Unique identifier (e.g., ASM-001)" },
+    "version": { "type": "string", "default": "0.1" },
+    "created": { "type": "string", "format": "date" },
+    "status": { "type": "string", "enum": ["draft", "confirmed", "invalidated"] },
+    "assumption": { "type": "string", "description": "The assumption stated clearly and specifically" },
+    "category": { "type": "string", "description": "Category of assumption (e.g., 'user', 'market', 'technical', 'business')" },
+    "confidence": { "type": "string", "enum": ["low", "medium", "high"], "description": "How confident you are that this assumption is true" },
+    "evidence": { "type": "string", "description": "What evidence supports or contradicts this assumption" },
+    "test_method": { "type": "string", "description": "How you plan to validate or invalidate this assumption" },
+    "result": { "type": "string", "description": "Outcome of testing (filled in after validation)" }
+  },
+  "required": ["id", "version", "status"]
+}

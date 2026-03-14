@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Vector — Blue Ocean Factor",
+  "description": "Captures a Blue Ocean strategy factor: what the industry does, what you do differently, and which strategic action you are taking.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "description": "Unique identifier (e.g., BO-001)" },
+    "version": { "type": "string", "default": "0.1" },
+    "created": { "type": "string", "format": "date" },
+    "status": { "type": "string", "enum": ["draft", "confirmed", "invalidated"] },
+    "factor": { "type": "string", "description": "The competitive factor being analyzed (e.g., 'Pricing', 'Onboarding Complexity')" },
+    "industry_standard": { "type": "string", "description": "What the industry typically does for this factor" },
+    "our_approach": { "type": "string", "description": "What we do differently for this factor" },
+    "action": { "type": "string", "enum": ["eliminate", "reduce", "raise", "create"], "description": "The Blue Ocean strategic action: eliminate, reduce, raise, or create" }
+  },
+  "required": ["id", "version", "status"]
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Vector — Interview",
+  "description": "Captures a user interview session: who was interviewed, what they said, and what patterns emerged.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "description": "Unique identifier (e.g., INT-001)" },
+    "version": { "type": "string", "default": "0.1" },
+    "created": { "type": "string", "format": "date" },
+    "status": { "type": "string", "enum": ["draft", "confirmed", "invalidated"] },
+    "participant": { "type": "string", "description": "Name or anonymous identifier of the interviewee" },
+    "role": { "type": "string", "description": "The participant's role or relationship to the product" },
+    "date": { "type": "string", "format": "date", "description": "Date the interview was conducted" },
+    "key_quotes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Notable direct quotes from the participant"
+    },
+    "jobs_observed": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Jobs to be done observed or mentioned during the interview"
+    },
+    "pain_points": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Frustrations, blockers, or unmet needs expressed by the participant"
+    },
+    "synthesis": { "type": "string", "description": "Brief summary of key findings from this interview" }
+  },
+  "required": ["id", "version", "status"]
+}
