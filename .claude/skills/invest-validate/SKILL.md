@@ -1,6 +1,6 @@
 ---
 name: invest-validate
-description: "Read /vector/research/assumptions/, prioritize unvalidated assumptions by risk, and generate a lightweight, stage-appropriate validation plan. Turns a list of untested hypotheses into an actionable sprint."
+description: "Reads /vector/research/assumptions/, prioritizes unvalidated assumptions by risk (Impact × Confidence), and generates a stage-appropriate validation plan. Use at the start of a sprint or before major feature investment to turn untested hypotheses into an actionable plan."
 argument-hint: "[--assumption id] [--stage discovery|alpha|beta|launched] [--dry-run]"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: invest-brief
-description: "Generate a design brief for a specific feature or flow from existing project research. Reads personas, JTBD, VECTOR.md principles and constraints, and quality gates to give a designer actionable direction grounded in real evidence — not assumptions about the audience."
+description: "Generates a design brief for a specific feature or flow from existing project research. Reads personas, JTBD, VECTOR.md principles and constraints, and quality gates to give a designer actionable direction grounded in real evidence. Use before design work begins on a feature or flow."
 argument-hint: "[feature description] [--dry-run]"
 ---
 

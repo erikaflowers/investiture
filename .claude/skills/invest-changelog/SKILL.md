@@ -1,6 +1,6 @@
 ---
 name: invest-changelog
-description: "Read git log since the last tag and VECTOR.md value prop, group commits by user-facing theme, filter out internal noise, and write a plain-language changelog keyed to what users can actually do now. Turns git history into release communication."
+description: "Reads git log since the last tag and VECTOR.md value prop, groups commits by user-facing theme, filters internal noise, and writes a plain-language changelog keyed to what users can now do. Use at release time or when updating a public changelog."
 argument-hint: "[--since tag|commit] [--version x.y.z] [--dry-run]"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: invest-handoff
-description: "Generate a single condensed onboarding document for a human collaborator or cold agent session, tailored to a specific role. Reads VECTOR.md, CLAUDE.md, ARCHITECTURE.md, and current /vector/ state to tell someone exactly what they need to know to contribute without reading everything."
+description: "Generates a condensed onboarding document tailored to a specific role (engineer, designer, agent, client). Reads VECTOR.md, CLAUDE.md, ARCHITECTURE.md, and current /vector/ state. Use when onboarding a collaborator, starting a cold agent session, or preparing a client check-in."
 argument-hint: "[--role engineer|designer|agent|client] [--dry-run]"
 ---
 

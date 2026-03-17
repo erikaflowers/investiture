@@ -1,6 +1,6 @@
 ---
 name: invest-synthesize
-description: "Take raw research input — interview notes, beta feedback, assumption validation results — extract structured insights, and propose specific patches to VECTOR.md and /vector/ schema files. Shows a full diff before writing anything."
+description: "Takes raw research input — interview notes, beta feedback, assumption validation results — extracts structured insights, and proposes specific patches to VECTOR.md and /vector/ schema files. Shows a full diff before writing anything. Use after user interviews or beta feedback rounds."
 argument-hint: "[--source file] [--dry-run]"
 ---
 
