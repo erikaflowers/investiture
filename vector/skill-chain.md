@@ -194,3 +194,19 @@ doctrine ──▶ architecture ──▶ dependency ──▶ compliance ──
 ```
 trace (reads: VECTOR.md ──▶ PRDs ──▶ ADRs ──▶ missions ──▶ codebase ──▶ tests/audits)
 ```
+
+---
+
+## Validation
+
+The core skill chain has been validated against a real codebase: [Clarion](https://github.com/celanthe/clarion) (self-hosted TTS proxy, ~2k LOC, Node.js).
+
+| Skill | Result | Output |
+|-------|--------|--------|
+| `invest-backfill` | Pass | Generated VECTOR.md, ARCHITECTURE.md, CLAUDE.md from existing codebase. Correctly inferred stack, layers, and conventions. |
+| `invest-doctrine` | Pass | Audited all three doctrine files for completeness and internal consistency. Output at `vector/audits/invest-doctrine.md`. |
+| `invest-architecture` | Pass | Audited codebase structure against ARCHITECTURE.md declarations. Output at `vector/audits/invest-architecture.md`. |
+
+All outputs landed in the correct `/vector/` subdirectories. File paths, naming conventions, and cross-skill references matched the dependency map above. Research scaffolding (assumptions, competitive landscape, schemas) was generated and readable by downstream skills.
+
+**Not yet validated:** `invest-capture`, `invest-prd --from-capture` (the capture loop). These require a coding session followed by capture — planned for next validation pass.
