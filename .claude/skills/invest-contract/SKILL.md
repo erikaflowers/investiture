@@ -2,6 +2,7 @@
 name: invest-contract
 description: "Generates a structured deliverable manifest with explicit acceptance criteria for each phase of a consulting engagement. Derives deliverables from PRD scope and doctrine quality gates. Produces an artifact suitable for attachment to a Statement of Work. Use when scoping a new engagement, beginning a new project phase, or when a client asks what exactly they are paying for."
 argument-hint: "[--phase N] [--format sow|checklist] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Deliverable Manifest & Acceptance Criteria
@@ -24,9 +25,9 @@ Read the following to understand what has been planned and how it is structured:
 
 1. **`VECTOR.md`** — Extract: quality gates (the project's definition of "good enough to ship"), ship criteria (what must be true before any release), constraints (boundaries on what can be delivered), project stage.
 
-2. **PRD files in `/vector/`** — If `invest-prd` has been run, PRDs exist with: problem statement, features, scope, out-of-scope items, success criteria. Each PRD feature is a candidate deliverable.
+2. **PRD files in `/vector/prds/`** — If `invest-prd` has been run, PRDs exist with: problem statement, features, scope, out-of-scope items, success criteria. Each PRD feature is a candidate deliverable.
 
-3. **Scope files in `/vector/`** — If `invest-scope` has been run, a phase decomposition exists with: MVP scope, v2 scope, dependencies, phase boundaries. Each phase becomes a manifest section.
+3. **Scope files in `/vector/scope/`** — If `invest-scope` has been run, a phase decomposition exists with: MVP scope, v2 scope, dependencies, phase boundaries. Each phase becomes a manifest section.
 
 4. **`/vector/metrics-framework.md`** — If `invest-metrics` has been run, success metrics exist. Deliverables should reference measurable outcomes where possible.
 

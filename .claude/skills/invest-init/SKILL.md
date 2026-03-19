@@ -2,6 +2,7 @@
 name: invest-init
 description: "Initializes Investiture on a new project with guided setup. Smarter than backfill — asks upfront questions about the project, audience, and constraints, then generates all three doctrine files and scaffolds the /vector/ directory. Use on new projects or when starting fresh. For existing codebases with code already written, use /invest-backfill instead."
 argument-hint: "[--minimal] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Guided Initialization
@@ -323,6 +324,10 @@ vector/
 ├── reports/
 ├── compliance/
 ├── contracts/
+├── proposals/
+├── retros/
+├── scope/
+├── sprints/
 └── changelog/
 ```
 
@@ -375,7 +380,7 @@ Written:
 - VECTOR.md
 - ARCHITECTURE.md
 - CLAUDE.md
-- /vector/ directory (12 subdirectories)
+- /vector/ directory (16 subdirectories)
 - /vector/research/README.md
 
 Next steps:

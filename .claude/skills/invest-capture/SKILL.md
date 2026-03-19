@@ -157,7 +157,7 @@ For each pattern:
 - **Source:** `[file(s)]`
 - **Existing ADR:** [Yes (ADR-NNN) / No]
 - **Significance:** [High — structural / Medium — notable / Low — minor]
-- **Action:** [Run /invest-adr / Document informally / Skip]
+- **Action:** [Run /invest-adr (if available) / Document informally / Skip]
 
 ---
 
@@ -216,7 +216,7 @@ Capture complete. [N] actionable items found.
 
 I can take the following actions now:
 1. Create assumption files for [N] new assumptions → /vector/research/assumptions/
-2. Draft ADRs for [N] decisions → /invest-adr [description]
+2. Draft ADRs for [N] decisions → /vector/decisions/
 3. Update doctrine files to resolve [N] drift items
 
 Which actions should I take? (all / 1,2,3 / none)
