@@ -13,9 +13,9 @@ npx investiture init
 ```
 
 This adds:
-- `.claude/skills/` -- Three skills that read and enforce your doctrine
+- `.claude/skills/` -- Eleven skills that read, enforce, and extend your doctrine
 - `vector/schemas/` -- Six research schemas (persona, JTBD, assumption, interview, competitive, blue ocean)
-- `vector/research/`, `vector/decisions/`, `vector/audits/` -- Directory structure for structured findings
+- `vector/research/`, `vector/decisions/`, `vector/audits/`, `vector/missions/`, `vector/handoffs/`, `vector/changelog/`, `vector/briefs/` -- Directory structure for structured findings
 
 Then open Claude Code and run `/invest-backfill`. It surveys your codebase and generates VECTOR.md, CLAUDE.md, and ARCHITECTURE.md.
 
@@ -111,11 +111,17 @@ vector/
   research/             Your structured findings
   decisions/            Architecture Decision Records
   audits/               Skill chain audit reports
+  missions/             Crew task manifests for multi-agent sprints
+  handoffs/             Role-specific onboarding snapshots
+  changelog/            Versioned release notes
+  briefs/               Design briefs from research and doctrine
 ```
 
 ### Skills
 
 The skill chain reads your doctrine at runtime and enforces it. Skills live in `.claude/skills/` and are auto-discovered by Claude Code.
+
+**Foundation (v1.3):**
 
 | Skill | Purpose |
 |-------|---------|
@@ -123,10 +129,33 @@ The skill chain reads your doctrine at runtime and enforces it. Skills live in `
 | `/invest-doctrine` | Validate doctrine for completeness, consistency, and drift |
 | `/invest-architecture` | Audit code against declared layers, imports, naming, tokens |
 
+**Research (v1.4):**
+
+| Skill | Purpose |
+|-------|---------|
+| `/invest-validate` | Prioritize unvalidated assumptions by risk and generate a validation plan |
+| `/invest-synthesize` | Take raw research input, extract insights, propose patches to doctrine |
+| `/invest-interview` | Generate structured user research discussion guides |
+
+**Design & Decisions (v1.4):**
+
+| Skill | Purpose |
+|-------|---------|
+| `/invest-brief` | Generate design briefs from personas, JTBD, and doctrine |
+| `/invest-adr` | Generate numbered Architecture Decision Records |
+
+**Fleet & Release (v1.4):**
+
+| Skill | Purpose |
+|-------|---------|
+| `/invest-crew` | Decompose features into scoped agent tasks for multi-agent sprints |
+| `/invest-handoff` | Generate role-specific onboarding docs (engineer, designer, agent, client) |
+| `/invest-changelog` | Generate user-facing release notes from git log and VECTOR.md |
+
 **Existing projects:** Run `/invest-backfill` first. It surveys your code and generates VECTOR.md, CLAUDE.md, and ARCHITECTURE.md.
 **Greenfield projects:** Fill in the three doctrine files, then run `/invest-doctrine` to validate.
 
-The chain runs in order: backfill creates the doctrine, doctrine validates it, architecture enforces it.
+The foundation chain runs in order: backfill creates the doctrine, doctrine validates it, architecture enforces it. The v1.4 skills extend the chain with research, design, fleet, and release capabilities.
 
 See [invest.md](invest.md) for the full skill chain reference.
 
@@ -165,7 +194,7 @@ investiture/
 ├── VECTOR.md              Project doctrine (read first)
 ├── CLAUDE.md              Contributor onboarding (read second)
 ├── ARCHITECTURE.md        Technical guide (read third)
-├── .claude/skills/        Skill chain (backfill, doctrine, architecture)
+├── .claude/skills/        Skill chain (11 skills — foundation, research, design, fleet)
 ├── src/                   Your app (start here)
 │   ├── App.jsx            App shell with routing
 │   ├── App.css
@@ -185,7 +214,11 @@ investiture/
 │   ├── schemas/           6 research schemas
 │   ├── research/          Your structured findings
 │   ├── decisions/         Architecture Decision Records
-│   └── audits/            Skill audit reports
+│   ├── audits/            Skill audit reports
+│   ├── missions/          Crew task manifests
+│   ├── handoffs/          Role-specific onboarding snapshots
+│   ├── changelog/         Versioned release notes
+│   └── briefs/            Design briefs
 ├── .env.example           Environment variable template
 ├── invest.md              Skill chain reference
 ├── install.sh             One-time setup
