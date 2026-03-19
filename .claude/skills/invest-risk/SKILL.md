@@ -2,6 +2,7 @@
 name: invest-risk
 description: "Generates a living risk register by scanning doctrine, assumptions, ADRs, and architecture audit findings. Classifies risks by category, severity, and likelihood, tracks mitigation status, and produces a burn-down summary. Use at sprint boundaries, before client reviews, or when project risk profile may have shifted."
 argument-hint: "[--category technical|product|operational|market] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Risk Register

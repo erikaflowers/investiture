@@ -2,6 +2,7 @@
 name: invest-handoff
 description: "Generates a condensed onboarding document tailored to a specific role (engineer, designer, agent, client). Reads VECTOR.md, CLAUDE.md, ARCHITECTURE.md, and current /vector/ state. Use when onboarding a collaborator, starting a cold agent session, or preparing a client check-in."
 argument-hint: "[--role engineer|designer|agent|client] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Generate Handoff

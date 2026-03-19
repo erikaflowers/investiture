@@ -2,6 +2,7 @@
 name: invest-compliance
 description: "Maps doctrine declarations and architecture decisions to compliance requirements for a specified regulatory framework (HIPAA, SOC 2, WCAG, GDPR, etc.). Produces a coverage matrix showing what is addressed, what is implemented, and where the gaps are. Use when working with regulated industries, preparing for audits, or demonstrating governance maturity to clients."
 argument-hint: "<framework: hipaa|soc2|wcag|gdpr|custom> [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Compliance Mapping

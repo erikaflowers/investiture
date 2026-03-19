@@ -1,7 +1,8 @@
 ---
 name: invest-prd
 description: "Generates a Product Requirements Document from VECTOR.md, personas, JTBD, and validated assumptions. Produces the artifact that gets passed between builder and stakeholder — structured for async collaboration, editable by non-technical people. Use when scoping a new feature, starting a new engagement, or when a stakeholder needs to review and approve scope."
-argument-hint: "[feature or initiative description] [--format full|lean] [--dry-run]"
+argument-hint: "[feature or initiative description] [--format full|lean] [--update prd-file] [--from-capture] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Product Requirements Document
@@ -10,21 +11,105 @@ You are writing the contract between intent and execution. A PRD is not document
 
 **This skill is the keystone of async collaboration.** The PRD is what gets passed back and forth between builder and stakeholder. It must be readable, editable, and specific enough that disagreements surface before implementation, not after.
 
-## Step 0: Get the Feature Description
+## Step 0: Determine Mode
 
-If a feature or initiative description was passed as an argument, use it directly.
+- **No arguments or `[feature description]`:** New PRD mode. Proceed to Step 1.
+- **`--update [prd-file]`:** Revision mode. Proceed to Step 0a.
+- **`--from-capture`:** Candidate generation mode. Proceed to Step 0b.
+- **`--format [full|lean]`:** Controls PRD depth. Default: full.
+- **`--dry-run`:** Generate and display without writing.
 
-If no argument was provided, prompt:
+### Step 0a: Revision Mode (`--update`)
+
+Read the specified PRD file from `/vector/prds/`. If the filename doesn't include a path, look in `/vector/prds/` for a match.
+
+If the file is not found, report: "PRD not found: [filename]. Check `/vector/prds/` for available PRDs." Stop.
+
+If found, read the full PRD and prompt:
 
 ```
-What feature or initiative are you writing a PRD for?
-Describe it in 1-3 sentences — what is being built and why.
+Updating: [PRD title] (v[current version])
+Status: [current status]
 
-Examples:
-  "Offline mode for field workers who lose connectivity for hours at a time"
-  "Admin dashboard showing team usage metrics and billing"
-  "Migrate auth from session tokens to JWTs for compliance"
+What feedback did the stakeholder give?
+Paste their comments, or describe what needs to change.
 ```
+
+Wait for the operator's response. Then:
+
+1. Parse the feedback into specific section changes.
+2. Increment the version number (1.0 → 1.1 for minor changes, 1.0 → 2.0 for scope changes).
+3. Update the Status field if appropriate (e.g., "In Review" → "Draft" if scope changed significantly).
+4. Apply the changes to the affected sections.
+5. Append a row to the Revision History table with today's date and a summary of what changed.
+6. Present a **diff summary** before writing:
+
+```
+PRD revision summary (v[old] → v[new]):
+
+Changed:
+- [Section]: [what changed]
+- [Section]: [what changed]
+
+Unchanged:
+- [list of sections not modified]
+
+Revision history entry:
+| [new version] | [today] | [OPERATOR] | [summary] |
+
+Write updated PRD to [same filename]? (yes/no/revise)
+```
+
+On confirmation, overwrite the existing file. The revision history inside the document tracks all versions.
+
+After writing, output:
+
+```
+PRD updated: /vector/prds/[filename]
+Version: [old] → [new]
+Sections changed: [N]
+Status: [new status]
+
+Next steps:
+- Share updated PRD with stakeholder (change status to "In Review")
+- If scope changed, re-run /invest-scope to update phase decomposition
+- If success criteria changed, re-run /invest-contract to update deliverable manifest
+```
+
+### Step 0b: Candidate Generation Mode (`--from-capture`)
+
+Read recent capture files from `/vector/captures/`. Sort by date, read the 3 most recent.
+
+From the captures, identify PRD candidates by looking for:
+
+- **Research gaps** that cluster around a theme — multiple gaps pointing at the same unserved user need suggest a feature worth scoping.
+- **Assumption clusters** — groups of related unvalidated assumptions that, if validated, would justify a new feature.
+- **Doctrine drift patterns** — repeated drift in the same direction suggests the product is evolving toward something not yet formally scoped.
+- **Patterns worth documenting** — if the same pattern keeps emerging, it may deserve a feature PRD rather than just a convention.
+
+Present 1-3 candidates:
+
+```
+PRD candidates from recent captures:
+
+1. [Candidate title] — [one sentence describing the need]
+   Based on: [which capture(s), which findings]
+   Confidence: [High — clear pattern / Medium — emerging signal / Low — single data point]
+
+2. [Candidate title] — [one sentence]
+   Based on: [sources]
+   Confidence: [level]
+
+3. [Candidate title] — [one sentence]
+   Based on: [sources]
+   Confidence: [level]
+
+Which should I develop into a full PRD? (1 / 2 / 3 / none)
+```
+
+If the operator selects a candidate, use its description as the feature input and proceed to Step 1.
+
+If no captures exist: "No capture files found in `/vector/captures/`. Run `/invest-capture` after a coding session first, then use `--from-capture` to identify PRD candidates from what was learned."
 
 ## Step 1: Read Doctrine and Research
 
@@ -175,7 +260,7 @@ Write a complete PRD using this structure. The language must be accessible to no
 
 **`--format lean`**: Abbreviated version with only: Problem, Proposed Solution, Scope (In/Out), Success Criteria, Open Questions. Suitable for small features or early-stage ideation where a full PRD is premature.
 
-## Step 4: Present for Confirmation
+## Step 4: Present and Collaborate
 
 Output the drafted PRD to the terminal in full. Then ask:
 
@@ -192,6 +277,19 @@ Write to /vector/prds/prd-[slug]-[date].md? (yes/no/revise)
 ```
 
 If the operator says "revise," ask what to change and redraft the affected sections.
+
+### Async Collaboration Workflow
+
+Once the PRD is written, it becomes the communication channel between builder and stakeholder. The workflow:
+
+1. **Draft** — Builder generates the PRD. Status: `Draft`.
+2. **Share** — The PRD file lives in `/vector/prds/`. Share via PR, direct file access, or by sending the rendered markdown. The stakeholder reads it as a standalone document — no meeting required.
+3. **In Review** — Change status to `In Review` when shared. The stakeholder's job is to read and respond with specific feedback: "Section X is wrong because Y" or "Missing Z from scope."
+4. **Revise** — When feedback comes back, run `/invest-prd --update [filename]` to apply changes. The revision history tracks every round. Each version is a snapshot of the conversation.
+5. **Approved** — When the stakeholder confirms the PRD reflects their intent, change status to `Approved`. This is the green light for implementation. Run `/invest-scope` and `/invest-contract` against the approved PRD.
+6. **Superseded** — If requirements change fundamentally after approval, create a new PRD and mark the old one `Superseded` with a reference to the replacement.
+
+The PRD is the async conversation — not Slack, not email, not a meeting recap. Comments and feedback are captured in the revision history, not scattered across communication channels. When someone asks "what did we agree to?", the PRD is the answer, and the revision history shows how we got there.
 
 ## Step 5: Write the File
 
@@ -219,6 +317,7 @@ Next steps:
 - Run /invest-scope to decompose into phases
 - Run /invest-contract to generate deliverable manifest
 - Address open questions before implementation begins
+- When feedback returns, run /invest-prd --update [filename] to revise
 ```
 
 ## Arguments
@@ -226,6 +325,8 @@ Next steps:
 - **No arguments:** Interactive — prompts for feature description
 - **`[feature description]`:** Uses the argument as the feature description
 - **`--format [full|lean]`:** Control PRD depth. Default: full.
+- **`--update [prd-file]`:** Revise an existing PRD with stakeholder feedback. Reads the file, prompts for feedback, generates a new version with diff summary.
+- **`--from-capture`:** Generate PRD candidates from recent `/vector/captures/` reports. Identifies research gaps and assumption clusters that suggest features worth scoping.
 - **`--dry-run`:** Draft and display without writing
 
 ## Output
@@ -239,6 +340,8 @@ Next steps:
 - At the start of a consulting engagement — the PRD is the first shared artifact
 - When scope is unclear or contested — the PRD forces the conversation
 - Before `invest-scope` or `invest-contract` — they read PRD output
+- After `/invest-capture` surfaces research gaps — use `--from-capture` to turn capture findings into PRD candidates
+- When stakeholder feedback arrives — use `--update` to revise the PRD and keep the conversation in the document
 
 ## Principles
 
@@ -248,3 +351,4 @@ Next steps:
 - **Success criteria are contracts.** When the stakeholder approves the PRD, they are agreeing to the success criteria. Make them specific enough that both sides can later agree on whether they were met.
 - **The PRD is alive.** It has a version and a revision history because it will change. The first draft is not the final draft. Async collaboration means the PRD goes back and forth — that's the process working, not the process failing.
 - **One feature, one PRD.** Do not bundle multiple features into a single document. If two features can be scoped, built, and evaluated independently, they get separate PRDs.
+- **The document is the conversation.** Feedback, revisions, and approvals live in the PRD's revision history — not in Slack threads, email chains, or meeting notes. When someone asks "what did we agree to and how did we get there?", the PRD answers both questions.

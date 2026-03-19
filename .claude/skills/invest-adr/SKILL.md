@@ -2,6 +2,7 @@
 name: invest-adr
 description: "Generates a numbered Architecture Decision Record from a decision description, using VECTOR.md constraints, ARCHITECTURE.md stack context, and existing ADRs to avoid contradictions. Use when making an architectural or product decision that should be documented and stored."
 argument-hint: "[decision description] [--status proposed|accepted|deprecated|superseded] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Decision Record

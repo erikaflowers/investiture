@@ -2,6 +2,7 @@
 name: invest-metrics
 description: "Generates a success metrics framework that maps doctrine goals to specific, trackable metrics with data source recommendations. Derives North Star, leading indicators, and guardrail metrics from VECTOR.md — not generic SaaS benchmarks. Use when defining what success looks like before building, or when a client asks how you will measure outcomes."
 argument-hint: "[--tier north-star|leading|guardrail] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Metrics Framework

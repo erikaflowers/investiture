@@ -2,6 +2,7 @@
 name: invest-retro
 description: "Generate a sprint retrospective from git activity, doctrine drift, and assumption validation changes. Analyzes what shipped, what slipped, what assumptions changed, and what the team learned. Reads git log, VECTOR.md, /vector/ state, and compares against sprint goals if available. Writes to /vector/retros/."
 argument-hint: "[sprint-name or date-range, e.g. 'sprint-1' or '2026-03-01..2026-03-15']"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Sprint Retrospective

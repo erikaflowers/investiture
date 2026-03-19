@@ -2,6 +2,7 @@
 name: invest-dependency
 description: "Scans the project's dependency tree and produces a risk-scored report covering licensing, maintenance health, security advisory status, and vendor concentration. Use before client deliverables, during onboarding audits, or when evaluating whether to add or remove a dependency."
 argument-hint: "[--scope production|all] [--fix] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Dependency Audit

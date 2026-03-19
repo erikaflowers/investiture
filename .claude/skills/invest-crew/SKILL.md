@@ -2,6 +2,7 @@
 name: invest-crew
 description: "Decomposes a feature into scoped agent tasks before a multi-agent sprint. Reads ARCHITECTURE.md layer ownership, CLAUDE.md agent model, and VECTOR.md constraints to generate a structured task manifest with branch names, commit prefixes, and explicit scope boundaries. Use before starting multi-agent feature work."
 argument-hint: "[feature description] [--dry-run] [--format flat]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Crew Manifest

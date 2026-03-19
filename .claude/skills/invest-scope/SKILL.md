@@ -2,6 +2,7 @@
 name: invest-scope
 description: "Decompose a PRD or feature set into phased scope with MVP boundaries, dependency mapping, and effort sizing. Separates must-have from nice-to-have with evidence. Use before sprint planning or when stakeholders ask what is in v1."
 argument-hint: "[prd-name or feature-area, e.g. 'auth-system' or 'voice-pipeline']"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Scope Decomposition

@@ -2,6 +2,7 @@
 name: invest-trace
 description: "Builds a requirements traceability matrix from user needs (VECTOR.md) through PRD features through architecture decisions through implementation. Shows which requirements have end-to-end coverage and which have gaps. Use at milestone boundaries, before client reviews, or when scope disputes arise."
 argument-hint: "[--depth doctrine|prd|code] [--requirement id] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Requirements Traceability

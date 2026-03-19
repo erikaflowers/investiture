@@ -2,6 +2,7 @@
 name: invest-benchmark
 description: "Scores the project's Investiture adoption and process maturity across seven dimensions. Produces a maturity scorecard with specific next actions to improve. Use during sales calls to demonstrate value on a prospect's codebase, monthly on active engagements to show progress, or when evaluating how well Investiture has been adopted."
 argument-hint: "[--dimension doctrine|research|architecture|decisions|risk|delivery|capture] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Process Maturity Benchmark

@@ -2,6 +2,7 @@
 name: invest-status
 description: "Compiles a client-facing project status report from git activity, audit state, mission progress, risk register, and doctrine health. Produces a polished report suitable for email, Notion, or slide deck — grounded in project data, not memory. Use at sprint boundaries or whenever a client needs visibility."
 argument-hint: "[--period 7d|14d|30d|custom] [--format email|full] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Status Report

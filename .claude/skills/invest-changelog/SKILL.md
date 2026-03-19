@@ -2,6 +2,7 @@
 name: invest-changelog
 description: "Reads git log since the last tag and VECTOR.md value prop, groups commits by user-facing theme, filters internal noise, and writes a plain-language changelog keyed to what users can now do. Use at release time or when updating a public changelog."
 argument-hint: "[--since tag|commit] [--version x.y.z] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Write Changelog
