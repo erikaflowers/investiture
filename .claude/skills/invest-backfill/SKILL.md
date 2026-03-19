@@ -17,9 +17,22 @@ Your job: survey what exists, infer what you can, include Investiture defaults, 
 Before doing anything else, check that the full Investiture skill chain exists in this project:
 
 ```
-.claude/skills/invest-backfill/SKILL.md    ← you are here
-.claude/skills/invest-doctrine/SKILL.md    ← needed for validation after backfill
-.claude/skills/invest-architecture/SKILL.md ← needed for enforcement after backfill
+.claude/skills/invest-backfill/SKILL.md      ← you are here
+.claude/skills/invest-doctrine/SKILL.md      ← needed for validation after backfill
+.claude/skills/invest-architecture/SKILL.md  ← needed for enforcement after backfill
+```
+
+The following v1.4 skills are optional but extend the chain with research, design, fleet, and release capabilities:
+
+```
+.claude/skills/invest-validate/SKILL.md      ← assumption risk prioritization + validation planning
+.claude/skills/invest-synthesize/SKILL.md    ← research intake → doctrine patches
+.claude/skills/invest-interview/SKILL.md     ← structured user research discussion guides
+.claude/skills/invest-brief/SKILL.md         ← design briefs from research + doctrine
+.claude/skills/invest-adr/SKILL.md           ← architecture decision records
+.claude/skills/invest-crew/SKILL.md          ← multi-agent task decomposition
+.claude/skills/invest-handoff/SKILL.md       ← role-specific onboarding docs
+.claude/skills/invest-changelog/SKILL.md     ← user-facing release notes from git log
 ```
 
 If `invest-doctrine` or `invest-architecture` are missing, warn the operator immediately:
@@ -422,7 +435,11 @@ The `/vector/` directory is the research artifact system — interviews, JTBD, p
 │   └── assumptions/.gitkeep
 ├── schemas/.gitkeep
 ├── decisions/.gitkeep
-└── audits/.gitkeep
+├── audits/.gitkeep
+├── missions/.gitkeep
+├── handoffs/.gitkeep
+├── changelog/.gitkeep
+└── briefs/.gitkeep
 ```
 
 **`/vector/README.md` contents:**
@@ -435,14 +452,18 @@ It is referenced by VECTOR.md and used by the Investiture skill chain.
 
 ## Structure
 
-- **research/interviews/** — User interview transcripts and summaries
+- **research/interviews/** — User interview transcripts, summaries, and discussion guides (`invest-interview`)
 - **research/jtbd/** — Jobs to Be Done analysis
 - **research/personas/** — User personas derived from research
 - **research/competitive/** — Competitive analysis artifacts
-- **research/assumptions/** — Documented assumptions with validation status
+- **research/assumptions/** — Documented assumptions with validation status and plans (`invest-validate`)
 - **schemas/** — Zero-Vector schema definitions (zv-*.json)
-- **decisions/** — Architecture Decision Records (ADRs)
-- **audits/** — Investiture skill chain audit reports
+- **decisions/** — Architecture Decision Records (`invest-adr`)
+- **audits/** — Investiture skill chain audit reports (`invest-doctrine`, `invest-architecture`, `invest-synthesize`)
+- **missions/** — Crew task manifests for multi-agent sprints (`invest-crew`)
+- **handoffs/** — Role-specific onboarding snapshots (`invest-handoff`)
+- **changelog/** — Versioned release notes (`invest-changelog`)
+- **briefs/** — Design briefs from research and doctrine (`invest-brief`)
 
 ## Usage
 

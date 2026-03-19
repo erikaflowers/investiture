@@ -42,7 +42,7 @@ installed=0
 echo -e "${GOLD}${BOLD}  Skills${RESET} ${DIM}.claude/skills/${RESET}"
 echo ""
 
-skills=("invest-backfill" "invest-doctrine" "invest-architecture")
+skills=("invest-backfill" "invest-doctrine" "invest-architecture" "invest-validate" "invest-synthesize" "invest-interview" "invest-brief" "invest-adr" "invest-crew" "invest-handoff" "invest-changelog")
 for skill in "${skills[@]}"; do
   dest=".claude/skills/${skill}/SKILL.md"
   if [ -f "$dest" ]; then
@@ -78,7 +78,7 @@ echo ""
 echo -e "${BLUE}${BOLD}  Research${RESET} ${DIM}vector/${RESET}"
 echo ""
 
-dirs=("vector/research/personas" "vector/research/jtbd" "vector/research/interviews" "vector/research/assumptions" "vector/research/competitive" "vector/decisions" "vector/audits")
+dirs=("vector/research/personas" "vector/research/jtbd" "vector/research/interviews" "vector/research/assumptions" "vector/research/competitive" "vector/decisions" "vector/audits" "vector/missions" "vector/handoffs" "vector/changelog" "vector/briefs")
 for dir in "${dirs[@]}"; do
   if [ -d "$dir" ]; then
     echo -e "  ${DIM}- ${dir}/ (already exists)${RESET}"

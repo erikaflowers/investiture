@@ -87,7 +87,12 @@ Violations: `core/` importing from `src/`, `services/`, or `design-system/`. `se
 └── /vector                # Zero Vector knowledge artifacts
     ├── /schemas           # zv-*.json schema definitions
     ├── /research          # Structured research artifacts
-    └── /decisions         # Architecture Decision Records
+    ├── /decisions         # Architecture Decision Records
+    ├── /audits            # Skill chain audit reports
+    ├── /missions          # Crew task manifests
+    ├── /handoffs          # Role-specific onboarding snapshots
+    ├── /changelog         # Versioned release notes
+    └── /briefs            # Design briefs
 ```
 
 ---
