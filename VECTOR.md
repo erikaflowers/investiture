@@ -6,15 +6,15 @@
 vector_version: "0.1"
 
 project:
-  name: "YOUR PROJECT NAME"
-  description: "One sentence. What is this and who is it for?"
-  stage: "discovery"  # discovery | definition | development | delivery | maintenance
-  started: "YYYY-MM-DD"
-  repo: ""
+  name: "Investiture"
+  description: "Open-source methodology engine for doctrine-first software development, delivered as Claude Code skills."
+  stage: "development"
+  started: "2025-12-01"
+  repo: "https://github.com/erikaflowers/investiture"
 
 owner:
-  name: ""
-  role: ""
+  name: "Zero Vector"
+  role: "Maintainer"
 
 knowledge:
   research: "./vector/research/"
@@ -25,24 +25,23 @@ knowledge:
 # Identity
 
 ## Problem Statement
-What problem does this project solve? Who experiences it? Why does it matter?
 
-[Write 2-3 sentences. Be specific. "Users struggle with X" is weak. "Fiction authors with 100K+ word manuscripts lose track of character continuity because no existing tool indexes prose at the entity level" is strong.]
+Software teams — especially solo developers, small teams, and AI-assisted builders — make dozens of implicit decisions per session that never get documented. Architecture drifts from intent, assumptions go unvalidated, and knowledge evaporates between sessions. When a new contributor joins or a stakeholder asks "why did you build it this way?", the answer is "I don't remember" or "check the git log." Existing methodology tools are either too heavyweight (enterprise PM suites) or too lightweight (a README that nobody updates).
 
 ## Target Audience
-Who is this for? What do they already use? What do they wish existed?
 
-[Describe your primary user. Not a persona yet — that lives in /vector/research/personas/. This is the 2-sentence version.]
+Developers and small teams who build with AI agents (particularly Claude Code). They want to move fast — vibe coding, rapid prototyping, shipping — but also want the knowledge produced during those sessions captured, organized, and actionable. Secondary audience: consultants who need structured methodology artifacts (PRDs, proposals, contracts, status reports) to run client engagements.
 
 ## Core Value Proposition
-If this works, what changes for the user?
 
-[One sentence. The "so that..." from a JTBD. Not features. Outcomes.]
+You code how you want to, and Investiture captures what you learned — turning implicit decisions into documented doctrine, unvalidated assumptions into research plans, and coding sessions into structured knowledge that compounds over time.
 
 ## What This Is Not
-What are you explicitly choosing NOT to build? What adjacent problems are out of scope?
 
-[This section prevents scope creep. Be specific about boundaries.]
+- **Not a project management tool.** No Gantt charts, no ticket tracking, no sprint boards. Investiture produces artifacts that feed into PM tools, but it is not one.
+- **Not a linter or code quality tool.** It audits against YOUR declared doctrine, not preset rules.
+- **Not a replacement for thinking.** It captures and structures decisions — it does not make them for you.
+- **Not proprietary methodology.** The skills are open source. The value is in what you do with them.
 
 ---
 
@@ -58,18 +57,19 @@ What are you explicitly choosing NOT to build? What adjacent problems are out of
 | Competitive Analysis | Not started | `./vector/research/competitive/` |
 | Assumptions | Not started | `./vector/research/assumptions/` |
 
-## Key Assumptions (Seed These Early)
+## Key Assumptions
 
-1. [Assumption about your user — what do you believe is true but have not validated?]
-2. [Assumption about the market — is there demand? How do you know?]
-3. [Assumption about the solution — will your approach actually work?]
-
-Mark each as: hypothesis | testing | validated | invalidated
+1. Developers using AI coding agents produce more implicit decisions per session than traditional development, making capture more valuable. — **hypothesis**
+2. The Claude Code skill format is sufficient to deliver a full methodology engine without a separate application. — **validated** (25 skills shipped and functional)
+3. Consulting engagements can be run entirely through Investiture artifacts (PRDs, proposals, contracts, status reports) without separate tooling. — **testing** (Surge Health, Arroyo engagements in progress)
+4. The capture loop (code → capture → update doctrine → code) is the primary adoption driver for non-consulting users. — **hypothesis**
+5. Users will run invest-capture after sessions voluntarily if the friction is low enough. — **hypothesis**
 
 ## Open Questions
 
-- [What do you need to learn before building?]
-- [What would change your approach if the answer surprised you?]
+- What is the minimum number of skills needed for a new adopter to get value? (Is the 25-skill chain intimidating?)
+- Should Investiture ship a "getting started" path that sequences skills for new users?
+- How do we measure adoption beyond GitHub stars? What signals indicate real usage?
 
 ---
 
@@ -150,33 +150,37 @@ Every session should leave the codebase in a state where the next session can pi
 
 If you cannot finish a task, leave a clear marker: a TODO comment with context, a note in the standup, or a partial implementation that compiles and runs.
 
-**Non-negotiable:** The project must run (`npm start` with no errors) after every session. No exceptions.
+**Non-negotiable:** The project must run after every session. No exceptions.
 
 ## Design Principles
 
-Project-specific principles go here. These are yours — not Investiture defaults.
-
-1. [Principle that guides every technical decision]
-2. [Principle that resolves ambiguity when two good options exist]
-3. [Principle that you would defend in a code review]
+1. **Skills are self-contained.** Each skill is a single SKILL.md file. No external dependencies, no shared state between skills except the /vector/ directory and doctrine files.
+2. **Doctrine over convention.** Investiture audits against what YOU declared, not what some framework thinks is best practice. Your rules, your project.
+3. **Capture over ceremony.** The methodology should cost less time than the knowledge it produces. If a skill takes longer to run than the session it captures, the skill is broken.
 
 ## Constraints
-- [Hard constraints: budget, timeline, team size, platform requirements]
-- [Soft constraints: preferences, existing skills, ecosystem choices]
+
+- **Claude Code skill format only.** No separate application, no server, no database. Skills are markdown files interpreted by Claude Code.
+- **Open source (MIT).** All skills are public.
+- **Must work for solo developers.** The methodology cannot assume a team. One person should get value from day one.
+- **No npm dependencies in skills.** Skills are pure markdown instructions. They use the tools Claude Code provides.
 
 ---
 
 # Quality Gates
 
 ## Definition of Done
-What does "done" mean for a feature in this project?
 
-- [ ] [Your criteria — e.g., "Works without errors under normal use"]
-- [ ] [Your criteria — e.g., "Edge cases handled gracefully"]
-- [ ] [Your criteria — e.g., "Documented in ARCHITECTURE.md if it adds a new pattern"]
+- [ ] Skill produces the output described in its SKILL.md
+- [ ] Output paths are consistent with other skills (/vector/ directory structure)
+- [ ] Skill reads from doctrine files and references them in output
+- [ ] Skill has `disable-model-invocation: true` if it writes files
+- [ ] Skill description is concise enough for discovery in skill listings
 
 ## Ship Criteria
-What must be true before this project goes to real users?
 
-- [ ] [Your criteria]
-- [ ] [Your criteria]
+- [ ] All 25 skills have consistent format (frontmatter, steps, arguments, output, principles)
+- [ ] Skill chain is documented (which skills feed into which)
+- [ ] VECTOR.md, CLAUDE.md, ARCHITECTURE.md templates are complete and usable
+- [ ] invest-init produces a working scaffold that other skills can operate on
+- [ ] invest-capture → invest-prd --from-capture loop works end-to-end
