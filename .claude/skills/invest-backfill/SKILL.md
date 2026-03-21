@@ -2,6 +2,7 @@
 name: invest-backfill
 description: "Survey an existing codebase and generate Investiture doctrine files — VECTOR.md, CLAUDE.md, ARCHITECTURE.md — by combining Investiture defaults with patterns inferred from the project. Run this once on a project that does not yet have doctrine. Then run invest-doctrine to validate what was generated."
 argument-hint: "[--dry-run] [--only vector|claude|architecture]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Backfill Doctrine

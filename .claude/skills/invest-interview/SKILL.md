@@ -2,6 +2,7 @@
 name: invest-interview
 description: "Generates a structured user research discussion guide from unvalidated assumptions and open questions in /vector/. Produces targeted questions, probing techniques, and explicit validation signals per assumption. Use before any user research session."
 argument-hint: "[--assumption id] [--theme topic] [--format [script|guide]] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Interview Guide

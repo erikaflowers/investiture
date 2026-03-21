@@ -2,6 +2,7 @@
 name: invest-architecture
 description: "Audit the project structure against ARCHITECTURE.md. Reads YOUR doctrine at runtime — layers, naming, stack, conventions — and checks the codebase against what YOU declared. Not a preset. Your rules, enforced."
 argument-hint: "[--fix] [path/to/scope]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Architecture Audit

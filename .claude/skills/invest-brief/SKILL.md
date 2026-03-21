@@ -2,6 +2,7 @@
 name: invest-brief
 description: "Generates a design brief for a specific feature or flow from existing project research. Reads personas, JTBD, VECTOR.md principles and constraints, and quality gates to give a designer actionable direction grounded in real evidence. Use before design work begins on a feature or flow."
 argument-hint: "[feature description] [--dry-run]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Design Brief

@@ -2,6 +2,7 @@
 name: invest-doctrine
 description: "Audit the doctrine files themselves — VECTOR.md, CLAUDE.md, ARCHITECTURE.md — for completeness, internal consistency, cross-document contradictions, and drift from the actual codebase. Run this before invest-architecture. The doctrine must be sound before you enforce it."
 argument-hint: "[path/to/specific-doctrine-file]"
+disable-model-invocation: true
 ---
 
 # Investiture Skill: Doctrine Audit
