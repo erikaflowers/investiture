@@ -6,7 +6,7 @@
 2. Read **CLAUDE.md** — contributor onboarding.
 3. Read **ARCHITECTURE.md** — layers, stack, conventions.
 
-Erika reviews all PRs. Write your PR description for her.
+All PRs are reviewed before merge. Write clear descriptions — the reviewer should understand what changed and why without reading every file.
 
 ## Adding or modifying skills
 
