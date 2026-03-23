@@ -2,27 +2,55 @@
 
 **Active skills for this project.** Each skill reads your doctrine files and enforces what you've written.
 
-## The Chain
+## Skill Tiers
 
-Skills run in order. Each one depends on the one before it.
+Not every skill is meant for every project. Investiture has a focused core and optional extensions.
+
+### Core Skills
+
+These handle bootstrapping, enforcement, and the ongoing work loop. Every Investiture project uses these.
+
+| Skill | Purpose | When to run |
+|-------|---------|-------------|
+| `/invest-backfill` | Survey an existing codebase and generate VECTOR.md, CLAUDE.md, ARCHITECTURE.md | Once, when adopting Investiture |
+| `/invest-bootstrap` | Write Investiture instructions into CLAUDE.md so agents follow doctrine | After backfill, or when agents ignore doctrine |
+| `/invest-check` | Quick preflight — confirm doctrine is loaded and current | Start of session, before major work |
+| `/invest-doctrine` | Validate doctrine for completeness, consistency, and drift | After editing doctrine files |
+| `/invest-architecture` | Audit code against declared layers, imports, naming, tokens | Before commits and PRs |
+
+### Extended Skills (optional)
+
+These add capabilities for teams that need them. Pick the ones that match your workflow — you don't need all of them.
+
+See the v1.5 skills branch for the full set. Extended skills cover planning (`invest-prd`, `invest-scope`, `invest-brief`), research (`invest-interview`, `invest-synthesize`, `invest-benchmark`), governance (`invest-compliance`, `invest-risk`, `invest-contract`), and team workflows (`invest-crew`, `invest-status`, `invest-retro`, `invest-handoff`).
+
+---
+
+## The Core Chain
+
+The five core skills run in a specific order. Each one builds on the one before it.
 
 ```
-/invest-backfill       →  Bootstrap: creates doctrine from an existing project
+/invest-backfill       →  Survey project, generate doctrine
+        ↓
+/invest-bootstrap      →  Write Investiture instructions into CLAUDE.md
+        ↓
+/invest-check          →  Quick preflight (run anytime)
+        ↓
 /invest-doctrine       →  Is the doctrine sound?
+        ↓
 /invest-architecture   →  Does the code follow the doctrine?
 ```
 
-Backfill creates the doctrine. Doctrine validates it. Architecture enforces it.
+Backfill creates the doctrine. Bootstrap makes the agent follow it. Check confirms it's loaded. Doctrine validates it. Architecture enforces it.
 
-For greenfield projects (created from the Investiture template), start at `/invest-doctrine` — the templates are already there. For existing projects being retrofitted, start at `/invest-backfill`.
+After initial setup, the ongoing loop is:
 
-## Active Skills
+```
+/invest-check → work → /invest-architecture → commit
+```
 
-| Skill | Purpose | Invocation |
-|-------|---------|------------|
-| `invest-backfill` | Surveys an existing codebase and generates VECTOR.md, CLAUDE.md, and ARCHITECTURE.md by combining Investiture defaults with inferred project patterns | `/invest-backfill` |
-| `invest-doctrine` | Audits VECTOR.md, CLAUDE.md, and ARCHITECTURE.md for completeness, consistency, contradictions, and drift from reality | `/invest-doctrine` |
-| `invest-architecture` | Audits the codebase against layers, naming, imports, tokens, and conventions declared in ARCHITECTURE.md | `/invest-architecture` |
+For greenfield projects (created from the Investiture template), start at `/invest-bootstrap` — the templates are already there. For existing projects being retrofitted, start at `/invest-backfill`.
 
 ### Invocation Order
 
@@ -38,20 +66,26 @@ For greenfield projects (created from the Investiture template), start at `/inve
 # Generate only a specific doctrine file
 /invest-backfill --only architecture
 
-# 2. Validate the generated doctrine
+# 2. Make the agent follow doctrine
+/invest-bootstrap
+
+# 3. Validate the generated doctrine
 /invest-doctrine
 
-# 3. Check the code against doctrine
+# 4. Check the code against doctrine
 /invest-architecture
 ```
 
 **Greenfield project (from Investiture template):**
 
 ```bash
-# 1. Check the doctrine itself
+# 1. Write Investiture section into CLAUDE.md
+/invest-bootstrap
+
+# 2. Check the doctrine itself
 /invest-doctrine
 
-# 2. If doctrine is sound, check the code against it
+# 3. If doctrine is sound, check the code against it
 /invest-architecture
 
 # Scope either skill to a specific file
@@ -62,12 +96,36 @@ For greenfield projects (created from the Investiture template), start at `/inve
 /invest-architecture --fix
 ```
 
+**Ongoing work sessions:**
+
+```bash
+# Quick preflight at start of session
+/invest-check
+
+# ... do your work ...
+
+# Verify before committing
+/invest-architecture
+```
+
 ### When to Run Each Skill
 
 Run `/invest-backfill` when:
 - You have an existing project with no doctrine files
 - You adopted Investiture but never filled in the templates
 - You want to understand what Investiture would infer about your project (`--dry-run`)
+
+Run `/invest-bootstrap` when:
+- After `/invest-backfill` generates doctrine files
+- When agents keep ignoring VECTOR.md or ARCHITECTURE.md
+- When onboarding a new agent to an Investiture project
+- When CLAUDE.md exists but doesn't reference the doctrine system
+
+Run `/invest-check` when:
+- At the start of a work session
+- Before starting a new feature or significant change
+- When an agent seems to be ignoring doctrine
+- As a quick sanity check before a commit
 
 Run `/invest-doctrine` when:
 - You have edited any doctrine file (VECTOR.md, CLAUDE.md, ARCHITECTURE.md)
@@ -79,16 +137,6 @@ Run `/invest-architecture` when:
 - You want to verify the codebase follows declared conventions
 - Before a commit or PR, as a structural check
 - After significant refactoring
-
-## Forthcoming
-
-| Skill | Purpose | Depends On | Version |
-|-------|---------|------------|---------|
-| `invest-alignment` | Traces features to user needs defined in VECTOR.md | `invest-doctrine` | v1.3 |
-| `invest-provenance` | Links design decisions to research artifacts in /vector | `invest-doctrine` | v1.3 |
-| `invest-onboarding` | Ensures doctrine stack is read before contributing | `invest-doctrine` | v1.3 |
-
-All forthcoming skills depend on `invest-doctrine`. Sound doctrine is the foundation the entire chain trusts.
 
 ## Adopting Investiture on an Existing Project
 
@@ -111,8 +159,10 @@ cp -r /tmp/investiture/.claude/skills/* .claude/skills/
 rm -rf /tmp/investiture
 ```
 
-This copies three skill directories into your project:
+This copies the core skill directories into your project:
 - `.claude/skills/invest-backfill/` — generates doctrine from your existing code
+- `.claude/skills/invest-bootstrap/` — writes Investiture instructions into CLAUDE.md
+- `.claude/skills/invest-check/` — quick preflight before work
 - `.claude/skills/invest-doctrine/` — validates doctrine files
 - `.claude/skills/invest-architecture/` — enforces code against doctrine
 
@@ -130,6 +180,7 @@ Backfill will survey your codebase — README, package manifest, directory struc
 Backfill generates drafts. Review the `[OPERATOR: ...]` sections and fill in what it couldn't infer. Then:
 
 ```bash
+/invest-bootstrap       # Make the agent follow doctrine
 /invest-doctrine        # Validate the doctrine is sound
 /invest-architecture    # Check code against doctrine
 ```
@@ -147,6 +198,8 @@ Each skill saves its report to `/vector/audits/`:
 | Skill | Report |
 |-------|--------|
 | `invest-backfill` | `/vector/audits/invest-backfill.md` |
+| `invest-bootstrap` | (no report — modifies CLAUDE.md directly) |
+| `invest-check` | (no report — prints to console only) |
 | `invest-doctrine` | `/vector/audits/invest-doctrine.md` |
 | `invest-architecture` | `/vector/audits/invest-architecture.md` |
 
@@ -161,6 +214,60 @@ Each skill reads your project's doctrine files — `VECTOR.md`, `CLAUDE.md`, `AR
 ### Customize
 
 Skills respect your customizations. If you change the stack, swap conventions, add layers, or rewrite your design principles — the skills adapt to YOUR doctrine, not a preset. `invest-backfill` infers from your actual project. `invest-doctrine` checks that your doctrine is internally consistent. `invest-architecture` checks that your code follows it.
+
+## First 5 Minutes
+
+You just installed Investiture on an existing project. Here's what happens.
+
+**Minute 0-1: Install.**
+`npx investiture init` adds `.claude/skills/` and `vector/` to your project. Your code is untouched.
+
+**Minute 1-2: Open Claude Code.**
+Run `claude` in your project. Claude Code auto-discovers the skills in `.claude/skills/`.
+
+**Minute 2-3: Backfill.**
+Run `/invest-backfill`. The agent reads your README, package.json, config files, directory structure, and git history. It generates VECTOR.md, CLAUDE.md, and ARCHITECTURE.md with `[OPERATOR: ...]` prompts for things it couldn't infer.
+
+**Minute 3-4: Review.**
+Open the generated files. Fill in the `[OPERATOR: ...]` sections — who your users are, what your constraints are, what trade-offs you've made. The agent inferred what it could. You fill in the rest.
+
+**Minute 4-5: Bootstrap.**
+Run `/invest-bootstrap`. This writes an Investiture section into CLAUDE.md that tells the agent to read doctrine files and follow them. Without this step, the doctrine exists but the agent doesn't know to check it.
+
+**You're set.** On future sessions, run `/invest-check` as a quick preflight, then work normally. Run `/invest-architecture` before committing.
+
+---
+
+## Why Agents Don't Follow Doctrine Automatically
+
+Doctrine files are passive. An agent reads CLAUDE.md when it opens a project, but it doesn't re-read VECTOR.md or ARCHITECTURE.md every time it writes code. If the agent isn't explicitly told to check doctrine, it will drift.
+
+This is why Investiture uses active skills, not just passive docs:
+
+- **`/invest-bootstrap`** writes instructions into CLAUDE.md that tell the agent to check doctrine
+- **`/invest-check`** is a quick preflight you run at the start of a session
+- **`/invest-architecture`** catches drift before it gets committed
+
+The pattern is: **tell the agent once (bootstrap), remind it periodically (check), catch mistakes (architecture).**
+
+If your agent is ignoring doctrine, run `/invest-bootstrap` to re-establish the instructions, then `/invest-check` to confirm they're loaded.
+
+---
+
+## Version History
+
+| Version | What changed |
+|---------|-------------|
+| v1.0 | Initial scaffold: VECTOR.md, CLAUDE.md, ARCHITECTURE.md templates |
+| v1.1 | Added `invest-backfill` — retrofit doctrine onto existing projects |
+| v1.2 | Added `invest-doctrine` — validate doctrine completeness and consistency |
+| v1.3 | Added `invest-architecture` — audit code against declared conventions |
+| v1.4 | Added `/vector` directory structure, research schemas, install script |
+| v1.5 | Added `invest-bootstrap` and `invest-check` (active enforcement). Skill tiers (core vs extended). First-5-minutes guide. |
+
+If you installed before v1.5 and only have 3 skills, run `npx investiture init` again — it adds new skills without overwriting existing doctrine files.
+
+---
 
 ## The Metaphor
 

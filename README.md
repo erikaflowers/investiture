@@ -17,7 +17,12 @@ This adds:
 - `vector/schemas/` -- Six research schemas (persona, JTBD, assumption, interview, competitive, blue ocean)
 - `vector/research/`, `vector/decisions/`, `vector/audits/` -- Directory structure for structured findings
 
-Then open Claude Code and run `/invest-backfill`. It surveys your codebase and generates VECTOR.md, CLAUDE.md, and ARCHITECTURE.md.
+Then open Claude Code and run:
+
+1. `/invest-backfill` — surveys your codebase and generates VECTOR.md, CLAUDE.md, and ARCHITECTURE.md
+2. Review the generated files and fill in the `[OPERATOR: ...]` sections
+3. `/invest-bootstrap` — writes Investiture instructions into CLAUDE.md so your agent follows doctrine
+4. `/invest-doctrine` — validates everything is sound
 
 **Alternative (no npm):**
 
@@ -117,16 +122,22 @@ vector/
 
 The skill chain reads your doctrine at runtime and enforces it. Skills live in `.claude/skills/` and are auto-discovered by Claude Code.
 
+### Core skills
+
 | Skill | Purpose |
 |-------|---------|
 | `/invest-backfill` | Survey an existing codebase and generate starter doctrine |
+| `/invest-bootstrap` | Write Investiture instructions into CLAUDE.md so agents follow doctrine |
+| `/invest-check` | Quick preflight — confirm doctrine is loaded and current |
 | `/invest-doctrine` | Validate doctrine for completeness, consistency, and drift |
 | `/invest-architecture` | Audit code against declared layers, imports, naming, tokens |
 
-**Existing projects:** Run `/invest-backfill` first. It surveys your code and generates VECTOR.md, CLAUDE.md, and ARCHITECTURE.md.
-**Greenfield projects:** Fill in the three doctrine files, then run `/invest-doctrine` to validate.
+**Existing projects:** Run `/invest-backfill` first, then `/invest-bootstrap` to make the agent follow it.
+**Greenfield projects:** Fill in the three doctrine files, run `/invest-bootstrap`, then `/invest-doctrine` to validate.
 
-The chain runs in order: backfill creates the doctrine, doctrine validates it, architecture enforces it.
+The chain: backfill creates the doctrine, bootstrap makes agents follow it, check confirms it's loaded, doctrine validates it, architecture enforces it.
+
+Extended skills for planning, research, governance, and team workflows are available in v1.5. See [invest.md](invest.md) for the full list and tiers.
 
 See [invest.md](invest.md) for the full skill chain reference.
 
