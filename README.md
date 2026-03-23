@@ -122,8 +122,6 @@ vector/
 
 The skill chain reads your doctrine at runtime and enforces it. Skills live in `.claude/skills/` and are auto-discovered by Claude Code.
 
-### Core skills
-
 | Skill | Purpose |
 |-------|---------|
 | `/invest-backfill` | Survey an existing codebase and generate starter doctrine |
@@ -134,10 +132,9 @@ The skill chain reads your doctrine at runtime and enforces it. Skills live in `
 
 **Existing projects:** Run `/invest-backfill` first, then `/invest-bootstrap` to make the agent follow it.
 **Greenfield projects:** Fill in the three doctrine files, run `/invest-bootstrap`, then `/invest-doctrine` to validate.
+**Ongoing sessions:** Run `/invest-check` at session start, `/invest-architecture` before committing.
 
-The chain: backfill creates the doctrine, bootstrap makes agents follow it, check confirms it's loaded, doctrine validates it, architecture enforces it.
-
-Extended skills for planning, research, governance, and team workflows are available in v1.5. See [invest.md](invest.md) for the full list and tiers.
+See [invest.md](invest.md) for the full skill reference, tiers, and version history.
 
 See [invest.md](invest.md) for the full skill chain reference.
 

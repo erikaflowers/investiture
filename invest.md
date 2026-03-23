@@ -18,11 +18,17 @@ These handle bootstrapping, enforcement, and the ongoing work loop. Every Invest
 | `/invest-doctrine` | Validate doctrine for completeness, consistency, and drift | After editing doctrine files |
 | `/invest-architecture` | Audit code against declared layers, imports, naming, tokens | Before commits and PRs |
 
-### Extended Skills (optional)
+### Extended Skills (v1.5, optional)
 
-These add capabilities for teams that need them. Pick the ones that match your workflow — you don't need all of them.
+These add capabilities for teams that need them. They are organized into groups. Pick the ones that match your workflow — you don't need all of them.
 
-See the v1.5 skills branch for the full set. Extended skills cover planning (`invest-prd`, `invest-scope`, `invest-brief`), research (`invest-interview`, `invest-synthesize`, `invest-benchmark`), governance (`invest-compliance`, `invest-risk`, `invest-contract`), and team workflows (`invest-crew`, `invest-status`, `invest-retro`, `invest-handoff`).
+| Group | Skills | What they cover |
+|-------|--------|----------------|
+| Getting Started | `invest-start`, `invest-init` | Guided onboarding for first-time users. `invest-start` detects project state and recommends a skill path. `invest-init` runs guided setup for new projects. |
+| Research | `invest-interview`, `invest-synthesize`, `invest-validate`, `invest-capture` | User research loop: generate guides, extract insights, prioritize assumptions, capture learnings. |
+| Planning | `invest-prd`, `invest-scope`, `invest-brief`, `invest-adr`, `invest-metrics`, `invest-crew` | Product planning: PRDs, scope decomposition, design briefs, ADRs, success metrics, multi-agent task breakdown. |
+| Client | `invest-proposal`, `invest-contract`, `invest-status`, `invest-handoff`, `invest-changelog` | Client-facing artifacts: proposals, deliverable manifests, status reports, onboarding docs, release notes. |
+| Governance | `invest-benchmark`, `invest-risk`, `invest-compliance`, `invest-dependency`, `invest-trace`, `invest-retro` | Maturity scoring, risk registers, regulatory mapping, dependency health, traceability, retrospectives. |
 
 ---
 
@@ -50,7 +56,9 @@ After initial setup, the ongoing loop is:
 /invest-check → work → /invest-architecture → commit
 ```
 
-For greenfield projects (created from the Investiture template), start at `/invest-bootstrap` — the templates are already there. For existing projects being retrofitted, start at `/invest-backfill`.
+**New to Investiture?** Run `/invest-start` (v1.5) — it detects your project state and gives you a sequenced path.
+**Greenfield projects:** Run `/invest-init` (v1.5) for guided setup, or fill in the templates and run `/invest-bootstrap`.
+**Existing projects:** Run `/invest-backfill` → `/invest-bootstrap` → `/invest-doctrine`.
 
 ### Invocation Order
 
