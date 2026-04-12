@@ -42,7 +42,7 @@ installed=0
 echo -e "${GOLD}${BOLD}  Skills${RESET} ${DIM}.claude/skills/${RESET}"
 echo ""
 
-skills=("invest-backfill" "invest-doctrine" "invest-architecture" "invest-validate" "invest-synthesize" "invest-interview" "invest-brief" "invest-adr" "invest-crew" "invest-handoff" "invest-changelog")
+skills=("invest-backfill" "invest-doctrine" "invest-architecture" "invest-preflight" "invest-manifest" "invest-repo-audit" "invest-remediate" "invest-verify-remediation")
 for skill in "${skills[@]}"; do
   dest=".claude/skills/${skill}/SKILL.md"
   if [ -f "$dest" ]; then
@@ -114,6 +114,7 @@ echo -e "    2. Run ${GOLD}/invest-backfill${RESET} to generate doctrine from yo
 echo -e "    3. Fill in the operator prompts (the parts only you know)"
 echo -e "    4. Run ${GOLD}/invest-doctrine${RESET} to validate"
 echo -e "    5. Run ${GOLD}/invest-architecture${RESET} to enforce"
+echo -e "    6. Run ${GOLD}/invest-preflight${RESET} to scan the codebase"
 echo ""
 echo -e "${DIM}  https://zerovector.design/investiture${RESET}"
 echo ""

@@ -20,7 +20,6 @@ export default function VectorMode({
   activeTab,
   setActiveTab,
   error,
-  designSlug,
   loadSample,
   handleProcess,
 }) {
@@ -83,11 +82,6 @@ export default function VectorMode({
           >
             {processing ? "Processing…" : "Transform"}
           </button>
-          {designSlug && (
-            <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-              Will pair with: <strong style={{ color: "var(--text-secondary)" }}>{designSlug}</strong>
-            </span>
-          )}
         </div>
 
         {error && <div className="zv-alert zv-alert-error" role="alert">Error: {error}</div>}

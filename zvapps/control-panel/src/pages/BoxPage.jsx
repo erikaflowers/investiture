@@ -1,10 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { parseDesignMd } from "../../core/parseDesignMd.js";
+import { useState } from "react";
 import VectorMode from "../modes/VectorMode.jsx";
-import DesignMode from "../modes/DesignMode.jsx";
-import DashboardMode from "../modes/DashboardMode.jsx";
-
-const PRESET_FILES = import.meta.glob("../../presets/*.md", { query: "?raw", import: "default", eager: true });
 
 const SAMPLES = {
   "Interview Notes": `USER INTERVIEW — Sarah Chen, Product Manager at a Series B SaaS company
@@ -243,7 +238,7 @@ Return a single JSON object with this exact structure:
 
 Output valid JSON only. No markdown wrapping. No explanation. Just the JSON object.`;
 
-function generateVectorMd(data, { designAttached = false } = {}) {
+function generateVectorMd(data) {
   if (!data) return "";
   const m = data.meta || {};
   const d = data.data || {};
@@ -253,9 +248,6 @@ function generateVectorMd(data, { designAttached = false } = {}) {
   md += `> Sources analyzed: ${m.sources || "unknown"} (${(m.source_types || []).join(", ")})\n`;
   md += `> Confidence: ${m.confidence || "unknown"}\n`;
   md += `> Input: ${(m.input_characters || 0).toLocaleString()} characters\n`;
-  if (designAttached) {
-    md += `> Design system: ./design.md\n`;
-  }
   md += `\n---\n\n`;
   md += `## Output Manifest\n\n`;
   md += `### Layer 1: This File\n`;
@@ -273,54 +265,13 @@ function generateVectorMd(data, { designAttached = false } = {}) {
   return md;
 }
 
-const BOX_MODES = [
-  { id: "vector", label: "Vector" },
-  { id: "design", label: "Design" },
-  { id: "dashboard", label: "Dashboard" },
-];
-
 export default function BoxPage() {
-  const [boxMode, setBoxMode] = useState("vector");
-
   const [inputText, setInputText] = useState("");
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState(null);
   const [vectorMd, setVectorMd] = useState(null);
   const [activeTab, setActiveTab] = useState("vector");
   const [error, setError] = useState(null);
-
-  const [designSlug, setDesignSlug] = useState("");
-  const [designMd, setDesignMd] = useState("");
-  const [designParsed, setDesignParsed] = useState(null);
-  const [designError, setDesignError] = useState(null);
-
-  const presetMap = useMemo(() => {
-    const map = {};
-    for (const [path, content] of Object.entries(PRESET_FILES)) {
-      const slug = path.split("/").pop().replace(/\.md$/, "");
-      map[slug] = content;
-    }
-    return map;
-  }, []);
-
-  useEffect(() => {
-    if (!designSlug) {
-      setDesignMd("");
-      setDesignParsed(null);
-      setDesignError(null);
-      return;
-    }
-    setDesignError(null);
-    const text = presetMap[designSlug];
-    if (!text) {
-      setDesignError(`Preset not found: ${designSlug}`);
-      setDesignMd("");
-      setDesignParsed(null);
-      return;
-    }
-    setDesignMd(text);
-    setDesignParsed(parseDesignMd(text));
-  }, [designSlug, presetMap]);
 
   const loadSample = (name) => {
     setInputText(name ? SAMPLES[name] : "");
@@ -364,7 +315,7 @@ export default function BoxPage() {
         else throw new Error("Could not parse structured output");
       }
 
-      const md = generateVectorMd(parsed, { designAttached: !!designMd });
+      const md = generateVectorMd(parsed);
       setResult(parsed);
       setVectorMd(md);
       setActiveTab("vector");
@@ -377,7 +328,6 @@ export default function BoxPage() {
           data: parsed.data,
           briefs: parsed.briefs,
           meta: parsed.meta,
-          design: designMd || undefined,
         }),
       });
     } catch (err) {
@@ -388,53 +338,17 @@ export default function BoxPage() {
   };
 
   return (
-    <div>
-      <div className="zv-tab-row">
-        {BOX_MODES.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            className="zv-tab"
-            aria-pressed={boxMode === m.id}
-            onClick={() => setBoxMode(m.id)}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
-
-      {boxMode === "vector" && (
-        <VectorMode
-          inputText={inputText}
-          setInputText={setInputText}
-          processing={processing}
-          result={result}
-          vectorMd={vectorMd}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          error={error}
-          designSlug={designSlug}
-          loadSample={loadSample}
-          handleProcess={handleProcess}
-        />
-      )}
-      {boxMode === "design" && (
-        <DesignMode
-          designSlug={designSlug}
-          setDesignSlug={setDesignSlug}
-          designParsed={designParsed}
-          designMd={designMd}
-          designError={designError}
-        />
-      )}
-      {boxMode === "dashboard" && (
-        <DashboardMode
-          vector={result}
-          vectorMd={vectorMd}
-          design={designParsed}
-          designMd={designMd}
-        />
-      )}
-    </div>
+    <VectorMode
+      inputText={inputText}
+      setInputText={setInputText}
+      processing={processing}
+      result={result}
+      vectorMd={vectorMd}
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      error={error}
+      loadSample={loadSample}
+      handleProcess={handleProcess}
+    />
   );
 }

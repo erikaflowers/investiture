@@ -1,338 +1,535 @@
 # Investiture Skills
 
-**Active skills for this project.** Each skill reads your doctrine files and enforces what you've written.
+An eight-skill harness for Claude Code that takes any codebase from "nothing documented" to "doctrine enforced, code audited, and issues remediated" in a structured, repeatable sequence.
 
-## The Chain
+Each skill is a standalone slash command. They can be run independently, but they are designed as two pipelines where each step feeds into the next.
 
-The foundation skills run in order. Each one depends on the one before it.
+---
 
-```
-/invest-backfill       →  Bootstrap: creates doctrine from an existing project
-/invest-doctrine       →  Is the doctrine sound?
-/invest-architecture   →  Does the code follow the doctrine?
-```
-
-The v1.4 skills extend the chain into research, design, fleet coordination, and release:
+## The Chain at a Glance
 
 ```
-/invest-validate       →  Which assumptions are riskiest? What should we test?
-/invest-interview      →  Generate a discussion guide for research sessions
-/invest-synthesize     →  Take raw research → propose doctrine patches
-/invest-brief          →  Generate a design brief from research + doctrine
-/invest-adr            →  Capture an architecture decision before it becomes invisible
-/invest-crew           →  Decompose a feature into scoped agent tasks
-/invest-handoff        →  Role-specific onboarding doc (engineer, designer, agent, client)
-/invest-changelog      →  User-facing release notes from git log + VECTOR.md
+Doctrine Chain:
+/invest-backfill ──> /invest-doctrine ──> /invest-architecture
+   (generate)          (validate)           (enforce)
+
+Audit Chain:
+/invest-preflight ──> /invest-manifest ──> /invest-repo-audit ──> /invest-remediate ──> /invest-verify-remediation
+     (scan)              (inventory)          (judge)               (plan)                (confirm)
 ```
 
-**Foundation chain:** Backfill creates the doctrine. Doctrine validates it. Architecture enforces it.
+| Step | Command | Input | Output | Time |
+|------|---------|-------|--------|------|
+| 1 | `/invest-backfill` | A codebase with no doctrine | VECTOR.md, CLAUDE.md, ARCHITECTURE.md | 10-20 min |
+| 2 | `/invest-doctrine` | Doctrine files | `/vector/audits/invest-doctrine.md` | 5-10 min |
+| 3 | `/invest-architecture` | Doctrine + codebase | `/vector/audits/invest-architecture.md` | 10-20 min |
+| 4 | `/invest-preflight` | A repo path | Conversation summary | ~2 min |
+| 5 | `/invest-manifest` | A repo path | `MANIFEST.md` at repo root | 10-30 min |
+| 6 | `/invest-repo-audit` | A repo path (uses MANIFEST.md if present) | `AUDIT.md` at repo root | 15-45 min |
+| 7 | `/invest-remediate` | Path to AUDIT.md | `REMEDIATION.md` at repo root | 5-15 min |
+| 8 | `/invest-verify-remediation` | A repo path (requires AUDIT.md + REMEDIATION.md) | Updated AUDIT.md, deletes REMEDIATION.md | 10-15 min |
 
-**Research loop:** Validate plans what to test → Interview generates the guide → Synthesize records what you learned → feeds back into Validate.
+---
 
-**On demand:** Brief, ADR, Crew, Handoff, and Changelog run independently whenever needed. All read doctrine; none modify the foundation chain.
+## Doctrine Chain
 
-For greenfield projects (created from the Investiture template), start at `/invest-doctrine` — the templates are already there. For existing projects being retrofitted, start at `/invest-backfill`.
+The doctrine chain establishes what your project is, validates that the documentation is sound, and enforces it against the codebase. Run this first on any project adopting Investiture.
 
-## Active Skills
+### Step 1: invest-backfill
 
-### Foundation (v1.3)
+**Command:** `/invest-backfill [--dry-run] [--only vector|claude|architecture]`
 
-| Skill | Purpose | Invocation |
-|-------|---------|------------|
-| `invest-backfill` | Surveys an existing codebase and generates VECTOR.md, CLAUDE.md, and ARCHITECTURE.md by combining Investiture defaults with inferred project patterns | `/invest-backfill` |
-| `invest-doctrine` | Audits VECTOR.md, CLAUDE.md, and ARCHITECTURE.md for completeness, consistency, contradictions, and drift from reality | `/invest-doctrine` |
-| `invest-architecture` | Audits the codebase against layers, naming, imports, tokens, and conventions declared in ARCHITECTURE.md | `/invest-architecture` |
+Surveys an existing codebase and generates the three Investiture doctrine files — VECTOR.md, CLAUDE.md, and ARCHITECTURE.md — by combining Investiture defaults with patterns inferred from the project. Run this once on a project that does not yet have doctrine.
 
-### Research (v1.4)
+#### What it does
 
-| Skill | Purpose | Invocation |
-|-------|---------|------------|
-| `invest-validate` | Reads `/vector/research/assumptions/`, prioritizes by risk (Impact x Confidence), generates a stage-appropriate validation sprint plan | `/invest-validate` |
-| `invest-interview` | Generates structured user research discussion guides from unvalidated assumptions, with entry questions, probing techniques, and validation signals | `/invest-interview` |
-| `invest-synthesize` | Takes raw research input, extracts structured insights, proposes specific patches to VECTOR.md and `/vector/` schema files with full diff preview | `/invest-synthesize` |
+- Reads package manifests, README, config files, directory structure, entry points, git history
+- Identifies framework, language, architecture patterns, naming conventions, state management
+- Surveys across 14 signal categories (identity, architecture, convention, agent, process)
+- Combines inferred patterns with Investiture defaults (Seven Principles, Core Relationship, layer system)
+- Presents a survey report for operator confirmation before writing anything
+- Generates VECTOR.md (project doctrine), CLAUDE.md (contributor onboarding), ARCHITECTURE.md (technical spec)
+- Initializes the `/vector/` directory structure with research scaffolding
 
-### Design & Decisions (v1.4)
+#### What it produces
 
-| Skill | Purpose | Invocation |
-|-------|---------|------------|
-| `invest-brief` | Generates a design brief for a feature or flow from personas, JTBD, assumptions, and doctrine | `/invest-brief` |
-| `invest-adr` | Generates numbered Architecture Decision Records from a decision description, cross-referencing existing ADRs and doctrine constraints | `/invest-adr` |
+- `VECTOR.md` at repo root — project identity, audience, problem, constraints, principles
+- `CLAUDE.md` at repo root — contributor onboarding, stack summary, key context
+- `ARCHITECTURE.md` at repo root — layers, conventions, stack, import rules, structure
+- `/vector/` directory — research, decisions, and audit scaffolding
+- `/vector/audits/invest-backfill.md` — summary of what was inferred and generated
 
-### Fleet & Release (v1.4)
+#### When to use it
 
-| Skill | Purpose | Invocation |
-|-------|---------|------------|
-| `invest-crew` | Decomposes a feature into scoped agent tasks with branch names, commit prefixes, and scope boundaries | `/invest-crew` |
-| `invest-handoff` | Generates role-specific onboarding docs (engineer, designer, agent, client) from doctrine and current `/vector/` state | `/invest-handoff` |
-| `invest-changelog` | Reads git log since last tag and VECTOR.md value prop, writes plain-language release notes grouped by user-facing theme | `/invest-changelog` |
+- First contact with a project that has no doctrine files
+- After adopting Investiture on an existing codebase
+- To understand what Investiture would infer about your project (`--dry-run`)
 
-### Invocation Order
+#### Key rules
 
-**Existing project (no doctrine files):**
+- Infers from reality, not Investiture defaults. The project as it is, not as it should be.
+- Never overwrites existing files. If VECTOR.md already exists, skips it.
+- Flags confidence levels on inferred sections. Low-confidence sections get `[OPERATOR: ...]` prompts.
+- Includes Investiture defaults (Seven Principles, Core Relationship) regardless of what is inferred.
 
-```bash
-# 1. Survey the project and generate doctrine
-/invest-backfill
+---
 
-# Preview what would be generated without writing files
-/invest-backfill --dry-run
+### Step 2: invest-doctrine
 
-# Generate only a specific doctrine file
-/invest-backfill --only architecture
+**Command:** `/invest-doctrine [path/to/specific-doctrine-file]`
 
-# 2. Validate the generated doctrine
-/invest-doctrine
+Audits the three doctrine files for completeness, internal consistency, cross-document contradictions, and drift from the actual codebase. The doctrine must be sound before you enforce it.
 
-# 3. Check the code against doctrine
-/invest-architecture
-```
+#### What it does
 
-**Greenfield project (from Investiture template):**
+- Checks VECTOR.md for completeness (Problem Statement, Target Audience, Value Prop, Principles, Constraints, Quality Gates)
+- Checks ARCHITECTURE.md for structural requirements (layer table, naming, stack, import direction, project structure)
+- Reality-checks declared structure against the actual filesystem
+- Checks CLAUDE.md for existence, override consistency with ARCHITECTURE.md
+- Cross-references all three files for contradictions (constraints vs. stack, principles vs. conventions, stage vs. completeness)
+- Scans the codebase for patterns that contradict doctrine declarations
 
-```bash
-# 1. Check the doctrine itself
-/invest-doctrine
+#### What it produces
 
-# 2. If doctrine is sound, check the code against it
-/invest-architecture
+`/vector/audits/invest-doctrine.md` — a severity-classified report covering:
+- Missing files (Critical)
+- Incomplete sections or contradictions (High)
+- Structure mismatches (Medium)
+- Gaps and placeholders (Low/Info)
 
-# Scope either skill to a specific file
-/invest-doctrine ARCHITECTURE.md
-/invest-architecture src/components
+#### When to use it
 
-# Auto-fix simple architecture violations
-/invest-architecture --fix
-```
-
-**Research loop:**
-
-```bash
-# 1. Prioritize which assumptions to test
-/invest-validate
-
-# Scope to a single assumption or override project stage
-/invest-validate --assumption user-needs-offline
-/invest-validate --stage beta
-
-# 2. Generate a discussion guide for interviews
-/invest-interview
-
-# Scope to a specific assumption or theme
-/invest-interview --assumption user-needs-offline
-/invest-interview --theme onboarding
-/invest-interview --format script   # word-for-word script for new interviewers
-
-# 3. After sessions, synthesize findings into doctrine patches
-/invest-synthesize --source path/to/interview-notes.md
-
-# Preview changes without writing
-/invest-synthesize --dry-run
-```
-
-**Design & decisions:**
-
-```bash
-# Generate a design brief before starting design work
-/invest-brief "Onboarding flow for first-time users"
-/invest-brief --dry-run
-
-# Capture an architecture decision
-/invest-adr "Use Supabase for auth instead of custom JWT"
-/invest-adr --status accepted
-```
-
-**Fleet & release:**
-
-```bash
-# Decompose a feature into agent tasks before a sprint
-/invest-crew "Export agent profiles as portable JSON"
-/invest-crew --format flat   # also output one-line-per-task for piping
-
-# Generate onboarding docs for a specific role
-/invest-handoff --role engineer
-/invest-handoff --role agent
-/invest-handoff --role client
-
-# Write a changelog entry
-/invest-changelog
-/invest-changelog --since v1.3.0 --version 1.4.0
-/invest-changelog --dry-run
-```
-
-### When to Run Each Skill
-
-**Foundation:**
-
-Run `/invest-backfill` when:
-- You have an existing project with no doctrine files
-- You adopted Investiture but never filled in the templates
-- You want to understand what Investiture would infer about your project (`--dry-run`)
-
-Run `/invest-doctrine` when:
-- You have edited any doctrine file (VECTOR.md, CLAUDE.md, ARCHITECTURE.md)
-- You suspect the doctrine has drifted from the codebase
+- After editing any doctrine file
 - After `/invest-backfill` generates files, to validate them
-- Before running `/invest-architecture` for the first time on a project
+- When you suspect doctrine has drifted from the codebase
+- Before running `/invest-architecture` for the first time
 
-Run `/invest-architecture` when:
-- You want to verify the codebase follows declared conventions
+#### Key rules
+
+- Drift is not failure. Doctrine evolves. But undocumented drift is debt.
+- Placeholders are fine in early stages — severity is stage-aware.
+- This skill checks the doctrine, not the code. `/invest-architecture` checks the code.
+
+---
+
+### Step 3: invest-architecture
+
+**Command:** `/invest-architecture [--fix] [path/to/scope]`
+
+Audits the codebase against ARCHITECTURE.md. Reads your doctrine at runtime and checks whether the code follows what you declared — layers, naming, imports, tokens, conventions.
+
+#### What it does
+
+- Reads ARCHITECTURE.md, VECTOR.md, and CLAUDE.md to extract all declared rules
+- Builds a token inventory if a design token system is declared
+- Audits every file in scope across six categories:
+  - **LAYER** — code belongs to the correct layer
+  - **IMPORT** — import direction rules followed
+  - **TOKENS** — no hardcoded design values outside the token file
+  - **NAMING** — filenames match declared conventions
+  - **STATE** — state management rules followed
+  - **SIZE** — file length limits observed
+- Suggests specific fixes for each violation
+- Optional auto-fix for safe mechanical changes (`--fix`)
+
+#### What it produces
+
+`/vector/audits/invest-architecture.md` — a severity-classified report:
+- High: structural violations (wrong layer, import direction violations)
+- Medium: convention violations (naming, token usage)
+- Low: style violations (file size, minor patterns)
+- Info: advisory notes
+
+#### When to use it
+
+- After `/invest-doctrine` confirms the doctrine is sound
 - Before a commit or PR, as a structural check
 - After significant refactoring
+- Periodic health checks on conventions
 
-**Research:**
+#### Key rules
 
-Run `/invest-validate` when:
-- Starting a sprint and deciding what to test this cycle
-- After `/invest-synthesize` updates assumptions — risk rankings may have changed
-- Before major feature investment — validate the assumptions that justify it
+- Doctrine is law. The audit checks code against what you declared, not a preset.
+- Audit, don't rewrite. Report violations with suggestions. Do not modify code unless `--fix` is passed.
+- No false positives. If uncertain, classify as Info, not High.
+- The `--fix` flag only handles safe mechanical changes (file renames, import reordering). Structural changes require human judgment.
 
-Run `/invest-interview` when:
-- Before any user research session — do not run sessions without a guide
-- After `/invest-validate` identifies which assumptions to test
-- When onboarding a non-researcher to run interviews (`--format script`)
+---
 
-Run `/invest-synthesize` when:
-- After user interviews or usability sessions
-- After a beta feedback round
-- After running assumption validation experiments
+## Audit Chain
 
-**Design & Decisions:**
+The audit chain takes any codebase from "I've never seen this before" to "audited, remediated, and verified" in a structured, repeatable sequence. Run this on any codebase you need to assess or improve.
 
-Run `/invest-brief` when:
-- Before starting design work on a feature or flow
-- When onboarding a designer to the project
-- After `/invest-synthesize` updates personas or JTBD — regenerate briefs to check if direction changed
+### Step 4: invest-preflight
 
-Run `/invest-adr` when:
-- Before committing to a new dependency or external service
-- Before adopting a new architectural pattern
-- When the same decision keeps coming up — record it so it stops being relitigated
+**Command:** `/invest-preflight [path-to-repo]`
 
-**Fleet & Release:**
+The reconnaissance pass. A fast, non-invasive scan that answers five questions: What is this? What's it made of? How big is it? What's the tech stack? What should I watch out for?
 
-Run `/invest-crew` when:
-- Before starting a multi-agent sprint
-- When a feature requires more than one agent or more than one layer change
+#### What it does
 
-Run `/invest-handoff` when:
-- Onboarding a contractor or new team member
-- Before starting a new cold agent session (`--role agent`)
-- Before a client check-in (`--role client`)
+- Reads package manifests (`package.json`, `Cargo.toml`, `pyproject.toml`, etc.)
+- Identifies framework, language, database, auth approach, and hosting
+- Counts files by extension, measures scale
+- Detects testing, CI/CD, linting, state management patterns
+- Scans for hazards: monorepo structures, secrets in code, files over 1000 lines, generated code, multiple languages
 
-Run `/invest-changelog` when:
-- At release time, before publishing release notes
-- After a sprint, to communicate what shipped
-- Before tagging a release — use `--dry-run` to preview
+#### What it produces
 
-## Forthcoming
+A structured summary printed directly to the conversation. No files written. Covers: project identity, scale metrics, structure map, git activity, hazards, and recommended next steps.
 
-| Skill | Purpose | Depends On | Version |
-|-------|---------|------------|---------|
-| `invest-alignment` | Traces features to user needs defined in VECTOR.md | `invest-doctrine` | TBD |
-| `invest-provenance` | Links design decisions to research artifacts in /vector | `invest-doctrine` | TBD |
+#### When to use it
 
-All forthcoming skills depend on `invest-doctrine`. Sound doctrine is the foundation the entire chain trusts.
+- First contact with an unfamiliar codebase
+- Before deciding whether to run the full chain
+- Quick orientation before any work session
+
+#### Key rules
+
+- Speed over completeness. This is a 2-minute scan, not a deep dive.
+- No files written. Output to conversation only.
+- The Hazards section is the most valuable part — flag anything that would surprise someone.
+- Be honest about unknowns. "Not detected" is better than a guess.
+
+---
+
+### Step 5: invest-manifest
+
+**Command:** `/invest-manifest [path-to-repo]`
+
+The complete inventory. Reads every source file in the codebase and produces a structured document describing what exists — every file, route, endpoint, database table, component, hook, and feature.
+
+#### What it does
+
+- Discovers project type from dependency manifests
+- Maps the full file tree (excluding node_modules, .git, dist, etc.)
+- Reads every source file to describe it accurately (uses parallel subagents for speed)
+- Produces a multi-section inventory document
+
+#### What it produces
+
+`MANIFEST.md` at the repo root, containing:
+
+1. **File Tree** — every file with a one-line description
+2. **Architecture Overview** — tech stack, patterns, entry points
+3. **Pages & Routes** — every client-side route (if applicable)
+4. **API Endpoints** — method, path, auth, request/response shapes (if applicable)
+5. **Database Schema** — tables, columns, relationships (if applicable)
+6. **Components** — every UI component with purpose, props, state (if applicable)
+7. **Hooks / Services / Utilities** — shared logic modules (if applicable)
+8. **Configuration & Environment** — env vars, config files, build settings
+9. **Feature Inventory** — every user-facing feature with working/partial/stub status
+
+#### When to use it
+
+- Before auditing (gives the audit a map to work from)
+- When onboarding to a project you will be working in long-term
+- When you need to understand the full scope before planning work
+
+#### Key rules
+
+- Sections adapt to the project type. A CLI tool will not have routes. A static site will not have a database.
+- Read before describing. Never guess from filenames.
+- Descriptions must be precise: not "handles authentication" but "verifies Google JWT, checks ADMIN_EMAIL, returns user role from ops_users table."
+
+---
+
+### Step 6: invest-repo-audit
+
+**Command:** `/invest-repo-audit [path-to-repo]`
+
+The quality assessment. Scans the codebase across 8 vectors, classifies every finding by severity, and produces a prioritized report.
+
+#### What it does
+
+Performs 8 parallel audit scans:
+
+1. **Dead Code** — files imported nowhere, functions exported but never called, orphaned CSS
+2. **Spaghetti & Complexity** — files over 500 lines, circular imports, god files, prop drilling
+3. **Error Handling** — uncaught API errors, missing loading/error/empty states, silent failures
+4. **Security** — secrets in source, auth bypass vectors, unsanitized input, CORS misconfig
+5. **Consistency** — naming conventions, API patterns, import styles
+6. **Feature Completeness** — half-implemented features, TODO density, commented-out code
+7. **Performance** — unnecessary re-renders, unbatched API calls, N+1 queries, bundle bloat
+8. **Documentation Gaps** �� uncommented complex logic, stale README
+
+#### What it produces
+
+`AUDIT.md` at the repo root, containing:
+
+- Summary metrics (files audited, finding counts by severity)
+- Critical, Significant, and Minor findings (file paths, line numbers, descriptions)
+- Dead code inventory
+- Commendations (things done well)
+- Recommended remediation priority
+- Per-file classification table
+
+#### Classification system
+
+| Level | Meaning |
+|-------|---------|
+| **CRITICAL** | Broken in production, data loss risk, security vulnerability |
+| **SIGNIFICANT DEBT** | Works but fragile — will break under growth or change |
+| **MINOR DEBT** | Suboptimal but functional — fix when convenient |
+| **CLEAN** | No issues found |
+
+#### When to use it
+
+- After shipping a milestone, before starting the next
+- Before a major refactor to understand what you are working with
+- Periodic health checks on active projects
+
+#### Key rules
+
+- CRITICAL means broken or vulnerable. Architectural preferences are not critical findings.
+- Every finding is verified by reading the file. No guessing from grep results.
+- No false alarms. Uncertainty is stated as uncertainty, not classified as critical.
+- Always finds at least 3 commendations. Credibility requires balance.
+
+#### Dependency on previous steps
+
+Uses `MANIFEST.md` as a map if it exists. Running `/invest-manifest` first produces a more thorough audit.
+
+---
+
+### Step 7: invest-remediate
+
+**Command:** `/invest-remediate [path-to-audit-md]`
+
+The planning step. Reads AUDIT.md and generates a phased remediation plan — a sequence of self-contained, agent-executable prompts ordered from lowest risk to highest risk.
+
+#### What it does
+
+- Parses every finding from AUDIT.md
+- Groups findings into phases by risk level
+- Generates a standalone prompt for each phase that an agent (or human) can execute without reading the original audit
+- Adds cross-phase dependency notes, risk checkpoints, and bail points
+
+#### Phase ordering (lowest risk first)
+
+| Order | Phase Type | Risk Level |
+|-------|-----------|------------|
+| 1 | Delete dead code | Zero |
+| 2 | Fix naming & consistency | Near-zero |
+| 3 | Add error boundaries / handling | Low |
+| 4 | Add validation / security fixes | Low-medium |
+| 5 | Extract components / split monoliths | Medium |
+| 6 | Performance fixes | Medium |
+| 7 | Architecture changes | High |
+| 8 | Feature completion | Variable |
+
+#### What it produces
+
+`REMEDIATION.md` at the repo root, containing:
+
+- All phase prompts in sequence, each with: header, context, numbered tasks (file paths, line numbers, acceptance criteria), verification steps, rollback guidance
+- Cross-phase notes: execution order, risk checkpoints, bail points
+- "What This Plan Does NOT Cover" section
+
+#### When to use it
+
+- Immediately after `/invest-repo-audit` when you intend to fix the findings
+- When you want to hand off fixes to other agents or developers
+- When you want a structured plan before touching code
+
+#### Key rules
+
+- Every task references a specific file. No vague instructions.
+- Preserves the audit's commendations — marks well-implemented code as "do NOT modify."
+- Does not invent findings. Only generates tasks for things in AUDIT.md.
+- Includes rollback guidance for medium and high risk phases.
+
+---
+
+### Step 8: invest-verify-remediation
+
+**Command:** `/invest-verify-remediation [path-to-repo]`
+
+The confirmation pass. After remediation phases have been executed, this skill verifies that findings were actually resolved without introducing new issues.
+
+#### What it does
+
+1. **Identifies what changed** — reads REMEDIATION.md, cross-references git history
+2. **Verifies each finding** — reads modified files, confirms fixes match spec
+3. **Checks for regressions** — build status, new lint errors, patterns the audit originally flagged
+4. **Checks for orphaned artifacts** — unused imports, dangling references from deleted files
+5. **Updates AUDIT.md** — adds resolution status to each finding, updates summary metrics
+6. **Deletes REMEDIATION.md** — it has served its purpose; resolution status lives in AUDIT.md
+7. **Patches MANIFEST.md** — spot-checks and updates for added/deleted/renamed files
+
+#### Finding statuses
+
+| Status | Meaning |
+|--------|---------|
+| **RESOLVED** | Fix confirmed, matches spec, no regressions |
+| **DEFERRED** | Intentionally skipped, documented in remediation plan |
+| **OPEN** | Was in a remediation phase but not addressed |
+
+#### What it produces
+
+- Conversation summary with counts (phases executed, files modified, findings resolved/deferred/open, regressions)
+- Updated `AUDIT.md` with resolution status on every finding
+- Updated `MANIFEST.md` (patched, not regenerated)
+- `REMEDIATION.md` deleted
+
+Ends with a verdict: **CLEAR TO RESUME BUILDING** or **ISSUES REMAIN** with details.
+
+#### When to use it
+
+- After completing some or all remediation phases
+- Before resuming feature work on a repo that went through the audit chain
+
+#### Key rules
+
+- Does NOT re-audit the entire codebase. Only checks files that changed and findings that were targeted.
+- Does NOT fix anything. Reports regressions without repairing them.
+- Honest about partial completion. If only 4 of 6 phases ran, it says so.
+
+---
+
+## Running the Chains
+
+### Doctrine chain (existing project, no doctrine)
+
+```bash
+/invest-backfill                # Generate doctrine from your codebase
+# Review the generated files, fill in [OPERATOR: ...] sections
+/invest-doctrine                # Validate the doctrine is sound
+/invest-architecture            # Check code against doctrine
+```
+
+### Doctrine chain (greenfield project)
+
+```bash
+# Fill in VECTOR.md, CLAUDE.md, ARCHITECTURE.md manually
+/invest-doctrine                # Validate
+/invest-architecture            # Enforce
+```
+
+### Audit chain (full sequence)
+
+```bash
+/invest-preflight               # 2 min — orient yourself
+/invest-manifest                # 10-30 min — inventory everything
+/invest-repo-audit              # 15-45 min — assess quality
+/invest-remediate               # 5-15 min — generate fix plan
+# ... execute the remediation phases ...
+/invest-verify-remediation      # 10-15 min — confirm fixes
+```
+
+### Partial runs
+
+You do not always need every step:
+
+| Situation | Run |
+|-----------|-----|
+| Quick orientation on a new repo | `/invest-preflight` only |
+| Need to understand what exists | `/invest-preflight` then `/invest-manifest` |
+| Quality check before a release | `/invest-preflight` then `/invest-repo-audit` |
+| Full audit with remediation | All five audit chain steps |
+| Re-verify after more fixes | `/invest-verify-remediation` again |
+| New project, establish doctrine | `/invest-backfill` then `/invest-doctrine` |
+| Check code follows your rules | `/invest-architecture` |
+
+### Both chains together
+
+```bash
+# Establish doctrine first
+/invest-backfill
+/invest-doctrine
+/invest-architecture
+
+# Then audit the codebase
+/invest-preflight
+/invest-manifest
+/invest-repo-audit
+/invest-remediate
+# ... execute phases ...
+/invest-verify-remediation
+```
+
+---
+
+## Files Created by the Chain
+
+| File | Created by | Used by | Lifecycle |
+|------|-----------|---------|-----------|
+| `VECTOR.md` | `/invest-backfill` | `/invest-doctrine`, `/invest-architecture` | Persists — project doctrine |
+| `CLAUDE.md` | `/invest-backfill` | `/invest-architecture` | Persists — contributor onboarding |
+| `ARCHITECTURE.md` | `/invest-backfill` | `/invest-doctrine`, `/invest-architecture` | Persists — technical spec |
+| `/vector/audits/` | `/invest-doctrine`, `/invest-architecture` | Operator reference | Overwritten on each run |
+| `MANIFEST.md` | `/invest-manifest` | `/invest-repo-audit`, `/invest-verify-remediation` | Persists, updated by verify |
+| `AUDIT.md` | `/invest-repo-audit` | `/invest-remediate`, `/invest-verify-remediation` | Persists, updated by verify |
+| `REMEDIATION.md` | `/invest-remediate` | `/invest-verify-remediation` | Temporary — deleted after verification |
+
+---
+
+## Optional Skills
+
+Research, design, fleet coordination, and release skills from v1.4 are available in `.claude/skills-optional/`. To activate any optional skill, copy its directory into `.claude/skills/`:
+
+```bash
+cp -r .claude/skills-optional/invest-changelog .claude/skills/
+```
+
+Available optional skills:
+
+| Skill | Purpose |
+|-------|---------|
+| `invest-validate` | Prioritize unvalidated assumptions by risk |
+| `invest-interview` | Generate structured user research discussion guides |
+| `invest-synthesize` | Take raw research and propose doctrine patches |
+| `invest-brief` | Generate design briefs from research and doctrine |
+| `invest-adr` | Generate numbered Architecture Decision Records |
+| `invest-crew` | Decompose features into scoped agent tasks |
+| `invest-handoff` | Generate role-specific onboarding docs |
+| `invest-changelog` | Write user-facing release notes from git log |
+
+---
+
+## Design Principles
+
+**Separation of concerns.** Each skill does one thing. Backfill generates. Doctrine validates. Architecture enforces. Preflight scans. Manifest inventories. Audit judges. Remediate plans. Verify confirms. No skill crosses into another's domain.
+
+**Read before judging.** No skill classifies, describes, or assesses a file it has not read. Grep results are verified by opening the file.
+
+**Doctrine is the oath.** The doctrine chain establishes what you believe about your project. The audit chain assesses the reality. Both chains derive their rules from your declarations, not presets.
+
+**Lowest risk first.** Remediation phases are ordered so that the safest changes happen first. If you bail out midway, you have done the easy wins and have not broken anything.
+
+**Self-contained phases.** Each remediation phase prompt can be handed to an agent that has never seen the audit. It includes all context needed to execute.
+
+**Credibility through balance.** Every audit includes commendations. Every remediation plan preserves things flagged as well-done. False alarms and inflated severity are treated as failures.
+
+**Artifacts are temporary.** REMEDIATION.md is deleted after verification. The resolution status is folded back into AUDIT.md. One source of truth, not three.
+
+---
 
 ## Adopting Investiture on an Existing Project
 
-Skills are discovered from your project's `.claude/skills/` directory. They do not install globally — each project carries its own skill chain. This is intentional: skills read YOUR doctrine, so they live next to YOUR code.
-
-### Step 1: Copy the skills into your project
+### Quick start
 
 ```bash
-# From your existing project directory
-cp -r /path/to/investiture/.claude/skills/ .claude/skills/
+npx investiture init
 ```
 
-If you don't have the Investiture repo locally:
+Or without npm:
 
 ```bash
-# Clone it, copy the skills, clean up
-git clone https://github.com/erikaflowers/investiture.git /tmp/investiture
-mkdir -p .claude/skills
-cp -r /tmp/investiture/.claude/skills/* .claude/skills/
-rm -rf /tmp/investiture
+bash <(curl -fsSL https://raw.githubusercontent.com/erikaflowers/investiture/main/inject.sh)
 ```
 
-This copies eleven skill directories into your project:
+This adds `.claude/skills/` (eight skills), `vector/schemas/` (six research schemas), and the `vector/` directory structure.
 
-**Foundation:**
-- `.claude/skills/invest-backfill/` — generates doctrine from your existing code
-- `.claude/skills/invest-doctrine/` — validates doctrine files
-- `.claude/skills/invest-architecture/` — enforces code against doctrine
+### Then
 
-**Research:**
-- `.claude/skills/invest-validate/` — assumption risk prioritization + validation planning
-- `.claude/skills/invest-interview/` — structured user research discussion guides
-- `.claude/skills/invest-synthesize/` — research intake → doctrine patches
+1. Open Claude Code in your project
+2. Run `/invest-backfill` to generate doctrine from your codebase
+3. Fill in the operator prompts (the parts only you know)
+4. Run `/invest-doctrine` to validate
+5. Run `/invest-architecture` to enforce
+6. Run `/invest-preflight` to scan the codebase
 
-**Design & Decisions:**
-- `.claude/skills/invest-brief/` — design briefs from research + doctrine
-- `.claude/skills/invest-adr/` — architecture decision records
+### How skills work
 
-**Fleet & Release:**
-- `.claude/skills/invest-crew/` — multi-agent task decomposition
-- `.claude/skills/invest-handoff/` — role-specific onboarding docs
-- `.claude/skills/invest-changelog/` — user-facing release notes from git log
-
-### Step 2: Run backfill
-
-```bash
-# Open Claude Code in your project, then:
-/invest-backfill
-```
-
-Backfill will survey your codebase — README, package manifest, directory structure, config files, git history — and generate VECTOR.md, CLAUDE.md, and ARCHITECTURE.md with a mix of Investiture defaults and inferred content from your project.
-
-### Step 3: Review, then validate
-
-Backfill generates drafts. Review the `[OPERATOR: ...]` sections and fill in what it couldn't infer. Then:
-
-```bash
-/invest-doctrine        # Validate the doctrine is sound
-/invest-architecture    # Check code against doctrine
-```
-
-### What gets committed
-
-The skills themselves (`.claude/skills/`) and the doctrine files (`VECTOR.md`, `CLAUDE.md`, `ARCHITECTURE.md`) should be committed to your repo. They are part of your project now. Future contributors and agents will discover them automatically.
-
-The `/vector/` directory (research artifacts, schemas, decision records) is created by backfill with `.gitkeep` files and a README. Commit the structure — it gives the doctrine files' `knowledge:` references somewhere to resolve, and gives audit reports a home. If you prefer to defer directory creation, pass `--no-vector` during backfill.
-
-### Audit reports and outputs
-
-Skills write to `/vector/`:
-
-| Skill | Output Location |
-|-------|-----------------|
-| `invest-backfill` | `/vector/audits/invest-backfill.md` |
-| `invest-doctrine` | `/vector/audits/invest-doctrine.md` |
-| `invest-architecture` | `/vector/audits/invest-architecture.md` |
-| `invest-synthesize` | `/vector/audits/invest-synthesize.md` |
-| `invest-validate` | `/vector/research/assumptions/validation-plan-[date].md` |
-| `invest-interview` | `/vector/research/interviews/guide-[slug]-[date].md` |
-| `invest-brief` | `/vector/briefs/[feature-slug]-[date].md` |
-| `invest-adr` | `/vector/decisions/ADR-[NNN]-[slug].md` |
-| `invest-crew` | `/vector/missions/[feature-slug].md` |
-| `invest-handoff` | `/vector/handoffs/[role]-[date].md` |
-| `invest-changelog` | `/vector/changelog/[version].md` + `CHANGELOG.md` |
-
-Audit files are overwritten on each run — the current state is what matters, git has the history. Snapshot files (briefs, handoffs, interview guides) are never overwritten — each is a point-in-time document. The relevant directories are created automatically if they do not exist.
-
-## How Skills Work
-
-Skills live in `.claude/skills/` and follow the [Agent Skills open standard](https://agentskills.io). They are automatically discovered by Claude Code (and 30+ other tools that support the standard).
-
-Each skill reads your project's doctrine files — `VECTOR.md`, `CLAUDE.md`, `ARCHITECTURE.md` — and audits your codebase against what YOU declared. The rules aren't ours. They're yours. We just enforce them.
-
-### Customize
-
-Skills respect your customizations. If you change the stack, swap conventions, add layers, or rewrite your design principles — the skills adapt to YOUR doctrine, not a preset. `invest-backfill` infers from your actual project. `invest-doctrine` checks that your doctrine is internally consistent. `invest-architecture` checks that your code follows it.
-
-## The Metaphor
-
-In the Cosmere, Investiture is the raw magical energy that fuels every magic system. A Windrunner's Surges, an Allomancer's metals, a Lightweaver's illusions — all powered by Investiture, all bound by oaths.
-
-Here, your doctrine is the oath. Skills are the Surges. They only work because you declared what you believe about your project. The more specific your doctrine, the more powerful your Skills become.
-
-The reading order is the first oath.
+Skills live in `.claude/skills/` and follow the Agent Skills open standard. They are automatically discovered by Claude Code. Each skill reads your project's doctrine files and audits your codebase against what you declared. The rules are yours. The skills enforce them.

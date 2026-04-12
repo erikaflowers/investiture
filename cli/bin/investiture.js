@@ -86,7 +86,7 @@ function init(fresh) {
   log(`${GOLD}${BOLD}  Skills${RESET} ${DIM}.claude/skills/${RESET}`);
   blank();
 
-  const skills = ['invest-backfill', 'invest-doctrine', 'invest-architecture'];
+  const skills = ['invest-backfill', 'invest-doctrine', 'invest-architecture', 'invest-preflight', 'invest-manifest', 'invest-repo-audit', 'invest-remediate', 'invest-verify-remediation'];
   for (const skill of skills) {
     const dest = path.join(targetDir, '.claude', 'skills', skill, 'SKILL.md');
     const src = path.join(templatesDir, 'skills', skill, 'SKILL.md');
@@ -212,6 +212,7 @@ function init(fresh) {
     log(`    3. Fill in the operator prompts (the parts only you know)`);
     log(`    4. Run ${GOLD}/invest-doctrine${RESET} to validate`);
     log(`    5. Run ${GOLD}/invest-architecture${RESET} to enforce`);
+    log(`    6. Run ${GOLD}/invest-preflight${RESET} to scan the codebase`);
   }
   blank();
   log(`${DIM}  https://zerovector.design/investiture${RESET}`);

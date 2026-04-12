@@ -8,6 +8,7 @@ export { default as Panel } from './components/Panel.jsx';
 export { default as StatusBar } from './components/StatusBar.jsx';
 export { default as LoadingPulse } from './components/LoadingPulse.jsx';
 export { default as SettingsLayout } from './components/SettingsLayout.jsx';
+export { default as PageLayout } from './components/PageLayout.jsx';
 
 export { default as useTheme } from './hooks/useTheme.js';
 

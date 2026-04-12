@@ -5,11 +5,13 @@ import BoxPage from "./pages/BoxPage.jsx";
 import DoctrinePage from "./pages/DoctrinePage.jsx";
 import DesignPage from "./pages/DesignPage.jsx";
 import SkillsPage from "./pages/SkillsPage.jsx";
+import VectorPage from "./pages/VectorPage.jsx";
 import HealthPage from "./pages/HealthPage.jsx";
 
 const PAGES = {
   box: BoxPage,
   doctrine: DoctrinePage,
+  vector: VectorPage,
   design: DesignPage,
   skills: SkillsPage,
   health: HealthPage,
