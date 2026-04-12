@@ -1,15 +1,12 @@
 {
-  "name": "investiture",
-  "version": "1.3.0",
+  "name": "investiture-control-panel",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "start": "vite",
     "build": "vite build",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "zvapps": "npm start --prefix zvapps/control-panel",
-    "zvapps:install": "npm install --prefix zvapps/control-panel",
-    "zvapps:build": "npm run build --prefix zvapps/control-panel"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "react": "^19.0.0",

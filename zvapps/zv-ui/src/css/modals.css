@@ -1,0 +1,77 @@
+/* ── Zero Vector UI — Panels + Modals ─────────────────────────────────────── */
+
+.zv-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-backdrop);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zv-panel {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.zv-panel.zv-panel-modal {
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+}
+
+.zv-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.zv-panel-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.zv-panel-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
+.zv-panel-close:hover {
+  color: var(--text-primary);
+}
+
+.zv-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* ── Inline panel — used as a content card, not a modal ───────────────────── */
+
+.zv-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.zv-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

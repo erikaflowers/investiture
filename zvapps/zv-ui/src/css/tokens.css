@@ -1,0 +1,35 @@
+/* ── Zero Vector UI — Default Tokens (Labrador Light fallback) ────────────── */
+/* These values are overridden at runtime by applyTheme() from src/themes.    */
+/* The :root block exists so the page paints something sensible if JS hasn't  */
+/* loaded yet. Once a theme applies, every var below gets replaced inline.    */
+
+:root {
+  --bg-primary: #faf8f5;
+  --bg-secondary: #f2efe9;
+  --bg-tertiary: #e9e5dd;
+  --bg-hover: #e0dbd2;
+  --border: #d6d0c8;
+  --border-light: #c8c1b8;
+  --text-primary: #2c2825;
+  --text-secondary: #6b6560;
+  --text-muted: #9a948e;
+  --accent: #1a6dd2;
+  --accent-dim: #e8f1fc;
+  --accent-hover: #1458b0;
+  --accent-secondary: #1a6dd2;
+  --error: #c4342b;
+  --error-bg: rgba(196, 52, 43, 0.1);
+  --success: #2d7a3e;
+  --success-bg: rgba(45, 122, 62, 0.1);
+  --warning: #c08b2e;
+  --warning-bg: rgba(192, 139, 46, 0.1);
+  --button-text: #ffffff;
+  --overlay-backdrop: rgba(0, 0, 0, 0.5);
+
+  --sidebar-width: 280px;
+  --topnav-height: 44px;
+  --statusbar-height: 26px;
+
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
