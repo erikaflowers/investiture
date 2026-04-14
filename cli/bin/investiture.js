@@ -32,9 +32,12 @@ function usage() {
   banner();
   log(`${WHITE}${BOLD}  Usage:${RESET}`);
   blank();
-  log(`    ${GOLD}npx investiture init${RESET}        Add skills + schemas to an existing project`);
-  log(`    ${GOLD}npx investiture init --fresh${RESET} Also create starter doctrine templates`);
-  log(`    ${GOLD}npx investiture --help${RESET}       Show this message`);
+  log(`    ${GOLD}npx investiture init${RESET}             Add skills + schemas to an existing project`);
+  log(`    ${GOLD}npx investiture init --fresh${RESET}      Also create starter doctrine templates`);
+  log(`    ${GOLD}npx investiture install-zvapps${RESET}    Install the Control Panel (zvapps/) into this project`);
+  log(`    ${GOLD}npx investiture update${RESET}            Sync zvapps/ + skills from upstream`);
+  log(`    ${GOLD}npx investiture update --dry-run${RESET}  Preview what would change`);
+  log(`    ${GOLD}npx investiture --help${RESET}            Show this message`);
   blank();
   log(`${DIM}  After init, open Claude Code and run /invest-backfill${RESET}`);
   blank();
@@ -290,6 +293,13 @@ if (!command || command === '--help' || command === '-h') {
 if (command === 'init') {
   const fresh = flags.includes('--fresh');
   init(fresh);
+} else if (command === 'install-zvapps') {
+  require('./install-zvapps.js').run();
+} else if (command === 'update') {
+  require('./update.js').run({
+    dryRun: flags.includes('--dry-run'),
+    diff: flags.includes('--diff'),
+  });
 } else {
   log(`${CORAL}  Unknown command: ${command}${RESET}`);
   usage();

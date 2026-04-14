@@ -1,7 +1,7 @@
 {
   "name": "investiture",
   "version": "1.5.0",
-  "description": "Add structured doctrine, research schemas, and a skill chain to any project. Built for Claude Code.",
+  "description": "Add structured doctrine, research schemas, a skill chain, and the Control Panel (zvapps) to any project. Built for Claude Code.",
   "bin": {
     "investiture": "bin/investiture.js"
   },
@@ -23,7 +23,8 @@
   "homepage": "https://zerovector.design/investiture",
   "files": [
     "bin/",
-    "templates/"
+    "templates/",
+    "update-manifest.json"
   ],
   "engines": {
     "node": ">=16"

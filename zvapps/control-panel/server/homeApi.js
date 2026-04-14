@@ -142,6 +142,57 @@ export function homeApiPlugin() {
           res.end('Method not allowed');
         }
       });
+
+      // ── Investiture version stamp ─────────────────────────────────────
+      server.middlewares.use('/api/home/investiture-version', async (req, res) => {
+        if (req.method !== 'GET') { res.statusCode = 405; res.end('Method not allowed'); return; }
+        try {
+          const stampPath = path.join(repoRoot, '.investiture-version.json');
+          if (!fs.existsSync(stampPath)) {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ installed: false }));
+            return;
+          }
+          const stamp = JSON.parse(fs.readFileSync(stampPath, 'utf-8'));
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ installed: true, ...stamp }));
+        } catch (err) {
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
+
+      // ── Check for updates ─────────────────────────────────────────────
+      server.middlewares.use('/api/home/check-updates', async (req, res) => {
+        if (req.method !== 'GET') { res.statusCode = 405; res.end('Method not allowed'); return; }
+        try {
+          const stampPath = path.join(repoRoot, '.investiture-version.json');
+          const installed = fs.existsSync(stampPath)
+            ? JSON.parse(fs.readFileSync(stampPath, 'utf-8')).version
+            : null;
+
+          const manifestUrl = 'https://raw.githubusercontent.com/erikaflowers/investiture/main/cli/update-manifest.json';
+          const https = await import('node:https');
+          const fetched = await new Promise((resolve, reject) => {
+            https.get(manifestUrl, (r) => {
+              if (r.statusCode !== 200) { reject(new Error(`HTTP ${r.statusCode}`)); return; }
+              let data = '';
+              r.on('data', (chunk) => { data += chunk; });
+              r.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });
+            }).on('error', reject);
+          });
+
+          const latest = fetched.version;
+          const upToDate = installed === latest;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ installed, latest, upToDate }));
+        } catch (err) {
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
     }
   };
 }

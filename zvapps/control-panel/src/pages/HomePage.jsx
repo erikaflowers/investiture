@@ -49,20 +49,39 @@ export default function HomePage() {
   const [repo, setRepo] = useState(null);
   const [git, setGit] = useState(null);
   const [tracking, setTracking] = useState(null);
+  const [version, setVersion] = useState(null);
+  const [updateStatus, setUpdateStatus] = useState(null);
+  const [checking, setChecking] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [repoRes, gitRes, trackRes] = await Promise.all([
+    const [repoRes, gitRes, trackRes, versionRes] = await Promise.all([
       fetch("/api/home/repo-scan").then((r) => r.json()).catch(() => null),
       fetch("/api/home/git-status").then((r) => r.json()).catch(() => null),
       fetch("/api/home/skill-tracking").then((r) => r.json()).catch(() => null),
+      fetch("/api/home/investiture-version").then((r) => r.json()).catch(() => null),
     ]);
     setRepo(repoRes);
     setGit(gitRes);
     setTracking(trackRes);
+    setVersion(versionRes);
     setLoading(false);
   }, []);
+
+  const checkForUpdates = async () => {
+    setChecking(true);
+    setUpdateStatus(null);
+    try {
+      const res = await fetch("/api/home/check-updates");
+      const data = await res.json();
+      setUpdateStatus(data);
+    } catch {
+      setUpdateStatus({ error: "Failed to check" });
+    } finally {
+      setChecking(false);
+    }
+  };
 
   useEffect(() => {
     load();
@@ -183,6 +202,58 @@ export default function HomePage() {
             </div>
           </Panel>
         )}
+
+        {/* Investiture version */}
+        <Panel title="Investiture">
+          {!version || !version.installed ? (
+            <>
+              <p style={{ color: "var(--text-muted)", fontSize: "13px", marginBottom: "12px" }}>
+                No <code>.investiture-version.json</code> found. This project may have been installed before the update mechanism existed.
+              </p>
+              <p style={{ color: "var(--text-muted)", fontSize: "12px" }}>
+                Run <code>npx investiture update</code> to stamp the current version.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="zv-home-stat-row" style={{ marginBottom: "14px" }}>
+                <div className="zv-home-stat">
+                  <span className="zv-home-stat-value">v{version.version}</span>
+                  <span className="zv-home-stat-label">installed</span>
+                </div>
+                <div className="zv-home-stat">
+                  <span className="zv-home-stat-value" style={{ fontSize: "14px" }}>{timeAgo(version.lastUpdatedAt)}</span>
+                  <span className="zv-home-stat-label">last synced</span>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className="zv-button"
+                  onClick={checkForUpdates}
+                  disabled={checking}
+                >
+                  {checking ? "Checking..." : "Check for updates"}
+                </button>
+                {updateStatus && !updateStatus.error && (
+                  <span style={{ fontSize: "12px", color: updateStatus.upToDate ? "var(--success)" : "var(--warning)" }}>
+                    {updateStatus.upToDate
+                      ? `✓ up to date (v${updateStatus.latest})`
+                      : `⚠ v${updateStatus.latest} available — run npx investiture update`}
+                  </span>
+                )}
+                {updateStatus?.error && (
+                  <span style={{ fontSize: "12px", color: "var(--error)" }}>
+                    {updateStatus.error}
+                  </span>
+                )}
+              </div>
+              <p style={{ color: "var(--text-muted)", fontSize: "11px", marginTop: "12px", fontFamily: "var(--font-mono)" }}>
+                {version.source}@{version.ref}
+              </p>
+            </>
+          )}
+        </Panel>
 
         {/* Skill freshness */}
         <Panel title="Skill Activity">
