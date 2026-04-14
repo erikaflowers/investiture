@@ -1,0 +1,34 @@
+/* ── Zero Vector UI — Responsive ──────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .zv-app-content {
+    padding: 16px;
+  }
+
+  .zv-top-nav {
+    padding: 0 8px;
+  }
+
+  .zv-top-nav-brand {
+    display: none;
+  }
+
+  .zv-top-nav-tab span {
+    display: none;
+  }
+
+  .zv-settings-sidebar {
+    width: 60px;
+    min-width: 60px;
+  }
+
+  .zv-settings-sidebar-title,
+  .zv-settings-nav-group-label,
+  .zv-settings-nav-link span {
+    display: none;
+  }
+
+  .zv-settings-content {
+    padding: 16px;
+  }
+}

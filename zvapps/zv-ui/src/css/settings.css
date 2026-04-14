@@ -1,0 +1,108 @@
+/* ── Zero Vector UI — Settings Layout (sidebar nav + content pane) ────────── */
+
+.zv-settings-layout {
+  display: flex;
+  flex: 1;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+.zv-settings-sidebar {
+  width: 220px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  padding: 16px 12px;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.zv-settings-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: var(--font-body);
+  padding: 8px 10px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  margin-bottom: 4px;
+}
+.zv-settings-back:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.zv-settings-sidebar-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 8px 10px 6px;
+}
+
+.zv-settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zv-settings-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.zv-settings-nav-group + .zv-settings-nav-group {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.zv-settings-nav-group-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: 0 12px 4px;
+}
+
+.zv-settings-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  text-align: left;
+  transition: color 0.15s, background 0.15s;
+}
+.zv-settings-nav-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+.zv-settings-nav-link.active {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.zv-settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 40px;
+}

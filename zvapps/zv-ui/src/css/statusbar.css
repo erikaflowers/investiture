@@ -1,0 +1,84 @@
+/* ── Zero Vector UI — Status Bar ──────────────────────────────────────────── */
+
+.zv-status-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--statusbar-height);
+  padding: 0 12px;
+  background: var(--bg-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.zv-status-bar-wave {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    var(--border) 0%,
+    var(--border) 35%,
+    var(--accent) 50%,
+    var(--border) 65%,
+    var(--border) 100%
+  );
+  background-size: 200% 100%;
+  animation: zvStatusWave 8s ease-in-out infinite;
+}
+
+@keyframes zvStatusWave {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.zv-status-bar-left,
+.zv-status-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zv-status-bar-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  color: var(--text-secondary);
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zv-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--text-muted);
+}
+
+.zv-status-dot.zv-status-dot-active {
+  background: var(--accent);
+}
+
+.zv-status-dot.zv-status-dot-pulse {
+  animation: zvStatusPulse 1s ease-in-out infinite;
+}
+
+@keyframes zvStatusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}

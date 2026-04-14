@@ -1,0 +1,36 @@
+/* ── Zero Vector UI — Loading pulse ───────────────────────────────────────── */
+
+.zv-loading {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  gap: 16px;
+}
+
+.zv-loading-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: zvPulse 2s ease-in-out infinite;
+}
+
+.zv-loading-text {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+@keyframes zvPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

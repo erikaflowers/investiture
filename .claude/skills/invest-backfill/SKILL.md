@@ -22,17 +22,14 @@ Before doing anything else, check that the full Investiture skill chain exists i
 .claude/skills/invest-architecture/SKILL.md  ← needed for enforcement after backfill
 ```
 
-The following v1.4 skills are optional but extend the chain with research, design, fleet, and release capabilities:
+The audit chain extends Investiture with codebase quality assessment and remediation:
 
 ```
-.claude/skills/invest-validate/SKILL.md      ← assumption risk prioritization + validation planning
-.claude/skills/invest-synthesize/SKILL.md    ← research intake → doctrine patches
-.claude/skills/invest-interview/SKILL.md     ← structured user research discussion guides
-.claude/skills/invest-brief/SKILL.md         ← design briefs from research + doctrine
-.claude/skills/invest-adr/SKILL.md           ← architecture decision records
-.claude/skills/invest-crew/SKILL.md          ← multi-agent task decomposition
-.claude/skills/invest-handoff/SKILL.md       ← role-specific onboarding docs
-.claude/skills/invest-changelog/SKILL.md     ← user-facing release notes from git log
+.claude/skills/invest-preflight/SKILL.md             ← quick codebase reconnaissance
+.claude/skills/invest-manifest/SKILL.md              ← complete codebase inventory
+.claude/skills/invest-repo-audit/SKILL.md            ← quality, stability, and architecture audit
+.claude/skills/invest-remediate/SKILL.md             ← phased remediation plan from audit findings
+.claude/skills/invest-verify-remediation/SKILL.md   ← verify fixes, update audit status
 ```
 
 If `invest-doctrine` or `invest-architecture` are missing, warn the operator immediately:

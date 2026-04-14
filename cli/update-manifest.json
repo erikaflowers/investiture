@@ -1,0 +1,46 @@
+{
+  "version": "1.5.0",
+  "description": "Declarative upgrade manifest for downstream Investiture installs. The update command reads this to decide which paths to replace, merge, preserve, or create-if-missing.",
+  "replace": [
+    "zvapps/zv-ui",
+    "zvapps/control-panel/src",
+    "zvapps/control-panel/server",
+    "zvapps/control-panel/core",
+    "zvapps/control-panel/vite.config.js",
+    "zvapps/control-panel/package.json",
+    "zvapps/control-panel/package-lock.json",
+    "zvapps/control-panel/.gitignore",
+    "invest.md"
+  ],
+  "merge": [
+    {
+      "path": "zvapps/control-panel/presets",
+      "pattern": "*.md",
+      "strategy": "add-and-update"
+    },
+    {
+      "path": ".claude/skills",
+      "pattern": "*/SKILL.md",
+      "strategy": "add-and-update"
+    },
+    {
+      "path": ".claude/skills-optional",
+      "pattern": "*/SKILL.md",
+      "strategy": "add-and-update"
+    }
+  ],
+  "preserve": [
+    "zvapps/control-panel/data",
+    "zvapps/control-panel/.env",
+    "zvapps/control-panel/.env.example",
+    "zvapps/control-panel/node_modules",
+    "zvapps/control-panel/dist",
+    "zvapps/control-panel/vector"
+  ],
+  "createIfMissing": [
+    { "src": "zvapps/control-panel/.env.example", "dest": "zvapps/control-panel/.env.example" }
+  ],
+  "postUpdate": {
+    "runNpmInstall": ["zvapps/control-panel"]
+  }
+}

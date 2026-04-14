@@ -32,9 +32,12 @@ function usage() {
   banner();
   log(`${WHITE}${BOLD}  Usage:${RESET}`);
   blank();
-  log(`    ${GOLD}npx investiture init${RESET}        Add skills + schemas to an existing project`);
-  log(`    ${GOLD}npx investiture init --fresh${RESET} Also create starter doctrine templates`);
-  log(`    ${GOLD}npx investiture --help${RESET}       Show this message`);
+  log(`    ${GOLD}npx investiture init${RESET}             Add skills + schemas to an existing project`);
+  log(`    ${GOLD}npx investiture init --fresh${RESET}      Also create starter doctrine templates`);
+  log(`    ${GOLD}npx investiture install-zvapps${RESET}    Install the Control Panel (zvapps/) into this project`);
+  log(`    ${GOLD}npx investiture update${RESET}            Sync zvapps/ + skills from upstream`);
+  log(`    ${GOLD}npx investiture update --dry-run${RESET}  Preview what would change`);
+  log(`    ${GOLD}npx investiture --help${RESET}            Show this message`);
   blank();
   log(`${DIM}  After init, open Claude Code and run /invest-backfill${RESET}`);
   blank();
@@ -86,7 +89,7 @@ function init(fresh) {
   log(`${GOLD}${BOLD}  Skills${RESET} ${DIM}.claude/skills/${RESET}`);
   blank();
 
-  const skills = ['invest-backfill', 'invest-doctrine', 'invest-architecture'];
+  const skills = ['invest-backfill', 'invest-doctrine', 'invest-architecture', 'invest-preflight', 'invest-manifest', 'invest-repo-audit', 'invest-remediate', 'invest-verify-remediation'];
   for (const skill of skills) {
     const dest = path.join(targetDir, '.claude', 'skills', skill, 'SKILL.md');
     const src = path.join(templatesDir, 'skills', skill, 'SKILL.md');
@@ -212,6 +215,7 @@ function init(fresh) {
     log(`    3. Fill in the operator prompts (the parts only you know)`);
     log(`    4. Run ${GOLD}/invest-doctrine${RESET} to validate`);
     log(`    5. Run ${GOLD}/invest-architecture${RESET} to enforce`);
+    log(`    6. Run ${GOLD}/invest-preflight${RESET} to scan the codebase`);
   }
   blank();
   log(`${DIM}  https://zerovector.design/investiture${RESET}`);
@@ -289,6 +293,13 @@ if (!command || command === '--help' || command === '-h') {
 if (command === 'init') {
   const fresh = flags.includes('--fresh');
   init(fresh);
+} else if (command === 'install-zvapps') {
+  require('./install-zvapps.js').run();
+} else if (command === 'update') {
+  require('./update.js').run({
+    dryRun: flags.includes('--dry-run'),
+    diff: flags.includes('--diff'),
+  });
 } else {
   log(`${CORAL}  Unknown command: ${command}${RESET}`);
   usage();
