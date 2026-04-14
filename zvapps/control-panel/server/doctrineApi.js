@@ -142,6 +142,55 @@ export function doctrineApiPlugin() {
           res.end(JSON.stringify({ error: err.message }));
         }
       });
+      // ── Skills scanner ────────────────────────────────────────────────
+      server.middlewares.use('/api/skills/list', async (req, res) => {
+        if (req.method !== 'GET') { res.statusCode = 405; res.end('Method not allowed'); return; }
+        try {
+          const skillsDir = path.join(repoRoot, '.claude', 'skills');
+          const optionalDir = path.join(repoRoot, '.claude', 'skills-optional');
+          const skills = [];
+
+          function scanDir(dir, group) {
+            if (!fs.existsSync(dir)) return;
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              if (!entry.isDirectory()) continue;
+              const skillFile = path.join(dir, entry.name, 'SKILL.md');
+              if (!fs.existsSync(skillFile)) continue;
+              const raw = fs.readFileSync(skillFile, 'utf-8');
+              const fm = parseFrontmatter(raw);
+              skills.push({
+                id: entry.name,
+                name: fm.name || entry.name,
+                description: fm.description || '',
+                version: fm.version || '',
+                group,
+              });
+            }
+          }
+
+          scanDir(skillsDir, 'active');
+          scanDir(optionalDir, 'optional');
+          skills.sort((a, b) => a.name.localeCompare(b.name));
+
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ skills }));
+        } catch (err) {
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
     }
   };
+}
+
+function parseFrontmatter(content) {
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return {};
+  const result = {};
+  for (const line of match[1].split('\n')) {
+    const m = line.match(/^(\w[\w-]*):\s*"?(.+?)"?\s*$/);
+    if (m) result[m[1]] = m[2];
+  }
+  return result;
 }

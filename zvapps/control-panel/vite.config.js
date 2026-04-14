@@ -5,6 +5,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { writeVectorPlugin } from './server/writeVector.js';
 import { doctrineApiPlugin } from './server/doctrineApi.js';
+import { homeApiPlugin } from './server/homeApi.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -12,7 +13,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
 
   return {
-    plugins: [react(), writeVectorPlugin(), doctrineApiPlugin()],
+    plugins: [react(), writeVectorPlugin(), doctrineApiPlugin(), homeApiPlugin()],
     root: 'src',
     css: {
       devSourcemap: true,

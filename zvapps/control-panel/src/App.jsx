@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AppShell, TopNav, ThemePicker, StatusBar } from "zv-ui";
 import CPSidebar from "./components/CPSidebar.jsx";
+import HomePage from "./pages/HomePage.jsx";
 import BoxPage from "./pages/BoxPage.jsx";
 import DoctrinePage from "./pages/DoctrinePage.jsx";
 import DesignPage from "./pages/DesignPage.jsx";
@@ -9,6 +10,7 @@ import VectorPage from "./pages/VectorPage.jsx";
 import HealthPage from "./pages/HealthPage.jsx";
 
 const PAGES = {
+  home: HomePage,
   box: BoxPage,
   doctrine: DoctrinePage,
   vector: VectorPage,
@@ -18,7 +20,7 @@ const PAGES = {
 };
 
 export default function App() {
-  const [page, setPage] = useState("box");
+  const [page, setPage] = useState("home");
 
   const ActivePage = PAGES[page] || BoxPage;
 

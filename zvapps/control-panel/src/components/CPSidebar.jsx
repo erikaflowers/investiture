@@ -1,5 +1,20 @@
 const NAV_GROUPS = [
   {
+    label: "",
+    items: [
+      {
+        id: "home",
+        label: "Home",
+        icon: (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+        ),
+      },
+    ],
+  },
+  {
     label: "Tools",
     items: [
       {
@@ -89,8 +104,8 @@ export default function CPSidebar({ page, onNavigate }) {
       <div className="zv-settings-sidebar-title">Control Panel</div>
       <nav className="zv-settings-nav">
         {NAV_GROUPS.map((group) => (
-          <div key={group.label} className="zv-settings-nav-group">
-            <div className="zv-settings-nav-group-label">{group.label}</div>
+          <div key={group.label || '_home'} className="zv-settings-nav-group">
+            {group.label && <div className="zv-settings-nav-group-label">{group.label}</div>}
             {group.items.map((item) => (
               <button
                 key={item.id}

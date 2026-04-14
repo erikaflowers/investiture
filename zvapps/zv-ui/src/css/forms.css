@@ -901,3 +901,240 @@
   font-size: 11px;
   flex-shrink: 0;
 }
+
+/* ── Skill cards ──────────────────────────────────────────────────────────── */
+
+.zv-skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 10px;
+}
+
+.zv-skill-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  transition: border-color 0.15s;
+}
+.zv-skill-card:hover {
+  border-color: var(--accent);
+}
+
+.zv-skill-card-optional {
+  opacity: 0.7;
+}
+.zv-skill-card-optional:hover {
+  opacity: 1;
+}
+
+.zv-skill-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.zv-skill-card-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  padding: 0;
+}
+
+.zv-skill-card-version {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.zv-skill-card-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Home page ────────────────────────────────────────────────────────────── */
+
+.zv-home-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .zv-home-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.zv-home-stat-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.zv-home-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zv-home-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.zv-home-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.zv-home-ext-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.zv-home-ext-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.zv-home-ext-item code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  background: none;
+  padding: 0;
+}
+
+/* ── Git status card ──────────────────────────────────────────────────────── */
+
+.zv-home-git-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.zv-home-git-branch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.zv-home-git-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.zv-home-git-dirty {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.zv-home-git-clean {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.zv-home-git-status,
+.zv-home-git-log {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zv-home-git-line {
+  font-size: 11px;
+  padding: 2px 0;
+}
+.zv-home-git-line code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: none;
+  padding: 0;
+}
+
+/* ── Key files ────────────────────────────────────────────────────────────── */
+
+.zv-home-key-files {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zv-home-key-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.zv-home-key-file code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-primary);
+  background: none;
+  padding: 0;
+  flex: 1;
+}
+
+/* ── Skill tracker ────────────────────────────────────────────────────────── */
+
+.zv-home-skill-tracker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zv-home-skill-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.zv-home-skill-row:last-child {
+  border-bottom: none;
+}
+
+.zv-home-skill-name {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-primary);
+  background: none;
+  padding: 0;
+  flex: 1;
+}
+
+.zv-home-skill-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  flex-shrink: 0;
+}
