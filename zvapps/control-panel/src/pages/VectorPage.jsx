@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { PageLayout, Panel } from "zv-ui";
+import { PageLayout } from "zv-ui";
 
 function formatSize(bytes) {
   if (bytes === null) return "";
@@ -11,7 +11,7 @@ function formatSize(bytes) {
 
 function FolderIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
     </svg>
   );
@@ -21,62 +21,109 @@ function FileIcon({ name }) {
   const isJson = name.endsWith(".json");
   const isMd = name.endsWith(".md");
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isJson ? "var(--accent)" : isMd ? "var(--success)" : "currentColor"} strokeWidth="2">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isJson ? "var(--accent)" : isMd ? "var(--success)" : "currentColor"} strokeWidth="2">
       <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
       <path d="M14 2v6h6" />
     </svg>
   );
 }
 
+function ChevronIcon() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  );
+}
+
+async function fetchDir(dir) {
+  const res = await fetch(`/api/vector/list?dir=${encodeURIComponent(dir)}`);
+  const data = await res.json();
+  return data.entries || [];
+}
+
+async function fetchFile(filePath) {
+  const res = await fetch(`/api/vector/read?file=${encodeURIComponent(filePath)}`);
+  const data = await res.json();
+  return data.content || "";
+}
+
+function MillerColumn({ entries, selected, onSelect, label }) {
+  return (
+    <div className="zv-miller-column">
+      <div className="zv-miller-column-header">{label}</div>
+      <div className="zv-miller-column-body">
+        {entries.length === 0 ? (
+          <div className="zv-miller-empty">Empty</div>
+        ) : (
+          entries.map((entry) => (
+            <button
+              key={entry.path}
+              type="button"
+              className={`zv-miller-item${selected === entry.path ? " active" : ""}`}
+              onClick={() => onSelect(entry)}
+            >
+              <span className="zv-miller-item-icon">
+                {entry.type === "dir" ? <FolderIcon /> : <FileIcon name={entry.name} />}
+              </span>
+              <span className="zv-miller-item-name">{entry.name}</span>
+              {entry.type === "dir" ? (
+                <span className="zv-miller-item-chevron"><ChevronIcon /></span>
+              ) : entry.size !== null ? (
+                <span className="zv-miller-item-size">{formatSize(entry.size)}</span>
+              ) : null}
+            </button>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function VectorPage() {
-  const [currentDir, setCurrentDir] = useState("");
-  const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [columns, setColumns] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileContent, setFileContent] = useState("");
   const [fileLoading, setFileLoading] = useState(false);
+  const scrollRef = useRef(null);
 
-  const loadDir = useCallback(async (dir) => {
-    setLoading(true);
+  const loadRoot = useCallback(async () => {
+    const entries = await fetchDir("");
+    setColumns([{ dir: "", label: "vector", entries, selected: null }]);
     setSelectedFile(null);
     setFileContent("");
-    try {
-      const res = await fetch(`/api/vector/list?dir=${encodeURIComponent(dir)}`);
-      const data = await res.json();
-      setEntries(data.entries || []);
-      setCurrentDir(dir);
-    } catch {
-      setEntries([]);
-    } finally {
-      setLoading(false);
-    }
   }, []);
 
   useEffect(() => {
-    loadDir("");
-  }, [loadDir]);
+    loadRoot();
+  }, [loadRoot]);
 
-  const openFile = async (filePath) => {
-    setFileLoading(true);
-    setSelectedFile(filePath);
-    try {
-      const res = await fetch(`/api/vector/read?file=${encodeURIComponent(filePath)}`);
-      const data = await res.json();
-      setFileContent(data.content || "");
-    } catch {
-      setFileContent("Error loading file.");
-    } finally {
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+    }
+  }, [columns]);
+
+  const handleSelect = async (colIndex, entry) => {
+    if (entry.type === "dir") {
+      const entries = await fetchDir(entry.path);
+      const updated = columns.slice(0, colIndex + 1);
+      updated[colIndex] = { ...updated[colIndex], selected: entry.path };
+      updated.push({ dir: entry.path, label: entry.name, entries, selected: null });
+      setColumns(updated);
+      setSelectedFile(null);
+      setFileContent("");
+    } else {
+      const updated = columns.slice(0, colIndex + 1);
+      updated[colIndex] = { ...updated[colIndex], selected: entry.path };
+      setColumns(updated);
+      setFileLoading(true);
+      setSelectedFile(entry.path);
+      const content = await fetchFile(entry.path);
+      setFileContent(content);
       setFileLoading(false);
     }
   };
-
-  const goUp = () => {
-    const parts = currentDir.split("/").filter(Boolean);
-    parts.pop();
-    loadDir(parts.join("/"));
-  };
-
-  const breadcrumbs = ["vector", ...currentDir.split("/").filter(Boolean)];
 
   const isJson = selectedFile?.endsWith(".json");
   const isMd = selectedFile?.endsWith(".md");
@@ -86,70 +133,26 @@ export default function VectorPage() {
       title="Vector"
       description="Browse the /vector directory — schemas, research artifacts, decisions, and briefs generated by The Box and the Investiture skill chain."
     >
-      <div className="zv-vector-browser">
-        <div className="zv-vector-listing">
-          <Panel>
-            <div className="zv-vector-breadcrumb">
-              {breadcrumbs.map((crumb, i) => (
-                <span key={i}>
-                  {i > 0 && <span className="zv-vector-breadcrumb-sep">/</span>}
-                  <button
-                    type="button"
-                    className="zv-vector-breadcrumb-item"
-                    onClick={() => {
-                      if (i === 0) loadDir("");
-                      else loadDir(breadcrumbs.slice(1, i + 1).join("/"));
-                    }}
-                  >
-                    {crumb}
-                  </button>
-                </span>
-              ))}
-            </div>
-
-            {loading ? (
-              <p style={{ color: "var(--text-muted)", fontSize: "13px", padding: "12px 0" }}>Loading...</p>
-            ) : entries.length === 0 ? (
-              <p style={{ color: "var(--text-muted)", fontStyle: "italic", fontSize: "13px", padding: "12px 0" }}>Empty directory</p>
-            ) : (
-              <div className="zv-vector-entries">
-                {currentDir && (
-                  <button type="button" className="zv-vector-entry" onClick={goUp}>
-                    <span className="zv-vector-entry-icon"><FolderIcon /></span>
-                    <span className="zv-vector-entry-name">..</span>
-                  </button>
-                )}
-                {entries.map((entry) => (
-                  <button
-                    key={entry.path}
-                    type="button"
-                    className={`zv-vector-entry${selectedFile === entry.path ? " active" : ""}`}
-                    onClick={() => {
-                      if (entry.type === "dir") loadDir(entry.path);
-                      else openFile(entry.path);
-                    }}
-                  >
-                    <span className="zv-vector-entry-icon">
-                      {entry.type === "dir" ? <FolderIcon /> : <FileIcon name={entry.name} />}
-                    </span>
-                    <span className="zv-vector-entry-name">{entry.name}</span>
-                    {entry.size !== null && (
-                      <span className="zv-vector-entry-size">{formatSize(entry.size)}</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </Panel>
+      <div className="zv-miller-browser">
+        <div className="zv-miller-columns" ref={scrollRef}>
+          {columns.map((col, i) => (
+            <MillerColumn
+              key={`${col.dir}-${i}`}
+              entries={col.entries}
+              selected={col.selected}
+              onSelect={(entry) => handleSelect(i, entry)}
+              label={col.label}
+            />
+          ))}
         </div>
 
-        <div className="zv-vector-preview">
+        <div className="zv-miller-preview">
           {selectedFile ? (
-            <Panel>
-              <div className="zv-doctrine-toolbar">
-                <div className="zv-doctrine-filename">{selectedFile}</div>
+            <>
+              <div className="zv-miller-preview-header">
+                <span className="zv-doctrine-filename">{selectedFile}</span>
               </div>
-              <div className="zv-vector-preview-body">
+              <div className="zv-miller-preview-body">
                 {fileLoading ? (
                   <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>Loading...</p>
                 ) : isJson ? (
@@ -162,13 +165,11 @@ export default function VectorPage() {
                   <pre className="zv-code">{fileContent}</pre>
                 )}
               </div>
-            </Panel>
+            </>
           ) : (
-            <Panel>
-              <p style={{ color: "var(--text-muted)", fontStyle: "italic", fontSize: "13px" }}>
-                Select a file to preview its contents.
-              </p>
-            </Panel>
+            <div className="zv-miller-preview-empty">
+              <p>Select a file to preview</p>
+            </div>
           )}
         </div>
       </div>
