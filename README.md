@@ -27,6 +27,39 @@ bash <(curl -fsSL https://raw.githubusercontent.com/erikaflowers/investiture/mai
 
 ---
 
+## Add the Control Panel
+
+Install the Investiture Control Panel — a local web app at `zvapps/` that lets you browse your doctrine files, edit DESIGN.md with a live preview, navigate your `/vector` folder in a Miller-column browser, inventory your skills, and track repo health:
+
+```bash
+npx investiture install-zvapps
+```
+
+This adds a self-contained sub-app under `zvapps/`:
+- `zvapps/control-panel/` -- the Control Panel (React + Vite, runs on port 3003)
+- `zvapps/zv-ui/` -- shared design system and theme engine
+
+Then run it:
+
+```bash
+npm run zvapps
+```
+
+Open http://localhost:3003 to see your project's Investiture dashboard.
+
+## Pull updates from upstream
+
+Investiture ships regular updates. Keep the Control Panel and skills in sync without losing your own content:
+
+```bash
+npx investiture update              # preview what would change
+npx investiture update --dry-run    # see the diff before applying
+```
+
+Updates replace `zvapps/` and active skills, preserve your doctrine files (VECTOR.md, ARCHITECTURE.md, CLAUDE.md, DESIGN.md), your `vector/` artifacts, your `.env`, and skill tracking data. Version stamp is recorded in `.investiture-version.json`.
+
+---
+
 ## Start a new project
 
 Use the GitHub template for a full scaffold with React, Vite, and the doctrine system built in:

@@ -97,7 +97,7 @@ export default function HomePage() {
   }
 
   return (
-    <div>
+    <div style={{ height: "100%", overflowY: "auto" }}>
       <header style={{ marginBottom: "24px" }}>
         <h2 className="zv-page-title">Welcome to your Investiture control panel.</h2>
         <p className="zv-page-description">
