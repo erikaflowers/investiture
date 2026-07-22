@@ -208,31 +208,37 @@ investiture/
 ├── VECTOR.md              Project doctrine (read first)
 ├── CLAUDE.md              Contributor onboarding (read second)
 ├── ARCHITECTURE.md        Technical guide (read third)
-├── .claude/skills/        Skill chain (8 skills — doctrine + audit)
-├── src/                   Your app (start here)
-│   ├── App.jsx            App shell with routing
-│   ├── App.css
-│   ├── main.jsx
-│   ├── index.html
-│   └── components/        Your UI components
-│       └── ErrorBoundary.jsx
-├── design-system/         CSS variables and tokens
-│   └── tokens.css
-├── core/                  Pure business logic
-│   ├── utils.js
-│   ├── utils.test.js      Example tests
-│   └── store.jsx          State management
-├── services/              External integrations
-│   └── api.js
+├── DESIGN.md              Orbital Brutalism — visual language for the site
+├── invest.md              Skill chain reference
+├── .investiture-version.json    Tracks installed Investiture version (downstream installs)
+├── .claude/
+│   ├── skills/            Active skills (8: doctrine + audit chains)
+│   └── skills-optional/   Available but not enabled (8: research, design, fleet, release)
+├── cli/                   npm package — the `npx investiture` CLI
+│   ├── bin/
+│   │   ├── investiture.js       Main entry (init, install-zvapps, update)
+│   │   ├── install-zvapps.js    First-time Control Panel install
+│   │   └── update.js            Sync upstream into downstream projects
+│   ├── templates/         What `npx investiture init` copies in
+│   ├── update-manifest.json     Declarative replace/merge/preserve rules
+│   └── package.json             Published to npm as `investiture`
+├── zvapps/                The Investiture Control Panel — v1.5
+│   ├── control-panel/     React + Vite app, port 3003
+│   │   ├── src/pages/     Home, Box, Doctrine, Vector, Design, Skills, Health
+│   │   ├── server/        Vite middleware plugins (doctrineApi, homeApi, writeVector)
+│   │   ├── core/          parseDesignMd + tests
+│   │   └── presets/       9 bundled DESIGN.md references (Stripe, Linear, etc.)
+│   └── zv-ui/             Shared design system (themes, components, CSS)
+├── src/                   Starter app scaffold (template)
+├── design-system/         CSS variables and tokens (template)
+├── core/                  Pure business logic (template)
+├── services/              External integrations (template)
 ├── vector/                Research and decisions
 │   ├── schemas/           6 research schemas
-│   ├── research/          Your structured findings
+│   ├── research/          Structured findings
 │   ├── decisions/         Architecture Decision Records
 │   └── audits/            Skill audit reports
-├── .env.example           Environment variable template
-├── invest.md              Skill chain reference
-├── install.sh             One-time setup
-├── package.json           Dependencies and scripts
+├── package.json           Scripts: npm start, npm run zvapps, npm run zvapps:install
 └── README.md              You are here
 ```
 
