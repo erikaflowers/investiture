@@ -1,5 +1,28 @@
-// Fresh ZV-grammar primitives (Addendum A, Step 3). Consume semantic
-// tokens only — never raw color, never radius, never glow.
+// ZV-accent primitives for the sidecar pages (Addendum A, applied
+// lightly per Samantha's ruling): theme variables for surfaces, --zv-*
+// accents for punctuation. No raw color in components, no radius.
+
+import { useRef, useState } from "react";
+
+export function useToast() {
+  const [toast, setToast] = useState(null); // {text, error}
+  const timer = useRef(null);
+  const showToast = (text, { error = false } = {}) => {
+    clearTimeout(timer.current);
+    setToast({ text, error });
+    timer.current = setTimeout(() => setToast(null), 3200);
+  };
+  return { toast, showToast };
+}
+
+export function Toast({ toast }) {
+  if (!toast) return null;
+  return (
+    <div className={`cp-toast${toast.error ? " is-error" : ""}`}>
+      {toast.text}
+    </div>
+  );
+}
 
 export function SystemLabel({ children }) {
   return <div className="cp-syslabel">{children}</div>;

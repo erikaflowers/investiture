@@ -13,11 +13,15 @@
  * which stamps the same variable names inline on :root.
  */
 
-.cp-page {
-  /* Scoped ZV accents — source: styles/shared/tokens.css */
+:root {
+  /* ZV accents — source: styles/shared/tokens.css. The --zv- prefix
+   * keeps them clear of the Labrador theme engine's variable names,
+   * so they are safe at :root and usable in the shell (top nav,
+   * modals) as well as inside .cp-page. */
   --zv-neon-green: #00ff80;
   --zv-neon-orange: #ffaa00;
   --zv-neon-green-soft: rgba(0, 255, 128, 0.15);
+  --zv-neon-orange-soft: rgba(255, 170, 0, 0.15);
   --zv-font-display: 'Proxima Nova', -apple-system, sans-serif;
   --zv-font-courier: 'Courier', 'Courier New', monospace;
 }
@@ -360,4 +364,278 @@
   color: var(--text-secondary);
   max-width: 48ch;
   margin: 12px auto 0;
+}
+
+/* --- Kanban board ------------------------------------------------------------ */
+
+.cp-board {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(180px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.cp-col {
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  padding: 10px;
+  min-height: 160px;
+  transition: background 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cp-col.is-drag-over {
+  background: var(--zv-neon-green-soft);
+}
+
+.cp-col-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.cp-col-count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.cp-card-item {
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  box-shadow: 3px 3px 0 var(--border);
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  cursor: grab;
+}
+
+.cp-card-item:active {
+  cursor: grabbing;
+}
+
+.cp-card-item.is-agent-card {
+  border-left-width: 3px;
+  border-left-style: solid;
+  border-left-color: var(--zv-neon-green);
+}
+
+.cp-card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.cp-card-meta {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.cp-card-priority {
+  color: var(--zv-neon-orange);
+  text-transform: uppercase;
+}
+
+.cp-card-move {
+  margin-top: 8px;
+}
+
+/* --- Editor ------------------------------------------------------------------- */
+
+.cp-editor {
+  display: grid;
+  grid-template-columns: 220px 1fr 260px;
+  gap: 20px;
+  align-items: start;
+}
+
+.cp-editor.no-history {
+  grid-template-columns: 220px 1fr;
+}
+
+.cp-editor-main {
+  min-width: 0;
+}
+
+.cp-editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cp-editor-status {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.cp-textarea {
+  width: 100%;
+  min-height: 520px;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.cp-textarea:focus {
+  outline: 2px solid var(--zv-neon-green);
+  outline-offset: -1px;
+}
+
+.cp-history {
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  padding: 12px 0;
+}
+
+.cp-snap-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border-light);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.cp-snap-row:last-child {
+  border-bottom: 0;
+}
+
+.cp-snap-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.cp-btn-mini {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border: 1px solid var(--border-light);
+  border-radius: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cp-btn-mini:hover {
+  background: var(--zv-neon-green-soft);
+}
+
+/* --- Form controls -------------------------------------------------------------- */
+
+.cp-input,
+.cp-select {
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.cp-input:focus,
+.cp-select:focus,
+.cp-textarea-sm:focus {
+  outline: 2px solid var(--zv-neon-green);
+  outline-offset: -1px;
+}
+
+.cp-textarea-sm {
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.cp-field {
+  margin-bottom: 14px;
+}
+
+.cp-field-label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* --- Modal (overlay + stopPropagation pattern) ----------------------------------- */
+
+.cp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-backdrop);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  z-index: 1000;
+}
+
+.cp-modal {
+  width: 440px;
+  max-width: calc(100vw - 48px);
+  border: 1px solid var(--border);
+  box-shadow: 6px 6px 0 var(--border);
+  background: var(--bg-primary);
+  padding: 24px;
+}
+
+.cp-modal-title {
+  font-family: var(--zv-font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin: 4px 0 16px;
+}
+
+.cp-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* --- Toast ------------------------------------------------------------------------ */
+
+.cp-toast {
+  position: fixed;
+  bottom: 44px;
+  right: 24px;
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 10px 16px;
+  border: 1px solid var(--text-primary);
+  box-shadow: 4px 4px 0 var(--border);
+  z-index: 1100;
+}
+
+.cp-toast.is-error {
+  color: var(--zv-neon-orange);
 }
