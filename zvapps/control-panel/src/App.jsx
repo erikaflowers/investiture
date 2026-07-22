@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell, TopNav, ThemePicker, StatusBar } from "zv-ui";
 import CPSidebar from "./components/CPSidebar.jsx";
 import QuickCapture from "./components/QuickCapture.jsx";
+import OnboardingWizard from "./components/OnboardingWizard.jsx";
+import { ProjectProvider, useProject } from "./zv/useProject.jsx";
+import ZeroGate from "./zv/ZeroGate.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import DoctrinePage from "./pages/DoctrinePage.jsx";
 import DesignPage from "./pages/DesignPage.jsx";
@@ -20,11 +23,11 @@ import EditorPage from "./pages/zv/EditorPage.jsx";
 
 const PAGES = {
   home: { component: HomePage },
-  overview: { component: OverviewPage, zv: true },
-  activity: { component: ActivityPage, zv: true },
-  board: { component: BoardPage, zv: true },
-  editor: { component: EditorPage, zv: true },
-  files: { component: FilesPage, zv: true },
+  overview: { component: OverviewPage, zv: true, gate: "overview" },
+  activity: { component: ActivityPage, zv: true, gate: "activity" },
+  board: { component: BoardPage, zv: true, gate: "board" },
+  editor: { component: EditorPage, zv: true, gate: "editor" },
+  files: { component: FilesPage, zv: true, gate: "files" },
   doctrine: { component: DoctrinePage },
   vector: { component: VectorPage },
   design: { component: DesignPage },
@@ -32,17 +35,33 @@ const PAGES = {
   health: { component: HealthPage },
 };
 
-export default function App() {
+function Panel() {
   const [page, setPage] = useState("home");
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const { project, onboarded } = useProject();
   const entry = PAGES[page] ?? PAGES.home;
   const ActivePage = entry.component;
+
+  useEffect(() => {
+    const open = () => setWizardOpen(true);
+    window.addEventListener("zv:open-wizard", open);
+    return () => window.removeEventListener("zv:open-wizard", open);
+  }, []);
+
+  const body = entry.gate ? (
+    <ZeroGate page={entry.gate} onSetup={() => setWizardOpen(true)}>
+      <ActivePage />
+    </ZeroGate>
+  ) : (
+    <ActivePage />
+  );
 
   return (
     <AppShell>
       <TopNav
         logo="◧"
-        brand="Investiture"
+        brand={onboarded && project?.name ? project.name : "Investiture"}
         right={
           <>
             <button className="cp-btn" onClick={() => setCaptureOpen(true)}>
@@ -55,17 +74,11 @@ export default function App() {
       <div className="zv-cp-layout">
         <CPSidebar page={page} onNavigate={setPage} />
         <main className="zv-cp-content">
-          {entry.zv ? (
-            <div className="cp-page">
-              <ActivePage />
-            </div>
-          ) : (
-            <ActivePage />
-          )}
+          {entry.zv ? <div className="cp-page">{body}</div> : body}
         </main>
       </div>
       <StatusBar
-        left={<span>Investiture Control Panel</span>}
+        left={<span>{onboarded && project?.name ? `${project.name} — sidecar` : "Investiture Control Panel"}</span>}
         right={<span>Zero Vector Design</span>}
       />
       <QuickCapture
@@ -73,6 +86,15 @@ export default function App() {
         onClose={() => setCaptureOpen(false)}
         onCreated={() => setPage("board")}
       />
+      <OnboardingWizard open={wizardOpen} onClose={() => setWizardOpen(false)} />
     </AppShell>
+  );
+}
+
+export default function App() {
+  return (
+    <ProjectProvider>
+      <Panel />
+    </ProjectProvider>
   );
 }

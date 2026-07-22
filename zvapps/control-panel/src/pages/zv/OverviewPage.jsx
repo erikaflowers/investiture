@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
-import { apiGet } from "../../zv/api.js";
+import { useProject } from "../../zv/useProject.jsx";
 import { staleness, relative, absolute } from "../../zv/time.js";
 import { SystemLabel, StalenessSquare, EmptyState } from "../../zv/kit.jsx";
+
+// Zero state is handled by ZeroGate in App — by the time this renders,
+// the project is onboarded (or state failed to load, which shows here).
 
 const RECENCY_CARDS = [
   { key: "lastAudit", label: "Last architecture audit" },
@@ -13,42 +15,25 @@ const RECENCY_CARDS = [
 const STATUS_ORDER = ["proposed", "queued", "in-progress", "done", "parked"];
 
 export default function OverviewPage() {
-  const [state, setState] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    apiGet("/api/zv/state").then(setState).catch((e) => setError(e.message));
-  }, []);
+  const { project, recency, backlogCounts, loading, error } = useProject();
 
   if (error) return <EmptyState label="error">{error}</EmptyState>;
-  if (!state) return null;
-
-  const { project, recency, backlogCounts } = state;
-
-  if (!project.onboarded) {
-    return (
-      <>
-        <SystemLabel>project overview</SystemLabel>
-        <h1 className="cp-page-title">Overview</h1>
-        <EmptyState label="zero state">
-          This is where you will view your project — its history, activity,
-          and plans. Nothing is tracked yet because onboarding has not run.
-          Onboarding arrives with the wizard; until then, this panel reads
-          whatever the project writes.
-        </EmptyState>
-      </>
-    );
-  }
+  if (loading || !project) return null;
 
   return (
     <>
       <SystemLabel>project overview</SystemLabel>
       <h1 className="cp-page-title">{project.name}</h1>
-      {project.description && (
-        <p style={{ color: "var(--text-secondary)", marginBottom: "32px" }}>
-          {project.description}
-        </p>
-      )}
+      <p style={{ color: "var(--text-secondary)", marginBottom: "32px" }}>
+        {project.description}{" "}
+        <button
+          className="cp-btn-mini"
+          style={{ marginLeft: "8px" }}
+          onClick={() => window.dispatchEvent(new Event("zv:open-wizard"))}
+        >
+          edit
+        </button>
+      </p>
 
       <SystemLabel>recency</SystemLabel>
       <div className="cp-card-grid">
