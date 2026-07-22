@@ -57,7 +57,7 @@ export default function FilesPage() {
 
       <div className="cp-files">
         <div className="cp-file-list">
-          <div className="cp-nav-group-label">
+          <div className="cp-list-label">
             <SystemLabel>doctrine</SystemLabel>
           </div>
           {doctrine.map((f) => (
@@ -73,7 +73,7 @@ export default function FilesPage() {
             </button>
           ))}
 
-          <div className="cp-nav-group-label" style={{ marginTop: "var(--space-4)" }}>
+          <div className="cp-list-label" style={{ marginTop: "16px" }}>
             <SystemLabel>plans</SystemLabel>
           </div>
           <button
@@ -85,7 +85,7 @@ export default function FilesPage() {
           </button>
 
           {backlog.length > 0 && (
-            <div className="cp-nav-group-label" style={{ marginTop: "var(--space-4)" }}>
+            <div className="cp-list-label" style={{ marginTop: "16px" }}>
               <SystemLabel>backlog</SystemLabel>
             </div>
           )}

@@ -45,13 +45,13 @@ export default function OverviewPage() {
       <SystemLabel>project overview</SystemLabel>
       <h1 className="cp-page-title">{project.name}</h1>
       {project.description && (
-        <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
+        <p style={{ color: "var(--text-secondary)", marginBottom: "32px" }}>
           {project.description}
         </p>
       )}
 
       <SystemLabel>recency</SystemLabel>
-      <div className="cp-card-grid" style={{ marginTop: "var(--space-3)" }}>
+      <div className="cp-card-grid">
         {RECENCY_CARDS.map(({ key, label }) => {
           const ts = recency[key];
           const level = staleness(ts);
@@ -69,7 +69,7 @@ export default function OverviewPage() {
       </div>
 
       <SystemLabel>backlog</SystemLabel>
-      <div className="cp-card-grid" style={{ marginTop: "var(--space-3)" }}>
+      <div className="cp-card-grid">
         {STATUS_ORDER.map((s) => (
           <div className="cp-card" key={s}>
             <SystemLabel>{s}</SystemLabel>
