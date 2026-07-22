@@ -44,13 +44,14 @@ function DoctrineEditor({ file }) {
     setSaved(false);
     setError(null);
     try {
-      const res = await fetch("/api/doctrine/write", {
-        method: "POST",
+      // zv write API: snapshots the prior version to .zv-history/ first.
+      const res = await fetch(`/api/zv/doctrine/${encodeURIComponent(file)}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ file, content: draft }),
+        body: JSON.stringify({ content: draft }),
       });
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error?.message ?? data.error ?? "Save failed");
       setContent(draft);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);

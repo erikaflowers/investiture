@@ -58,6 +58,10 @@ generated from the template do.
 - **The Box is retired.** Its page is no longer routed; the panel replaces
   it with the sidecar pages. (`/api/write-vector` and the Anthropic proxy
   remain in this release but are deprecated and will be removed.)
+- **`/api/doctrine/write` is removed.** It wrote doctrine files without
+  snapshotting. The Doctrine and Design pages now save through
+  `PUT /api/zv/doctrine/:name`, which snapshots the prior version to
+  `zvapps/.zv-history/` first. `/api/doctrine/read` is unchanged.
 - **Panel visual base is unchanged** (zv-ui + Labrador themes) with Zero
   Vector brand accents on the sidecar pages. If you customized panel code
   directly, your changes live in replaced paths — copy them out before

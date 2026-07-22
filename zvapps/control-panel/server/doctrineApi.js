@@ -39,34 +39,9 @@ export function doctrineApiPlugin() {
         }
       });
 
-      server.middlewares.use('/api/doctrine/write', async (req, res) => {
-        if (req.method !== 'POST') {
-          res.statusCode = 405;
-          res.end('Method not allowed');
-          return;
-        }
-        let body = '';
-        req.on('data', chunk => { body += chunk; });
-        req.on('end', () => {
-          try {
-            const { file, content } = JSON.parse(body);
-            const filepath = safePath(file);
-            if (!filepath) {
-              res.statusCode = 400;
-              res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify({ error: `Invalid file: ${file}` }));
-              return;
-            }
-            fs.writeFileSync(filepath, content, 'utf-8');
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ success: true, file }));
-          } catch (err) {
-            res.statusCode = 500;
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ error: err.message }));
-          }
-        });
-      });
+      // /api/doctrine/write was removed in 2.0: it wrote doctrine WITHOUT
+      // snapshotting. All doctrine writes go through PUT /api/zv/doctrine/:name
+      // (zvApi.js), which snapshots to .zv-history/ first. Reads stay here.
 
       // ── Vector folder browser ───────────────────────────────────────────
       const vectorRoot = path.join(repoRoot, 'vector');
