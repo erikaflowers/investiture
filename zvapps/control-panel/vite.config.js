@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react';
 import { writeVectorPlugin } from './server/writeVector.js';
 import { doctrineApiPlugin } from './server/doctrineApi.js';
 import { homeApiPlugin } from './server/homeApi.js';
+import { zvApiPlugin } from './server/zvApi.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -13,7 +14,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
 
   return {
-    plugins: [react(), writeVectorPlugin(), doctrineApiPlugin(), homeApiPlugin()],
+    plugins: [react(), writeVectorPlugin(), doctrineApiPlugin(), homeApiPlugin(), zvApiPlugin()],
     root: 'src',
     css: {
       devSourcemap: true,
@@ -28,7 +29,7 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: true,
     },
     server: {
-      port: 3003,
+      port: 3067,
       open: false,
       fs: {
         allow: [
@@ -37,7 +38,7 @@ export default defineConfig(({ mode }) => {
       },
       hmr: {
         host: 'localhost',
-        port: 3003,
+        port: 3067,
       },
       proxy: {
         '/api/anthropic': {
