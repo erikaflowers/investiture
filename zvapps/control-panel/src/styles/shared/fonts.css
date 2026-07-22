@@ -1,0 +1,81 @@
+/* Zero-Vector Design — Font Faces
+ *
+ * Proxima Nova is served from public/fonts/proxima-nova/ as OpenType
+ * files (10 weights: Light/Regular/Semibold/Bold/Extrabold/Black,
+ * with italics for 300/400/600/700). They land in the bundle via
+ * absolute paths resolved from the site root.
+ *
+ * OTF is not the ideal web format — .woff2 would be ~30-50% smaller.
+ * Worth converting when the refresh stabilizes. Not blocking.
+ */
+
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/fonts/proxima-nova/ProximaNova-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/fonts/proxima-nova/ProximaNova-LightIt.otf') format('opentype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/fonts/proxima-nova/ProximaNova-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/fonts/proxima-nova/ProximaNova-RegularItalic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/fonts/proxima-nova/ProximaNova-Semibold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/fonts/proxima-nova/ProximaNova-SemiboldIt.otf') format('opentype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/fonts/proxima-nova/ProximaNova-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/fonts/proxima-nova/ProximaNova-BoldIt.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/fonts/proxima-nova/ProximaNova-Extrabld.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/fonts/proxima-nova/ProximaNova-Black.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}

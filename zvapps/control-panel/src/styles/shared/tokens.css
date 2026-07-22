@@ -1,0 +1,86 @@
+/* Zero-Vector Design — Shared Design Tokens
+ *
+ * Single source of truth for the Orbital Brutalism skin, consumed by the
+ * zv-*, inv-*, and zh-* design systems. White-first: dark sections opt in
+ * via the .zv-invert scope (shared/invert.css) — never re-declare palette
+ * tokens in page or system scopes.
+ */
+
+:root {
+  /* Surfaces — white-first */
+  --surface: #ffffff;
+  --surface-raised: #fafafa;
+  --surface-inverse: #000000;
+  --hairline: rgba(0, 0, 0, 0.08);
+
+  /* Ink */
+  --text-primary: #000000;
+  --text-secondary: #333333;
+  --text-tertiary: #666666;
+  --text-muted: rgba(0, 0, 0, 0.4);
+
+  /* Neon punctuation — the only chromatic tokens */
+  --neon-pink: #ff00fb;
+  --neon-green: #00ff80;
+  --neon-orange: #ffaa00;
+  --neon-pink-soft: rgba(255, 0, 251, 0.15);
+  --neon-green-soft: rgba(0, 255, 128, 0.15);
+  --neon-orange-soft: rgba(255, 170, 0, 0.15);
+
+  /* Links — inverted scopes remap this */
+  --link: var(--text-primary);
+
+  /* Typography */
+  --font-display: 'Proxima Nova', -apple-system, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Courier', 'Courier New', monospace;
+
+  /* Type scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: clamp(1.25rem, 3vw, 1.75rem);
+  --text-xl: clamp(1.75rem, 4vw, 2.75rem);
+  --text-2xl: clamp(2.25rem, 6vw, 3.5rem);
+  --text-display: clamp(3.5rem, 7vw, 6rem);
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* Layout */
+  --container-max: 1100px;
+  --container-padding: 24px;
+  --section-padding: 160px;
+
+  /* Borders & hard shadows */
+  --border: 1px solid var(--text-primary);
+  --shadow-hard: 4px 4px 0 var(--text-primary);
+  --shadow-hard-lg: 8px 8px 0 var(--text-primary);
+
+  /* Motion — mechanical */
+  --duration-fast: 150ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --section-padding: 96px;
+    --container-padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --section-padding: 72px;
+  }
+}

@@ -1,0 +1,48 @@
+/* Zero-Vector Design — Inverted (dark) scope
+ *
+ * The ONE way to make a black-on-white section white-on-black. Add
+ * .zv-invert to a section and every semantic token remaps inside it —
+ * borders, hard shadows, and links flip automatically because they
+ * reference the semantic tokens.
+ *
+ * Do not re-declare palette tokens anywhere else.
+ */
+
+.zv-invert {
+  background: var(--surface);
+  color: var(--text-primary);
+
+  --surface: #000000;
+  --surface-raised: #111111;
+  --surface-inverse: #ffffff;
+  --hairline: rgba(255, 255, 255, 0.1);
+
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-tertiary: #999999;
+  --text-muted: rgba(255, 255, 255, 0.4);
+
+  --link: var(--neon-green);
+}
+
+/* Inverted link hover: neon-pink pop (carried over from the old
+ * black-first-section rule). */
+.zv-invert a:hover {
+  color: var(--neon-pink);
+}
+
+/* Light island inside an inverted section — restores the root
+ * (white-first) token values for a card that stays light on black. */
+.zv-revert {
+  --surface: #ffffff;
+  --surface-raised: #fafafa;
+  --surface-inverse: #000000;
+  --hairline: rgba(0, 0, 0, 0.08);
+
+  --text-primary: #000000;
+  --text-secondary: #333333;
+  --text-tertiary: #666666;
+  --text-muted: rgba(0, 0, 0, 0.4);
+
+  --link: var(--text-primary);
+}

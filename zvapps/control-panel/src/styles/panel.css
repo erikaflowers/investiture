@@ -1,0 +1,438 @@
+/* Investiture Control Panel — panel chrome and components.
+ *
+ * Consumes shared/tokens.css ONLY. Tokens are read-only law (Addendum A):
+ * no new tokens, no raw hex, no border-radius, no glow. Hard shadows,
+ * Courier + neon-orange for system labels, neon-green for interactive,
+ * dark sections via .zv-invert exclusively. Motion: 150ms, mechanical.
+ */
+
+body {
+  font-family: var(--font-body);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: var(--text-base);
+}
+
+/* --- Shell ------------------------------------------------------------ */
+
+.cp-shell {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
+.cp-topbar {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: var(--border);
+  background: var(--surface);
+}
+
+.cp-brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-md);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.cp-topbar-right {
+  margin-left: auto;
+}
+
+.cp-body {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 0;
+}
+
+/* --- Sidebar nav: terminal-style, neon-green interactive -------------- */
+
+.cp-sidebar {
+  border-right: var(--border);
+  padding: var(--space-6) 0;
+  background: var(--surface);
+}
+
+.cp-nav-group {
+  margin-bottom: var(--space-6);
+}
+
+.cp-nav-group-label {
+  padding: 0 var(--space-6);
+  margin-bottom: var(--space-2);
+}
+
+.cp-nav-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2) var(--space-6);
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.cp-nav-btn:hover {
+  background: var(--neon-green-soft);
+}
+
+.cp-nav-btn.is-active {
+  background: var(--surface-inverse);
+  color: var(--neon-green);
+}
+
+.cp-nav-btn.is-active::before {
+  content: "> ";
+}
+
+/* --- Content ---------------------------------------------------------- */
+
+.cp-content {
+  padding: var(--space-8) var(--space-8) var(--space-16);
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.cp-page-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-xl);
+  letter-spacing: -0.02em;
+  margin: var(--space-2) 0 var(--space-8);
+}
+
+/* --- System label: Courier + neon-orange (grammar) -------------------- */
+
+.cp-syslabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--neon-orange);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* --- Cards: hard border, hard offset shadow --------------------------- */
+
+.cp-card {
+  border: var(--border);
+  box-shadow: var(--shadow-hard);
+  background: var(--surface);
+  padding: var(--space-6);
+}
+
+.cp-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.cp-stat-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-lg);
+  margin: var(--space-2) 0;
+}
+
+.cp-stat-detail {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+/* --- Staleness squares: filled, never rounded ------------------------- */
+
+.cp-square {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: var(--space-2);
+  vertical-align: baseline;
+}
+
+.cp-square.is-fresh {
+  background: var(--neon-green);
+}
+
+.cp-square.is-aging {
+  background: var(--neon-orange);
+}
+
+.cp-square.is-stale {
+  background: var(--surface-inverse);
+}
+
+/* --- Buttons: mechanical press ---------------------------------------- */
+
+.cp-btn {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-4);
+  border: var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-hard);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+
+.cp-btn:hover {
+  background: var(--neon-green-soft);
+}
+
+.cp-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+.cp-btn.is-active {
+  background: var(--surface-inverse);
+  color: var(--neon-green);
+}
+
+.cp-btn-row {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+
+/* --- Activity feed ----------------------------------------------------- */
+
+.cp-feed {
+  border: var(--border);
+  box-shadow: var(--shadow-hard);
+  background: var(--surface);
+}
+
+.cp-feed-row {
+  display: grid;
+  grid-template-columns: 170px 130px 1fr;
+  gap: var(--space-4);
+  align-items: baseline;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--text-sm);
+}
+
+.cp-feed-row:last-child {
+  border-bottom: 0;
+}
+
+.cp-feed-ts {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.cp-feed-detail {
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+/* --- Actor chips ------------------------------------------------------- */
+
+.cp-actor {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 1px var(--space-2);
+  border: 1px solid var(--text-primary);
+}
+
+.cp-actor.is-agent {
+  background: var(--surface-inverse);
+  color: var(--neon-green);
+  border-color: var(--surface-inverse);
+}
+
+/* --- Tables (skills inventory) ----------------------------------------- */
+
+.cp-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: var(--border);
+  box-shadow: var(--shadow-hard);
+  background: var(--surface);
+}
+
+.cp-table th {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--neon-orange);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border);
+}
+
+.cp-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--text-sm);
+  vertical-align: baseline;
+}
+
+.cp-table tr:last-child td {
+  border-bottom: 0;
+}
+
+/* --- File browser ------------------------------------------------------ */
+
+.cp-files {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.cp-file-list {
+  border: var(--border);
+  box-shadow: var(--shadow-hard);
+  background: var(--surface);
+  padding: var(--space-3) 0;
+}
+
+.cp-file-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.cp-file-btn:hover {
+  background: var(--neon-green-soft);
+}
+
+.cp-file-btn.is-active {
+  background: var(--surface-inverse);
+  color: var(--neon-green);
+}
+
+.cp-file-meta {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+/* --- Rendered markdown ------------------------------------------------- */
+
+.cp-md {
+  border: var(--border);
+  box-shadow: var(--shadow-hard);
+  background: var(--surface);
+  padding: var(--space-8);
+  max-width: none;
+  line-height: 1.6;
+}
+
+.cp-md h1,
+.cp-md h2,
+.cp-md h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: var(--space-6) 0 var(--space-3);
+}
+
+.cp-md h1 {
+  font-size: var(--text-lg);
+  margin-top: 0;
+}
+
+.cp-md h2 {
+  font-size: var(--text-md);
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: var(--space-2);
+}
+
+.cp-md p,
+.cp-md li {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.cp-md ul,
+.cp-md ol {
+  padding-left: var(--space-6);
+}
+
+.cp-md code {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background: var(--surface-raised);
+  border: 1px solid var(--hairline);
+  padding: 0 var(--space-1);
+}
+
+.cp-md pre {
+  background: var(--surface-raised);
+  border: 1px solid var(--hairline);
+  padding: var(--space-4);
+  overflow-x: auto;
+  margin-bottom: var(--space-4);
+}
+
+.cp-md pre code {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.cp-md table {
+  border-collapse: collapse;
+  margin-bottom: var(--space-4);
+}
+
+.cp-md th,
+.cp-md td {
+  border: 1px solid var(--hairline);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.cp-md a {
+  color: var(--link);
+}
+
+/* --- Status bar: the one dark section, via .zv-invert only ------------- */
+
+.cp-statusbar {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-6);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+/* --- Empty / zero states ------------------------------------------------ */
+
+.cp-empty {
+  border: var(--border);
+  box-shadow: var(--shadow-hard);
+  background: var(--surface);
+  padding: var(--space-12);
+  text-align: center;
+}
+
+.cp-empty p {
+  color: var(--text-tertiary);
+  max-width: 48ch;
+  margin: var(--space-3) auto 0;
+}
