@@ -176,9 +176,11 @@ else
   echo "  Node.js found ($(node --version))"
 fi
 
-# 4. Install project dependencies
+# 4. Install project dependencies (root app + control panel)
 echo "  Installing dependencies..."
 npm install --silent
+echo "  Installing control panel dependencies..."
+npm run zvapps:install --silent
 
 # 5. Check for Claude Code
 if ! command -v claude &> /dev/null; then
@@ -234,8 +236,10 @@ echo "    core/               — pure business logic"
 echo "    services/           — API and external integrations"
 echo ""
 echo "  Next steps:"
-echo "    1. Run:  bash make-it-mine.sh    — Name your project and configure your AI agent"
-echo "    2. Run:  bash start.sh           — Launch your app and open Claude Code"
+echo "    1. Run:  npm run zvapps          — Open the control panel at http://localhost:3067"
+echo "                                       (it will walk you through naming your project)"
+echo "    2. Run:  npm start               — Your app at http://localhost:3000"
+echo "    3. Optional:  bash make-it-mine.sh  — Configure your AI agent's persona"
 echo ""
 echo "  Version control (important!):"
 echo "    Save your work anytime:  git add . && git commit -m \"describe what changed\""

@@ -37,7 +37,7 @@ The control panel at `zvapps/` is the flagship of the scaffold: a stable, non-AI
 
 Panel pages: **Overview** (recency + staleness cues), **Activity** (telemetry feed), **Board** (kanban — drag a card, the file changes), **Editor** (doctrine + PRD, with visible snapshot/restore), **Files** (rendered markdown browser), plus **Skills**, Doctrine, Design System, and Health from the workbench.
 
-Agents participate through two rituals — read the PRD and backlog before working, log the session when they stop — defined in [CLAUDE.md](CLAUDE.md). The full file formats, API surface, and telemetry event contract live in [`zvapps/ZV-CONTRACT.md`](zvapps/ZV-CONTRACT.md). Concurrency is last-write-wins: this is a local, single-user tool.
+Agents participate through two rituals — read the PRD and backlog before working, log the session when they stop — defined in [CLAUDE.md](CLAUDE.md). One honest limitation: telemetry reflects agent compliance with those rituals, not automatic instrumentation — if an agent skips the ritual, the activity feed and recency cards won't know the session happened. The full file formats, API surface, and telemetry event contract live in [`zvapps/ZV-CONTRACT.md`](zvapps/ZV-CONTRACT.md). Concurrency is last-write-wins: this is a local, single-user tool.
 
 ---
 
