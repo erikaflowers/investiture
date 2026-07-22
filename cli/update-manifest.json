@@ -1,5 +1,5 @@
 {
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "Declarative upgrade manifest for downstream Investiture installs. The update command reads this to decide which paths to replace, merge, preserve, or create-if-missing.",
   "replace": [
     "zvapps/zv-ui",
@@ -10,6 +10,7 @@
     "zvapps/control-panel/package.json",
     "zvapps/control-panel/package-lock.json",
     "zvapps/control-panel/.gitignore",
+    "zvapps/ZV-CONTRACT.md",
     "invest.md"
   ],
   "merge": [
@@ -35,7 +36,12 @@
     "zvapps/control-panel/.env.example",
     "zvapps/control-panel/node_modules",
     "zvapps/control-panel/dist",
-    "zvapps/control-panel/vector"
+    "zvapps/control-panel/vector",
+    "zvapps/PROJECT.md",
+    "zvapps/PRD.md",
+    "zvapps/backlog",
+    "zvapps/telemetry",
+    "zvapps/.zv-history"
   ],
   "createIfMissing": [
     { "src": "zvapps/control-panel/.env.example", "dest": "zvapps/control-panel/.env.example" }

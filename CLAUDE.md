@@ -90,11 +90,53 @@ Blockers: [anything stopping progress]
 
 ---
 
+## Agent Rituals — the Sidecar Contract
+
+The control panel (`npm run zvapps`, port 3067) is this project's memory.
+Its files — `zvapps/PRD.md`, `zvapps/backlog/`, `zvapps/telemetry/events.jsonl` —
+are the source of truth; the GUI is a view. Every agent session follows two
+rituals. The full schema is in `zvapps/ZV-CONTRACT.md`; concurrency is
+last-write-wins.
+
+### Startup ritual (before any work)
+
+1. **Read the PRD** (`zvapps/PRD.md`) and **scan the backlog** (`zvapps/backlog/*.md`
+   front-matter) so you know the plan and what is queued or in progress.
+2. **Emit a session-start event** by appending one line to
+   `zvapps/telemetry/events.jsonl` (create the directory if missing):
+
+   ```bash
+   echo '{"ts":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","event":"session-start","actor":"agent:<name>","payload":{"agent":"<name>"}}' >> zvapps/telemetry/events.jsonl
+   ```
+
+### Shutdown ritual (end of session)
+
+1. **Update backlog statuses** for anything you moved — edit the `status:`
+   front-matter (enum: proposed / queued / in-progress / done / parked) or
+   `PUT /api/zv/backlog/:id` if the panel is running. New commitments become
+   new backlog files (`created-by: agent:<name>`).
+2. **Append to the PRD changelog** when you shipped something a reader of the
+   plan should know about (`## Changelog`, dated bullet, or `POST /api/zv/prd/append`).
+3. **Write your context catch-up** wherever your agent config keeps it, then
+   emit `context-catchup-written` and `session-end` events (same append
+   pattern; `session-end` payload takes a one-line `summary`).
+
+Skills that run audits should emit `audit-run` events — the Overview page's
+recency cards read them.
+
+---
+
 ## Current Release
 
-**v1.5.0 (2026-04-14)** — Control Panel + zv-ui + update mechanism. See PR #6 and the v1.5.0 tag.
+**v2.0.0 (in review)** — "The Companion Sidecar Brain," on `sprint/investiture-2-0`
+pending merge. The panel becomes a sidecar: `/api/zv/*` write API with
+path allowlist and snapshot-on-write, telemetry event contract (public API —
+see `zvapps/ZV-CONTRACT.md`), Board/Editor/Activity/Overview/Files pages,
+zero state + onboarding wizard, ZV start page, agent rituals. Port 3067.
+Migration notes: `docs/MIGRATION-2.0.md`.
 
-Tested end-to-end against the zerovector repo as a live downstream. 26 files replaced, 8 optional skills added, 5 user paths preserved byte-identical through `npx investiture update`.
+Previous: **v1.5.0 (2026-04-14)** — Control Panel + zv-ui + update mechanism
+(PR #6, tag v1.5.0), verified against zerovector as a live downstream.
 
 ---
 

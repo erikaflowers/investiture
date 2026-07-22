@@ -1,6 +1,43 @@
 # Investiture
 
-A project scaffold with clean architecture, structured doctrine, and a skill chain that enforces it. Built for Claude Code.
+A project scaffold with a sidecar brain. Clean architecture, structured doctrine, a skill chain that enforces it — and a local control panel that tracks your project's past, present, and future in plain markdown files. Built for Claude Code.
+
+---
+
+## Start here: use this template
+
+Investiture is a **GitHub template repository**. You don't clone it as a product — you generate your own repo from it and replace everything visible.
+
+1. Click **Use this template** on GitHub (or `gh repo create my-project --template erikaflowers/investiture`)
+2. `cd my-project && bash install.sh` — installs dependencies, including Claude Code itself
+3. `npm run zvapps` and open **http://localhost:3067** — the control panel opens in zero state and walks you through naming your project (two questions; it seeds your PRD and an empty backlog)
+4. `npm start` — your app at http://localhost:3000, currently a hello-world start page that exists to be deleted
+5. Open the project in Claude Code and build
+
+### Prerequisites
+
+- A Mac, Linux machine, or Windows PC with an internet connection
+- **[VS Code](https://code.visualstudio.com/)** — free code editor
+- **[GitHub account](https://github.com/signup)** — free; version control and a backup of everything you build
+- **Windows users:** run the install script from [Git Bash](https://git-scm.com/download/win) or [WSL](https://learn.microsoft.com/en-us/windows/wsl/install)
+
+The install script detects your platform and handles the rest (Homebrew/Node on Mac, apt/dnf/pacman/zypper on Linux, winget/choco on Windows).
+
+---
+
+## The sidecar
+
+The control panel at `zvapps/` is the flagship of the scaffold: a stable, non-AI companion that tracks:
+
+- **Past** — doctrine edit history (every save snapshots to `.zv-history/`, one-click restore), audit runs, context catch-ups
+- **Present** — a session activity feed from the telemetry log, skills inventory with last-used staleness
+- **Future** — your PRD and a backlog kanban board
+
+**Everything is markdown.** Backlog cards are markdown files with YAML front-matter; the board is just a view of them. The PRD is a markdown file. The telemetry log is human-readable JSONL. No databases — the files are the source of truth, hand-editable, and yours. The panel's write API touches exactly two territories (the `zvapps/` folder and the four doctrine files) and rejects everything else at the API layer.
+
+Panel pages: **Overview** (recency + staleness cues), **Activity** (telemetry feed), **Board** (kanban — drag a card, the file changes), **Editor** (doctrine + PRD, with visible snapshot/restore), **Files** (rendered markdown browser), plus **Skills**, Doctrine, Design System, and Health from the workbench.
+
+Agents participate through two rituals — read the PRD and backlog before working, log the session when they stop — defined in [CLAUDE.md](CLAUDE.md). The full file formats, API surface, and telemetry event contract live in [`zvapps/ZV-CONTRACT.md`](zvapps/ZV-CONTRACT.md). Concurrency is last-write-wins: this is a local, single-user tool.
 
 ---
 
@@ -13,9 +50,9 @@ npx investiture init
 ```
 
 This adds:
-- `.claude/skills/` -- Eight skills: doctrine chain (backfill, validate, enforce) + audit chain (scan, inventory, audit, remediate, verify)
-- `vector/schemas/` -- Six research schemas (persona, JTBD, assumption, interview, competitive, blue ocean)
-- `vector/research/`, `vector/decisions/`, `vector/audits/` -- Directory structure for structured findings
+- `.claude/skills/` — eight skills: doctrine chain (backfill, validate, enforce) + audit chain (scan, inventory, audit, remediate, verify)
+- `vector/schemas/` — six research schemas (persona, JTBD, assumption, interview, competitive, blue ocean)
+- `vector/research/`, `vector/decisions/`, `vector/audits/` — directory structure for structured findings
 
 Then open Claude Code and run `/invest-backfill`. It surveys your codebase and generates VECTOR.md, CLAUDE.md, and ARCHITECTURE.md.
 
@@ -25,81 +62,25 @@ Then open Claude Code and run `/invest-backfill`. It surveys your codebase and g
 bash <(curl -fsSL https://raw.githubusercontent.com/erikaflowers/investiture/main/inject.sh)
 ```
 
----
-
-## Add the Control Panel
-
-Install the Investiture Control Panel — a local web app at `zvapps/` that lets you browse your doctrine files, edit DESIGN.md with a live preview, navigate your `/vector` folder in a Miller-column browser, inventory your skills, and track repo health:
+**Then add the control panel:**
 
 ```bash
 npx investiture install-zvapps
+npm run zvapps          # → http://localhost:3067
 ```
 
-This adds a self-contained sub-app under `zvapps/`:
-- `zvapps/control-panel/` -- the Control Panel (React + Vite, runs on port 3003)
-- `zvapps/zv-ui/` -- shared design system and theme engine
-
-Then run it:
-
-```bash
-npm run zvapps
-```
-
-Open http://localhost:3003 to see your project's Investiture dashboard.
+---
 
 ## Pull updates from upstream
 
-Investiture ships regular updates. Keep the Control Panel and skills in sync without losing your own content:
-
 ```bash
-npx investiture update              # preview what would change
-npx investiture update --dry-run    # see the diff before applying
+npx investiture update --dry-run    # see what would change
+npx investiture update              # apply
 ```
 
-Updates replace `zvapps/` and active skills, preserve your doctrine files (VECTOR.md, ARCHITECTURE.md, CLAUDE.md, DESIGN.md), your `vector/` artifacts, your `.env`, and skill tracking data. Version stamp is recorded in `.investiture-version.json`.
+Updates replace the panel's code and merge new skills. They never touch what's yours: doctrine files (VECTOR.md, ARCHITECTURE.md, CLAUDE.md, DESIGN.md), `vector/` artifacts, your PRD, backlog, project config, telemetry log, doctrine snapshots, and `.env`. The rules are declarative in [`cli/update-manifest.json`](cli/update-manifest.json); the installed version is stamped in `.investiture-version.json`.
 
----
-
-## Start a new project
-
-Use the GitHub template for a full scaffold with React, Vite, and the doctrine system built in:
-
-```bash
-git clone https://github.com/erikaflowers/investiture.git my-project
-cd my-project && bash install.sh
-```
-
-Or use `--fresh` to get starter doctrine templates without the app scaffold:
-
-```bash
-mkdir my-project && cd my-project && git init
-npx investiture init --fresh
-```
-
-### Prerequisites
-
-- A Mac, Linux machine, or Windows PC
-- An internet connection
-- **[VS Code](https://code.visualstudio.com/)** -- Free code editor. You'll use this to see what Claude Code is doing and to browse your project files.
-- **[GitHub account](https://github.com/signup)** -- Free. Version control for your code: unlimited undo, branches to try ideas, and a backup of everything you build.
-- **Windows users:** Run the install script from [Git Bash](https://git-scm.com/download/win) or [WSL](https://learn.microsoft.com/en-us/windows/wsl/install).
-
-The install script handles everything else, including Claude Code itself.
-
-The script detects your platform and installs the right dependencies:
-- **Mac:** Homebrew and Node.js via brew
-- **Linux/WSL:** Git and Node.js via your package manager (apt, dnf, pacman, zypper)
-- **Windows (Git Bash):** Node.js via winget or choco
-
----
-
-## Run
-
-```bash
-npm start
-```
-
-Your app opens at http://localhost:3000
+**Coming from 1.x?** See [docs/MIGRATION-2.0.md](docs/MIGRATION-2.0.md).
 
 ---
 
@@ -107,31 +88,22 @@ Your app opens at http://localhost:3000
 
 ### Doctrine
 
-Three files that define your project before a line of code is written:
+Three files that define your project before a line of code is written, plus one for its look:
 
-1. **VECTOR.md** -- Project doctrine. Why this project exists, who it serves, what you know, what you still need to learn.
-2. **CLAUDE.md** -- Contributor onboarding. What any human or AI needs to know before touching code.
-3. **ARCHITECTURE.md** -- Technical specification. Layers, stack, conventions, naming, import rules.
+1. **VECTOR.md** — project doctrine: why this exists, who it serves, what you know, what you still need to learn
+2. **CLAUDE.md** — contributor onboarding for humans and agents, including the sidecar rituals
+3. **ARCHITECTURE.md** — technical specification: layers, stack, conventions, naming, import rules
+4. **DESIGN.md** — your design system as markdown, editable in the panel with live preview
 
 ### Architecture
 
 Four layers. Claude knows to use them:
 
 ```
-src/                    Your app (start here)
-  App.jsx               App shell (layout, routing)
-  App.css               Global styles
-  components/           Reusable UI components
-
-design-system/          Visual foundation
-  tokens.css            Colors, spacing, typography as CSS variables
-
-core/                   Pure business logic
-  utils.js              Helper functions (no side effects)
-  store.jsx             App state management (React Context)
-
-services/               External integrations
-  api.js                API client (swap for your backend)
+src/                    Your app (the start page lives here — delete it)
+design-system/          tokens.css — colors, spacing, typography as CSS variables
+core/                   Pure business logic (utils, state — no side effects, no DOM)
+services/               External integrations (API client — swap for your backend)
 ```
 
 ### Research
@@ -148,28 +120,13 @@ vector/
 
 ### Skills
 
-Eight skills in two chains. Each reads your doctrine at runtime and enforces it. Skills live in `.claude/skills/` and are auto-discovered by Claude Code.
+Eight active skills in two chains, auto-discovered by Claude Code from `.claude/skills/` (eight more in `.claude/skills-optional/`).
 
-**Doctrine Chain:**
+**Doctrine chain:** `/invest-backfill` · `/invest-doctrine` · `/invest-architecture`
+**Audit chain:** `/invest-preflight` · `/invest-manifest` · `/invest-repo-audit` · `/invest-remediate` · `/invest-verify-remediation`
 
-| Skill | Purpose |
-|-------|---------|
-| `/invest-backfill` | Survey an existing codebase and generate VECTOR.md, CLAUDE.md, ARCHITECTURE.md |
-| `/invest-doctrine` | Validate doctrine for completeness, consistency, and drift |
-| `/invest-architecture` | Audit code against declared layers, imports, naming, tokens |
-
-**Audit Chain:**
-
-| Skill | Purpose |
-|-------|---------|
-| `/invest-preflight` | Quick reconnaissance — project type, tech stack, scale, hazards |
-| `/invest-manifest` | Complete codebase inventory — every file, route, endpoint, component |
-| `/invest-repo-audit` | Quality assessment across 8 vectors with severity classification |
-| `/invest-remediate` | Generate phased remediation plan from audit findings |
-| `/invest-verify-remediation` | Verify fixes, update audit status, confirm ready to resume |
-
-**Existing projects:** Run `/invest-backfill` to generate doctrine, then `/invest-preflight` to scan.
-**Greenfield projects:** Fill in the three doctrine files, then run `/invest-doctrine` to validate.
+**Existing projects:** run `/invest-backfill`, then `/invest-preflight`.
+**Greenfield:** fill in the doctrine files, then run `/invest-doctrine` to validate.
 
 See [invest.md](invest.md) for the full skill chain reference.
 
@@ -177,27 +134,18 @@ See [invest.md](invest.md) for the full skill chain reference.
 
 ## What to do next
 
-Open this project in Claude Code (`claude` in terminal) and try these prompts, each one teaches a different architecture layer:
+Open the project in Claude Code (`claude` in terminal) and try these, each teaches part of the system:
 
-1. **"Change the app title and tagline using content/en.json"**
-   Teaches: the content layer
-
-2. **"Add a dark mode toggle using the design tokens"**
-   Teaches: CSS variables, theme switching, data attributes
-
-3. **"Add a todo list that uses content strings, design tokens, core logic, and localStorage"**
-   Teaches: all four layers working together
-
-4. **"Fetch data from a public API and display it in cards"**
-   Teaches: the service layer, async/await, loading states
+1. **"Add a todo list that uses design tokens, core logic, and localStorage"** — the four layers working together
+2. **"Fetch data from a public API and display it in cards"** — the service layer, async, loading states
+3. **"Add 'dark mode support' to the backlog and start on it"** — watch the card land on the board, then move as the agent works
+4. **"Run /invest-preflight"** — your first audit; the Overview page's recency card notices
 
 ---
 
 ## The reading order
 
-VECTOR.md, CLAUDE.md, ARCHITECTURE.md. Read them in that order. This is onboarding for both humans and agents.
-
-CLAUDE.md is generated by `install.sh` and read automatically by Claude Code when it opens your project. It contains architecture rules, constraints, project structure, and starter prompts.
+VECTOR.md → CLAUDE.md → ARCHITECTURE.md. Onboarding for humans and agents alike. CLAUDE.md is read automatically by Claude Code when it opens your project.
 
 ---
 
@@ -206,40 +154,35 @@ CLAUDE.md is generated by `install.sh` and read automatically by Claude Code whe
 ```
 investiture/
 ├── VECTOR.md              Project doctrine (read first)
-├── CLAUDE.md              Contributor onboarding (read second)
+├── CLAUDE.md              Contributor onboarding + agent rituals (read second)
 ├── ARCHITECTURE.md        Technical guide (read third)
-├── DESIGN.md              Orbital Brutalism — visual language for the site
+├── DESIGN.md              Design system as markdown
 ├── invest.md              Skill chain reference
-├── .investiture-version.json    Tracks installed Investiture version (downstream installs)
 ├── .claude/
 │   ├── skills/            Active skills (8: doctrine + audit chains)
-│   └── skills-optional/   Available but not enabled (8: research, design, fleet, release)
+│   └── skills-optional/   Available but not enabled (8 more)
 ├── cli/                   npm package — the `npx investiture` CLI
-│   ├── bin/
-│   │   ├── investiture.js       Main entry (init, install-zvapps, update)
-│   │   ├── install-zvapps.js    First-time Control Panel install
-│   │   └── update.js            Sync upstream into downstream projects
+│   ├── bin/               init, install-zvapps, update
 │   ├── templates/         What `npx investiture init` copies in
-│   ├── update-manifest.json     Declarative replace/merge/preserve rules
-│   └── package.json             Published to npm as `investiture`
-├── zvapps/                The Investiture Control Panel — v1.5
-│   ├── control-panel/     React + Vite app, port 3003
-│   │   ├── src/pages/     Home, Box, Doctrine, Vector, Design, Skills, Health
-│   │   ├── server/        Vite middleware plugins (doctrineApi, homeApi, writeVector)
-│   │   ├── core/          parseDesignMd + tests
-│   │   └── presets/       9 bundled DESIGN.md references (Stripe, Linear, etc.)
-│   └── zv-ui/             Shared design system (themes, components, CSS)
-├── src/                   Starter app scaffold (template)
-├── design-system/         CSS variables and tokens (template)
-├── core/                  Pure business logic (template)
-├── services/              External integrations (template)
+│   └── update-manifest.json   Declarative replace/merge/preserve rules
+├── zvapps/                The sidecar
+│   ├── ZV-CONTRACT.md     File formats, API, telemetry contract (public API)
+│   ├── PRD.md             Your product plan (seeded by onboarding)
+│   ├── PROJECT.md         Project config (name, description — front-matter)
+│   ├── backlog/           One markdown file per backlog item
+│   ├── telemetry/         events.jsonl — append-only session log (gitignored)
+│   ├── .zv-history/       Doctrine snapshots (gitignored)
+│   ├── control-panel/     React + Vite app, port 3067
+│   │   ├── src/pages/zv/  Overview, Activity, Board, Editor, Files, Skills
+│   │   ├── server/        Vite middleware plugins (zvApi + legacy)
+│   │   └── core/zv/       Front-matter, allowlist, backlog, PRD, telemetry logic + tests
+│   └── zv-ui/             Shared base design system (Labrador themes)
+├── src/                   Your app — ships as a disposable ZV start page
+├── design-system/         CSS tokens (yours)
+├── core/                  Pure logic (yours)
+├── services/              Integrations (yours)
 ├── vector/                Research and decisions
-│   ├── schemas/           6 research schemas
-│   ├── research/          Structured findings
-│   ├── decisions/         Architecture Decision Records
-│   └── audits/            Skill audit reports
-├── package.json           Scripts: npm start, npm run zvapps, npm run zvapps:install
-└── README.md              You are here
+└── package.json           npm start · npm run zvapps · npm test
 ```
 
 ---

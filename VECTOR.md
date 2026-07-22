@@ -71,6 +71,16 @@ Mark each as: hypothesis | testing | validated | invalidated
 - [What do you need to learn before building?]
 - [What would change your approach if the answer surprised you?]
 
+## Project Memory (the Sidecar)
+
+Doctrine states intent; the sidecar records everything that moves. The
+project's past (doctrine snapshots, audit history), present (session
+telemetry, skill usage), and future (`zvapps/PRD.md`, `zvapps/backlog/`)
+live as markdown and JSONL under `zvapps/`, surfaced by the control panel
+(`npm run zvapps`, port 3067). Agents read the PRD and backlog before
+working and log their sessions when they stop — the rituals are in
+CLAUDE.md, the schemas in `zvapps/ZV-CONTRACT.md`.
+
 ---
 
 # Architecture Doctrine

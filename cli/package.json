@@ -1,6 +1,6 @@
 {
   "name": "investiture",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "Add structured doctrine, research schemas, a skill chain, and the Control Panel (zvapps) to any project. Built for Claude Code.",
   "bin": {
     "investiture": "bin/investiture.js"
