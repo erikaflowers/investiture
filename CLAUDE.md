@@ -42,6 +42,7 @@ Things that aren't obvious from the code but will cause wrong assumptions:
 - **`cli/update-manifest.json` is the boundary.** It declares which paths get replaced, merged, preserved, or create-if-missing when a downstream runs `npx investiture update`. Adding a new user-owned file (like a new doctrine template) means updating this manifest.
 - **Skills live in two places:** `.claude/skills/` (active) and `.claude/skills-optional/` (available but not enabled). The Control Panel's Skills page scans both. Upstream updates replace SKILL.md files in both directories per the merge rule.
 - **Doctrine files are user-owned, never replaced by updates.** VECTOR.md, ARCHITECTURE.md, CLAUDE.md, DESIGN.md, and everything under `vector/` belong to the downstream project after install. The update command will not touch them.
+- **The backlog and PRD are meant to be committed by downstream projects** — they are git-diffable markdown, deliberately NOT in the shipped `.gitignore`. The template ships an empty backlog (only `zvapps/backlog/.gitkeep`). **Investiture's own five internal cards are excluded on the maintainer machine via `.git/info/exclude`, which is local and never ships.** Because that exclusion makes them untracked, git operations offer them no protection — `git stash` in particular will drop them from the working tree without warning (it did, once; they were recovered from history). The system of record for the framework's own backlog is the Notion Roadmap, not this repo.
 
 ---
 

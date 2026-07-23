@@ -4,10 +4,18 @@ dist/
 .env.local
 .DS_Store
 *.log
+
+# Runtime state, not curated content — snapshots and the append-only
+# session log are regenerated locally and grow without bound.
 zvapps/.zv-history/
 zvapps/telemetry/
 
-# Investiture tracks its own backlog in Notion, not here. The framework
-# dogfoods its own sidecar on the operator machine (untracked cards), but
-# generated/cloned repos must ship a zero-state backlog — only .gitkeep.
-zvapps/backlog/*.md
+# NOTE: the backlog and PRD are intentionally NOT ignored. Backlog items are
+# markdown with YAML front-matter precisely so a downstream project commits,
+# diffs, and versions them alongside its code — the same for zvapps/PRD.md.
+# The template ships an empty backlog (only zvapps/backlog/.gitkeep); your
+# cards are yours to commit.
+#
+# Investiture's OWN five internal cards are excluded on the maintainer machine
+# via .git/info/exclude (local, never shipped), not here — so they never leak
+# into a generated template. Their system of record is the Notion Roadmap.
