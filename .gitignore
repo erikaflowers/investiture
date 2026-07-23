@@ -6,3 +6,8 @@ dist/
 *.log
 zvapps/.zv-history/
 zvapps/telemetry/
+
+# Investiture tracks its own backlog in Notion, not here. The framework
+# dogfoods its own sidecar on the operator machine (untracked cards), but
+# generated/cloned repos must ship a zero-state backlog — only .gitkeep.
+zvapps/backlog/*.md

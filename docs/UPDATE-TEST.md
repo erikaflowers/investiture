@@ -42,8 +42,9 @@ applied regardless of CLI version.
 
 - **All 37 checksummed user files byte-identical** after the update:
   the four doctrine files, all 31 `vector/` artifacts, panel `data/`, `.env`
-- `zvapps/backlog/` correctly did **not** appear — the template's seed
-  card (BL-0001) ships only to template-generated repos, never via update
+- `zvapps/backlog/` was correctly untouched by the update — backlog items
+  are never added, removed, or modified by `update` (the template ships an
+  empty backlog with only a `.gitkeep`; there is no seed card)
 - The pre-existing local edits to panel code were overwritten, as
   documented (panel code is upstream territory; MIGRATION-2.0.md says to
   copy customizations out first)

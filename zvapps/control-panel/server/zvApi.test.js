@@ -109,6 +109,24 @@ describe("Qin Finding 2 — snapshot-before-write ordering (regression)", () => 
 });
 
 describe("Qin Finding 2 — onboarding idempotency (regression)", () => {
+  it("seeds the PRD and an empty backlog on a fresh install (no seed card)", async () => {
+    const backlogDir = path.join(api.root, "zvapps", "backlog");
+    // Fresh install: template ships an empty backlog (only .gitkeep).
+    fs.rmSync(backlogDir, { recursive: true, force: true });
+
+    const res = await api.call("POST", "/onboarding", { name: "Fresh", description: "new" });
+    expect(res.status).toBe(200);
+    // PRD is seeded...
+    expect(fs.existsSync(path.join(api.root, "zvapps", "PRD.md"))).toBe(true);
+    // ...and the backlog exists but is empty — no seed card ships.
+    const cards = fs
+      .readdirSync(backlogDir)
+      .filter((f) => f.endsWith(".md"));
+    expect(cards).toHaveLength(0);
+    const list = await api.call("GET", "/backlog");
+    expect(list.json.items).toHaveLength(0);
+  });
+
   it("re-running onboarding preserves onboarded-date and does not overwrite the PRD", async () => {
     const first = await api.call("POST", "/onboarding", { name: "Alpha", description: "one" });
     expect(first.status).toBe(200);

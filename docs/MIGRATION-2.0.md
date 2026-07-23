@@ -27,9 +27,11 @@ everything user-owned — including the new 2.0 paths, which are declared in
 | `zvapps/ZV-CONTRACT.md` | The 2.0 contract document | replaced (upstream-owned) |
 | VECTOR / ARCHITECTURE / CLAUDE / DESIGN `.md` | Doctrine | preserved, as always |
 
-Because `zvapps/backlog/` is not part of any replace or merge rule, existing
-1.x installs do **not** receive the template's seed backlog item — new repos
-generated from the template do.
+Because `zvapps/backlog/` is not part of any replace or merge rule, an update
+never adds, removes, or touches backlog items — yours are entirely your own.
+The template itself ships an **empty** backlog (only a `.gitkeep`); there is no
+seed card. Onboarding creates an empty backlog and seeds the PRD, nothing
+more.
 
 ## What's new
 
