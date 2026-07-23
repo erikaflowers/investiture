@@ -1,20 +1,17 @@
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { writeVectorPlugin } from './server/writeVector.js';
 import { doctrineApiPlugin } from './server/doctrineApi.js';
 import { homeApiPlugin } from './server/homeApi.js';
 import { zvApiPlugin } from './server/zvApi.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, '.', '');
-
+export default defineConfig(() => {
   return {
-    plugins: [react(), writeVectorPlugin(), doctrineApiPlugin(), homeApiPlugin(), zvApiPlugin()],
+    plugins: [react(), doctrineApiPlugin(), homeApiPlugin(), zvApiPlugin()],
     root: 'src',
     css: {
       devSourcemap: true,
@@ -39,23 +36,6 @@ export default defineConfig(({ mode }) => {
       hmr: {
         host: 'localhost',
         port: 3067,
-      },
-      proxy: {
-        '/api/anthropic': {
-          target: 'https://api.anthropic.com',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/anthropic/, ''),
-          headers: {
-            'x-api-key': env.ANTHROPIC_API_KEY || '',
-            'anthropic-version': '2023-06-01',
-          },
-          configure: (proxy) => {
-            proxy.on('proxyReq', (proxyReq) => {
-              proxyReq.removeHeader('origin');
-              proxyReq.removeHeader('referer');
-            });
-          },
-        },
       },
     },
     test: {

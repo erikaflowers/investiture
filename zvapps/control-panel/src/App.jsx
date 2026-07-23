@@ -19,7 +19,8 @@ import EditorPage from "./pages/zv/EditorPage.jsx";
 
 // zv-ui shell + Labrador themes are the base skin; the sidecar pages
 // (marked zv: true) add a scoped taste of the ZV brand via .cp-page.
-// The Box is superseded (brief, Decision 7) — not routed.
+// The Box is removed (brief, Decision 7): BoxPage, writeVector.js, and the
+// Anthropic proxy were deleted in R-2 Task 3.
 
 const PAGES = {
   home: { component: HomePage },

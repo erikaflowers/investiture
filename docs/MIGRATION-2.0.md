@@ -57,9 +57,13 @@ more.
 
 - **Port: 3003 → 3067.** The panel dev server and HMR both move. Update
   bookmarks and any tooling that assumed 3003.
-- **The Box is retired.** Its page is no longer routed; the panel replaces
-  it with the sidecar pages. (`/api/write-vector` and the Anthropic proxy
-  remain in this release but are deprecated and will be removed.)
+- **The Box is removed.** Its page (`BoxPage`), its unguarded write endpoint
+  (`server/writeVector.js` / `POST /api/write-vector`), and the
+  credential-bearing `/api/anthropic` proxy are all deleted as of 2.0.0 — not
+  merely unrouted. If your downstream still has these files, a `2.0.0` update
+  leaves your copies in place (replace is non-destructive) but ships none of
+  them to new installs; delete them from your tree to close the unguarded
+  write path and the env-key proxy.
 - **`/api/doctrine/write` is removed.** It wrote doctrine files without
   snapshotting. The Doctrine and Design pages now save through
   `PUT /api/zv/doctrine/:name`, which snapshots the prior version to
