@@ -5,6 +5,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { createGuard, OutOfBoundsError, DOCTRINE_FILES } from "./allowlist.js";
+import { safeWriteFileSync } from "./safeWrite.js";
 
 let root;
 let outside;
@@ -110,4 +111,55 @@ describe("symlink escapes", () => {
     );
     expect(guard.guardPath("zvapps/alias.md")).toContain("zvapps");
   });
+});
+
+// Qin Finding 4 + Renic R3 — the guard alone cannot close the symlink hole;
+// the no-follow WRITE is the durable fix. These prove that even when
+// guardPath PASSES (the path is in-territory), a symlink at the final
+// segment makes the write itself fail rather than escape.
+describe("no-follow write closes the symlink escape", () => {
+  it("(A) dangling final-segment symlink: guard passes, write refuses (ELOOP)", () => {
+    const outsideTarget = path.join(outside, "pwned.md");
+    const linkPath = path.join(root, "zvapps", "backlog", "BL-0099-evil.md");
+    // Dangling: target does not exist yet, so existsSync(link) is false and
+    // the guard realpaths only the (in-territory) parent — it PASSES.
+    fs.symlinkSync(outsideTarget, linkPath);
+    const guarded = guard.guardPath("zvapps/backlog/BL-0099-evil.md");
+    expect(guarded).toContain("zvapps"); // guard did not catch it
+
+    // The write must refuse to follow the link, and must NOT create the
+    // outside target (the Finding-4 reproduction wrote pwned.md outside).
+    expect(() => safeWriteFileSync(guarded, "owned")).toThrow(
+      expect.objectContaining({ code: "ELOOP" })
+    );
+    expect(fs.existsSync(outsideTarget)).toBe(false);
+  });
+
+  it("(C) check-to-write TOCTOU swap: symlink planted after the check still fails the write", () => {
+    const outsideTarget = path.join(outside, "toctou.md");
+    const targetPath = path.join(root, "zvapps", "backlog", "BL-0100.md");
+    // Guard checks a normal absent path (not a symlink) — passes.
+    const guarded = guard.guardPath("zvapps/backlog/BL-0100.md");
+    // Attacker swaps a symlink into that exact path before the write.
+    fs.symlinkSync(outsideTarget, targetPath);
+    // The no-follow open fails regardless of when the link was planted.
+    expect(() => safeWriteFileSync(guarded, "owned")).toThrow(
+      expect.objectContaining({ code: "ELOOP" })
+    );
+    expect(fs.existsSync(outsideTarget)).toBe(false);
+  });
+
+  it("writes normally when the final segment is a real file or absent", () => {
+    const p = path.join(root, "zvapps", "backlog", "BL-0001-ok.md");
+    safeWriteFileSync(p, "first"); // absent → created
+    expect(fs.readFileSync(p, "utf-8")).toBe("first");
+    safeWriteFileSync(p, "second"); // real file → truncated + rewritten
+    expect(fs.readFileSync(p, "utf-8")).toBe("second");
+  });
+
+  // Renic variant (B), a mid-tail dangling directory link
+  // (backlog/evil/BL.md, `evil` dangling): the open fails ENOENT because you
+  // cannot create through a dangling directory link, so it is not
+  // independently exploitable and needs no separate guard. Documented here so
+  // nobody re-litigates it.
 });

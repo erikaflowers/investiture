@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 import { createGuard, DOCTRINE_FILES, OutOfBoundsError } from "../core/zv/allowlist.js";
 import { parseFrontmatter, serializeFrontmatter, FrontmatterError } from "../core/zv/frontmatter.js";
+import { safeWriteFileSync, safeAppendFileSync, safeCopyFileSync } from "../core/zv/safeWrite.js";
 import * as backlog from "../core/zv/backlog.js";
 import * as prd from "../core/zv/prd.js";
 import * as telemetry from "../core/zv/telemetry.js";
@@ -29,7 +30,7 @@ export function zvApiPlugin() {
   function emitEvent(event, actor, payload) {
     const file = logPath();
     fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.appendFileSync(file, telemetry.makeLine({ event, actor, payload }, nowIso()), "utf-8");
+    safeAppendFileSync(file, telemetry.makeLine({ event, actor, payload }, nowIso()));
   }
 
   function readLog() {
@@ -48,7 +49,7 @@ export function zvApiPlugin() {
     for (let n = 2; fs.existsSync(path.join(dir, `${id}.md`)); n++) {
       id = `${base}-${n}`;
     }
-    fs.copyFileSync(filePath, guard.guardPath(path.join(dir, `${id}.md`)));
+    safeCopyFileSync(filePath, guard.guardPath(path.join(dir, `${id}.md`)));
     return id;
   }
 
@@ -161,7 +162,7 @@ export function zvApiPlugin() {
       },
       b.body
     );
-    fs.writeFileSync(filePath, content, "utf-8");
+    safeWriteFileSync(filePath, content);
     emitEvent("file-updated", b.createdBy, { file: rel(filePath), via: "api", snapshot: null });
     sendJson(res, 201, { id, path: rel(filePath) });
   }
@@ -190,11 +191,9 @@ export function zvApiPlugin() {
       "updated-date": today(),
     };
     const filePath = guard.guardPath(itemRel);
-    fs.writeFileSync(
+    safeWriteFileSync(
       filePath,
-      backlog.serializeItem(updated, b.body !== undefined ? b.body : itemBody),
-      "utf-8"
-    );
+      backlog.serializeItem(updated, b.body !== undefined ? b.body : itemBody));
     emitEvent("file-updated", "human", { file: itemRel, via: "api", snapshot: null });
     sendJson(res, 200, { id, path: itemRel });
   }
@@ -226,7 +225,7 @@ export function zvApiPlugin() {
       return sendErr(res, 400, "INVALID_INPUT", "content (string) is required");
     }
     const snapshot = snapshotDoctrine(name);
-    fs.writeFileSync(filePath, b.content, "utf-8");
+    safeWriteFileSync(filePath, b.content);
     emitEvent("file-updated", "human", { file: name, via: "api", snapshot });
     sendJson(res, 200, { name, snapshot });
   }
@@ -240,7 +239,7 @@ export function zvApiPlugin() {
     if (missing.length) {
       return sendErr(res, 400, "INVALID_INPUT", `PRD missing required sections: ${missing.join(", ")}`);
     }
-    fs.writeFileSync(prdPath(), b.content, "utf-8");
+    safeWriteFileSync(prdPath(), b.content);
     emitEvent("file-updated", "human", { file: "zvapps/PRD.md", via: "api", snapshot: null });
     sendJson(res, 200, { path: "zvapps/PRD.md" });
   }
@@ -259,13 +258,13 @@ export function zvApiPlugin() {
     const p = prdPath();
     if (!fs.existsSync(p)) {
       const { data } = readProject();
-      fs.writeFileSync(p, prd.seedPrd(data?.name, data?.description, today()), "utf-8");
+      safeWriteFileSync(p, prd.seedPrd(data?.name, data?.description, today()));
     }
     const updated = prd.appendToSection(fs.readFileSync(p, "utf-8"), b.section, today(), b.actor, String(b.entry).trim());
     if (updated === null) {
       return sendErr(res, 400, "INVALID_INPUT", `PRD has no "${b.section}" section to append to`);
     }
-    fs.writeFileSync(p, updated, "utf-8");
+    safeWriteFileSync(p, updated);
     emitEvent("file-updated", b.actor, { file: "zvapps/PRD.md", via: "api", snapshot: null });
     sendJson(res, 200, { path: "zvapps/PRD.md", section: b.section });
   }
@@ -301,7 +300,7 @@ export function zvApiPlugin() {
       return sendErr(res, 404, "NOT_FOUND", `No snapshot ${snapId} for ${b.file}`);
     }
     const preRestoreSnapshot = snapshotDoctrine(b.file);
-    fs.copyFileSync(snapPath, filePath);
+    safeCopyFileSync(snapPath, filePath);
     emitEvent("file-updated", "human", { file: b.file, via: "api", snapshot: preRestoreSnapshot });
     sendJson(res, 200, { file: b.file, restoredFrom: snapId, preRestoreSnapshot });
   }
@@ -338,16 +337,14 @@ export function zvApiPlugin() {
       onboarded: true,
       "onboarded-date": existing?.["onboarded-date"] ?? today(),
     };
-    fs.writeFileSync(
+    safeWriteFileSync(
       projectPath(),
-      serializeFrontmatter(projectData, projectBody, PROJECT_KEY_ORDER),
-      "utf-8"
-    );
+      serializeFrontmatter(projectData, projectBody, PROJECT_KEY_ORDER));
     written.push("zvapps/PROJECT.md");
 
     // 2. Seed PRD only if absent — never overwrite (§6.4).
     if (!fs.existsSync(prdPath())) {
-      fs.writeFileSync(prdPath(), prd.seedPrd(projectData.name, description, today()), "utf-8");
+      safeWriteFileSync(prdPath(), prd.seedPrd(projectData.name, description, today()));
       written.push("zvapps/PRD.md");
     }
 
