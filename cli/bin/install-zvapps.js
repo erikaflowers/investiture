@@ -194,7 +194,7 @@ function run() {
     // Next steps
     log(`${WHITE}${BOLD}  Next steps:${RESET}`);
     blank();
-    log(`    ${GOLD}npm run zvapps${RESET}       Start the control panel (port 3003)`);
+    log(`    ${GOLD}npm run zvapps${RESET}       Start the control panel (port 3067)`);
     log(`    ${GOLD}npx investiture update${RESET}  Pull the latest from upstream`);
     blank();
   } finally {

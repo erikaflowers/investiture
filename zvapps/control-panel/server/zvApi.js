@@ -198,6 +198,14 @@ export function zvApiPlugin() {
     const err = backlog.validationError(b);
     if (err) return sendErr(res, 400, "INVALID_INPUT", err);
 
+    // Qin Finding 6: record who actually made the edit, not a hardcoded
+    // "human". Optional actor field, validated like created-by; defaults to
+    // "human" (the panel UI is the human's path and sends none).
+    const actor = b.actor ?? "human";
+    if (!backlog.ACTOR_RE.test(actor)) {
+      return sendErr(res, 400, "INVALID_INPUT", 'actor must be "human" or "agent:<name>"');
+    }
+
     const { body: itemBody, path: itemRel, invalid, ...front } = item;
     const updated = {
       ...front,
@@ -211,7 +219,7 @@ export function zvApiPlugin() {
     safeWriteFileSync(
       filePath,
       backlog.serializeItem(updated, b.body !== undefined ? b.body : itemBody));
-    emitEvent("file-updated", "human", { file: itemRel, via: "api", snapshot: null });
+    emitEvent("file-updated", actor, { file: itemRel, via: "api", snapshot: null });
     sendJson(res, 200, { id, path: itemRel });
   }
 

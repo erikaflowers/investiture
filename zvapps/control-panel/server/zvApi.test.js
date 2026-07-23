@@ -132,6 +132,30 @@ describe("R2 — telemetry endpoint refuses recency self-certification", () => {
   });
 });
 
+describe("Qin Finding 6 — backlog update records the real actor", () => {
+  it("logs the request's actor on file-updated, not a hardcoded human", async () => {
+    const created = await api.call("POST", "/backlog", { title: "card", createdBy: "human" });
+    await api.call("PUT", `/backlog/${created.json.id}`, { status: "queued", actor: "agent:decker" });
+    const log = await api.call("GET", "/telemetry?type=file-updated");
+    const updateEvent = log.json.events.find(
+      (e) => e.payload?.file?.includes(created.json.id)
+    );
+    expect(updateEvent.actor).toBe("agent:decker");
+  });
+
+  it("defaults to human when no actor is sent (the panel UI path)", async () => {
+    const created = await api.call("POST", "/backlog", { title: "card", createdBy: "human" });
+    const res = await api.call("PUT", `/backlog/${created.json.id}`, { status: "done" });
+    expect(res.status).toBe(200);
+  });
+
+  it("rejects a malformed actor", async () => {
+    const created = await api.call("POST", "/backlog", { title: "card", createdBy: "human" });
+    const res = await api.call("PUT", `/backlog/${created.json.id}`, { status: "done", actor: "Decker" });
+    expect(res.status).toBe(400);
+  });
+});
+
 describe("R6 — re-onboarding preserves unknown PROJECT.md keys", () => {
   it("keeps an extra front-matter key a user/agent added", async () => {
     await api.call("POST", "/onboarding", { name: "Alpha", description: "one" });
