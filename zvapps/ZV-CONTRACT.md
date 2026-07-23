@@ -1,10 +1,17 @@
 # ZV-CONTRACT — Investiture 2.0 Sidecar Contract
 
-**Version:** 2.0.0-draft.1
-**Status:** Awaiting Samantha's review (Milestone 1 deliverable)
+**Version:** 2.0.0-draft.2
+**Status:** Amended during pre-release remediation R-1 (post Qin/Renic audit)
 **Scope:** This document is the single authority for the Investiture 2.0 sidecar: file formats, directory layout, the write API, the telemetry event contract, and the onboarding data flow. Milestones 2–5 implement this document. If implementation and contract disagree, the contract wins; if the contract is silent, park the question — do not improvise.
 
 The telemetry event contract (§5) is **public API**: downstream consumers (Telltale) depend on it. Changes after review require a version bump and migration notes.
+
+### Amendments
+
+- **2026-07-23 (R-1 remediation):** The contract survived the build unamended but the release audit found two claims it could no longer make honestly.
+  - **§4.5** — the prior claim that all symlink escapes fail was overstated. Corrected to describe the no-follow (`O_NOFOLLOW`) write as the actual symlink defense, with the residual threat model stated: this is defense in depth, not a perimeter against an attacker who already holds local write inside `zvapps/`.
+  - **§5** — added the advisory-not-authoritative preamble: telemetry actors are self-reported, the endpoint is unauthenticated, recency informs but never certifies, and `audit-run` is refused over HTTP.
+  - **§6.2** — zero state is now git-enforced (gitignored backlog + `.gitkeep`); there is no seed card.
 
 ---
 
@@ -145,10 +152,13 @@ Enforced in one shared server-side function used by every endpoint that touches 
 
 1. Clients never send raw filesystem paths. They send ids (`BL-0007`), doctrine names (`CLAUDE.md`), or fixed resources (PRD, telemetry). The server maps these to paths.
 2. Every server-constructed path is canonicalized with `path.resolve` and must satisfy exactly one of:
-   - inside `<repoRoot>/zvapps/` (after resolution — `..` segments, absolute-path smuggling, and symlink escapes via `fs.realpathSync` of the containing directory all fail this test), or
+   - inside `<repoRoot>/zvapps/` (after resolution — `..` segments and absolute-path smuggling fail this test), or
    - exact string equality with one of the four doctrine paths (§3).
-3. Anything else → 403 `OUT_OF_BOUNDS`, and the attempt is logged to stderr.
-4. Milestone 2 ships tests proving rejection of: `../` traversal in ids/names, absolute paths, doctrine-lookalike names (`CLAUDE.md.bak`, `./CLAUDE.md/..`), symlinks inside `zvapps/` pointing outside, and writes to `node_modules`, dotfiles, and source directories.
+
+   **Symlinks are NOT fully closed by this check** (amended 2026-07-23). The guard realpaths the deepest *existing* ancestor, so a **dangling** symlink at the final segment (target absent) passes containment, and a symlink swapped in *after* the check but *before* the write (TOCTOU) is invisible to any check-time test. Realpath-ing the full candidate is impossible pre-write — the file does not exist yet.
+3. The durable symlink defense is therefore at the **write**, not the check: every write site opens the final path with `O_NOFOLLOW` (`core/zv/safeWrite.js`), so a symlink at the final segment fails the open with `ELOOP` regardless of when it was planted. This is **defense in depth, not a perimeter**: an attacker who can already plant or swap symlinks inside `zvapps/` generally has local filesystem write access and can often write directly. The boundary raises the cost of a specific escape (writing *through* the tool to an outside target); it does not claim to contain an attacker who already holds local write.
+4. Anything failing the containment check → 403 `OUT_OF_BOUNDS`, logged to stderr. A no-follow open that hits a planted symlink fails `ELOOP` → 500 `IO_ERROR` (the request was structurally valid; the filesystem was hostile).
+5. Tests prove rejection of: `../` traversal in ids/names, absolute paths, doctrine-lookalike names (`CLAUDE.md.bak`, `./CLAUDE.md/..`), writes to `node_modules`/dotfiles/source dirs (guard), and — for the write — the dangling-final-segment and check-to-write-swap symlink cases (`allowlist.test.js`, `O_NOFOLLOW` → `ELOOP`, outside target never created).
 
 ### 4.6 Snapshots
 
@@ -161,6 +171,11 @@ Enforced in one shared server-side function used by every endpoint that touches 
 ---
 
 ## 5. Telemetry event contract (PUBLIC API)
+
+**Advisory, not authoritative (amended 2026-07-23).** The telemetry log is a self-reported activity record, not a trust signal. Actors are caller-supplied and the local `POST /api/zv/telemetry` endpoint is unauthenticated, so any event's `actor` is impersonable and any "now" event is fabricable through legitimate fields. Two consequences bind every consumer, Telltale included:
+
+- **Recency (§5.4) informs, it does not certify.** "Last audit was fresh" means an `audit-run` event exists, not that an audit ran. Never gate a release, health decision, or approval on it.
+- **The HTTP endpoint refuses recency-driving self-certification.** `audit-run` is excluded from the postable set (`HTTP_POSTABLE_EVENTS`) — it must be written to the log directly by audit tooling that actually ran, not asserted over the open endpoint. It remains a valid *log* event (§5.3). The durable correction — derive recency from audit *artifacts* (a report file's presence and mtime) rather than event claims — is tracked in the backlog and supersedes §5.4 when it lands.
 
 ### 5.1 Transport and location
 
@@ -224,6 +239,8 @@ Body below the front-matter is free space for the human; the panel does not mana
 ### 6.2 Zero state definition
 
 The panel is in **zero state** when `PROJECT.md` is absent or `onboarded` is not `true`. In zero state, every page renders its explainer ("this is where you will view your project…") instead of empty views, plus the entry point to the wizard. The shipped template repo is in zero state by construction: no `PROJECT.md`, no `PRD.md`, no `zvapps/backlog/` items, no telemetry log.
+
+Enforced by git, not just intention (amended 2026-07-23): `zvapps/backlog/*.md` is gitignored and the directory ships with only a `.gitkeep`, so template clones and fresh `install-zvapps` receive an **empty** backlog. There is no "seed card." A framework maintainer's own backlog items live on the maintainer's machine, untracked (the framework dogfoods its own sidecar), with durable tracking in the external roadmap — the repo is not the system of record for the framework's internal work.
 
 ### 6.3 Seed PRD template
 
