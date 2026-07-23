@@ -33,6 +33,12 @@ function replaced(p) { log(`  ${GREEN}~${RESET} replaced ${DIM}${p}${RESET}`); }
 function added(p) { log(`  ${GREEN}+${RESET} added ${DIM}${p}${RESET}`); }
 function preserved(p) { log(`  ${BLUE}·${RESET} preserved ${DIM}${p}${RESET}`); }
 function kept(p) { log(`  ${BLUE}·${RESET} ${YELLOW}kept (not in upstream, not deleted)${RESET} ${DIM}${p}${RESET}`); }
+function backedUp(p, backup) { log(`  ${YELLOW}~${RESET} ${YELLOW}backed up before overwrite${RESET} ${DIM}${p} -> ${backup}${RESET}`); }
+function wouldBackup(p) { log(`  ${YELLOW}⇥${RESET} ${DIM}would back up (local changes) ${p}${RESET}`); }
+
+function backupStamp() {
+  return new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
+}
 function wouldReplace(p) { log(`  ${YELLOW}~${RESET} ${DIM}would replace ${p}${RESET}`); }
 function wouldAdd(p) { log(`  ${YELLOW}+${RESET} ${DIM}would add ${p}${RESET}`); }
 function error(msg) { log(`${CORAL}  Error: ${msg}${RESET}`); }
@@ -160,6 +166,12 @@ function runReplace(manifest, source, target, dryRun, summary) {
   }
 }
 
+// Merge (R5). Skills and presets are closer to user content than panel code,
+// so a downstream that tuned a SKILL.md or preset must not lose it silently.
+// Before overwriting a file whose current content DIFFERS from the incoming
+// upstream version (customized, or on an older version), copy the current
+// version to a timestamped `.orig-<ts>.bak` alongside it and report the path.
+// Identical files are overwritten with no backup (nothing is lost).
 function runMerge(manifest, source, target, dryRun, summary) {
   for (const mergeRule of manifest.merge || []) {
     const srcDir = path.join(source, mergeRule.path);
@@ -172,11 +184,22 @@ function runMerge(manifest, source, target, dryRun, summary) {
       const destFile = path.join(destDir, rel);
       const isNew = !fs.existsSync(destFile);
       const displayPath = path.join(mergeRule.path, rel);
+      const differs = !isNew &&
+        fs.readFileSync(destFile).toString() !== fs.readFileSync(srcFile).toString();
       if (dryRun) {
         if (isNew) { wouldAdd(displayPath); summary.wouldAdd++; }
-        else { wouldReplace(displayPath); summary.wouldReplace++; }
+        else {
+          wouldReplace(displayPath); summary.wouldReplace++;
+          if (differs) { wouldBackup(displayPath); summary.backedUp++; }
+        }
       } else {
         if (!fs.existsSync(path.dirname(destFile))) fs.mkdirSync(path.dirname(destFile), { recursive: true });
+        if (differs) {
+          const backupPath = `${destFile}.orig-${backupStamp()}.bak`;
+          fs.copyFileSync(destFile, backupPath);
+          backedUp(displayPath, path.basename(backupPath));
+          summary.backedUp++;
+        }
         fs.copyFileSync(srcFile, destFile);
         if (isNew) { added(displayPath); summary.added++; }
         else { replaced(displayPath); summary.replaced++; }
@@ -264,7 +287,7 @@ function run({ dryRun = false } = {}) {
     log(`${DIM}  Upstream version: ${manifest.version}${RESET}`);
     blank();
 
-    const summary = { replaced: 0, added: 0, preserved: 0, kept: 0, wouldReplace: 0, wouldAdd: 0 };
+    const summary = { replaced: 0, added: 0, preserved: 0, kept: 0, backedUp: 0, wouldReplace: 0, wouldAdd: 0 };
 
     header('Replace');
     runReplace(manifest, source, target, dryRun, summary);
@@ -291,10 +314,10 @@ function run({ dryRun = false } = {}) {
     }
 
     if (dryRun) {
-      log(`${BOLD}  Would:${RESET} ${summary.wouldReplace} replace, ${summary.wouldAdd} add, ${summary.preserved} preserve, ${summary.kept} keep`);
+      log(`${BOLD}  Would:${RESET} ${summary.wouldReplace} replace, ${summary.wouldAdd} add, ${summary.preserved} preserve, ${summary.kept} keep, ${summary.backedUp} back up`);
       log(`${DIM}  Run without --dry-run to apply.${RESET}`);
     } else {
-      log(`${BOLD}  Done:${RESET} ${summary.replaced} replaced, ${summary.added} added, ${summary.preserved} preserved, ${summary.kept} kept`);
+      log(`${BOLD}  Done:${RESET} ${summary.replaced} replaced, ${summary.added} added, ${summary.preserved} preserved, ${summary.kept} kept, ${summary.backedUp} backed up`);
     }
     blank();
   } finally {

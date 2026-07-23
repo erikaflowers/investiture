@@ -10,7 +10,7 @@ import path from "path";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
-const { runReplace } = require("../../../cli/bin/update.js");
+const { runReplace, runMerge } = require("../../../cli/bin/update.js");
 
 let source, target, logs;
 
@@ -77,5 +77,38 @@ describe("R4a — replace is non-destructive to downstream-added files", () => {
     expect(fs.existsSync(path.join(target, "zvapps/control-panel/server/zvApi.js"))).toBe(false);
     expect(summary.kept).toBe(1);
     expect(logs.join("\n")).toMatch(/kept.*myPlugin\.js/s);
+  });
+});
+
+describe("R5 — merge backs up a customized skill/preset before overwriting", () => {
+  const rule = { path: ".claude/skills", pattern: "*/SKILL.md" };
+  const baseSummary = () => ({ replaced: 0, added: 0, preserved: 0, kept: 0, backedUp: 0, wouldReplace: 0, wouldAdd: 0 });
+
+  it("preserves a modified downstream SKILL.md in recoverable form and reports it", () => {
+    write(source, ".claude/skills/invest-audit/SKILL.md", "UPSTREAM v2 skill body");
+    write(target, ".claude/skills/invest-audit/SKILL.md", "DOWNSTREAM CUSTOMIZED skill body");
+
+    const summary = baseSummary();
+    runMerge({ merge: [rule] }, source, target, false, summary);
+
+    const skillDir = path.join(target, ".claude/skills/invest-audit");
+    // The upstream version is now live...
+    expect(fs.readFileSync(path.join(skillDir, "SKILL.md"), "utf-8")).toBe("UPSTREAM v2 skill body");
+    // ...and the customization is recoverable from a .bak alongside it.
+    const backups = fs.readdirSync(skillDir).filter((f) => f.includes(".orig-") && f.endsWith(".bak"));
+    expect(backups).toHaveLength(1);
+    expect(fs.readFileSync(path.join(skillDir, backups[0]), "utf-8")).toBe("DOWNSTREAM CUSTOMIZED skill body");
+    expect(summary.backedUp).toBe(1);
+    expect(logs.join("\n")).toMatch(/backed up.*SKILL\.md/s);
+  });
+
+  it("does not back up an identical (un-customized) skill", () => {
+    write(source, ".claude/skills/invest-audit/SKILL.md", "same body");
+    write(target, ".claude/skills/invest-audit/SKILL.md", "same body");
+    const summary = baseSummary();
+    runMerge({ merge: [rule] }, source, target, false, summary);
+    const skillDir = path.join(target, ".claude/skills/invest-audit");
+    expect(fs.readdirSync(skillDir).filter((f) => f.endsWith(".bak"))).toHaveLength(0);
+    expect(summary.backedUp).toBe(0);
   });
 });
