@@ -12,11 +12,26 @@ export const EVENT_TYPES = [
   "context-catchup-written",
 ];
 
-// Returns an error string, or null if the event is valid.
-export function validationError(event) {
+// Events the HTTP POST endpoint accepts. `audit-run` is EXCLUDED (Renic R2):
+// it drives recency (lastAudit / lastStabilityPass), and the open,
+// unauthenticated endpoint let any caller self-certify a fresh clean audit as
+// any actor — the exact failure this product exists to prevent. audit-run
+// remains a valid log event, but it must be written to events.jsonl directly
+// by audit tooling that actually ran, not asserted over HTTP. The durable fix
+// (derive recency from artifacts, not claims) is tracked separately.
+export const HTTP_POSTABLE_EVENTS = EVENT_TYPES.filter((e) => e !== "audit-run");
+
+// Returns an error string, or null if the event is valid. `scope` is "log"
+// (any contract event, e.g. a direct file append) or "http" (the restricted
+// set the POST endpoint accepts).
+export function validationError(event, { scope = "log" } = {}) {
   if (!event || typeof event !== "object") return "event must be an object";
-  if (!EVENT_TYPES.includes(event.event)) {
-    return `event must be one of: ${EVENT_TYPES.join(", ")}`;
+  const allowed = scope === "http" ? HTTP_POSTABLE_EVENTS : EVENT_TYPES;
+  if (!allowed.includes(event.event)) {
+    if (scope === "http" && EVENT_TYPES.includes(event.event)) {
+      return `event '${event.event}' cannot be posted over HTTP (it drives recency and would be self-certified); write it to the telemetry log directly`;
+    }
+    return `event must be one of: ${allowed.join(", ")}`;
   }
   if (!ACTOR_RE.test(event.actor ?? "")) {
     return 'actor must be "human" or "agent:<name>"';

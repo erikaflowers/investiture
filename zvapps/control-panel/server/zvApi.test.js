@@ -108,6 +108,30 @@ describe("Qin Finding 2 — snapshot-before-write ordering (regression)", () => 
   });
 });
 
+describe("R2 — telemetry endpoint refuses recency self-certification", () => {
+  it("rejects a forged audit-run over HTTP (400) and does not poison recency", async () => {
+    const forge = await api.call("POST", "/telemetry", {
+      event: "audit-run",
+      actor: "agent:qin",
+      payload: { result: "pass" },
+    });
+    expect(forge.status).toBe(400);
+    // State's recency must NOT show a fresh audit — the forge never landed.
+    const state = await api.call("GET", "/state");
+    expect(state.json.recency.lastAudit).toBeNull();
+    expect(state.json.recency.lastStabilityPass).toBeNull();
+  });
+
+  it("still accepts a legitimate session-start over HTTP (201)", async () => {
+    const res = await api.call("POST", "/telemetry", {
+      event: "session-start",
+      actor: "agent:heavy",
+      payload: { agent: "heavy" },
+    });
+    expect(res.status).toBe(201);
+  });
+});
+
 describe("Qin Finding 2 — onboarding idempotency (regression)", () => {
   it("seeds the PRD and an empty backlog on a fresh install (no seed card)", async () => {
     const backlogDir = path.join(api.root, "zvapps", "backlog");

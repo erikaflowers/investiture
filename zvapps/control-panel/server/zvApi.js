@@ -307,7 +307,9 @@ export function zvApiPlugin() {
 
   async function handleTelemetryPost(req, res) {
     const b = await readBody(req);
-    const err = telemetry.validationError(b);
+    // "http" scope rejects audit-run — the open endpoint must not let a
+    // caller self-certify a recency-driving audit as any actor (Renic R2).
+    const err = telemetry.validationError(b, { scope: "http" });
     if (err) return sendErr(res, 400, "INVALID_INPUT", err);
     emitEvent(b.event, b.actor, b.payload);
     sendJson(res, 201, { ok: true });

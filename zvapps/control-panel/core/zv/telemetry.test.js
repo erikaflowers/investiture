@@ -17,6 +17,18 @@ describe("validationError", () => {
     expect(validationError({ event: "session-end", actor: "heavy", payload: {} })).toMatch(/actor/);
     expect(validationError({ event: "session-end", actor: "human" })).toMatch(/payload/);
   });
+
+  it("R2 — http scope refuses audit-run; log scope still accepts it", () => {
+    const auditEvent = { event: "audit-run", actor: "agent:qin", payload: { result: "pass" } };
+    // Over HTTP, the recency-driving self-certification is rejected.
+    expect(validationError(auditEvent, { scope: "http" })).toMatch(/cannot be posted over HTTP/);
+    // Written directly to the log by real audit tooling, it is still valid.
+    expect(validationError(auditEvent, { scope: "log" })).toBeNull();
+    // The benign events an agent legitimately posts still pass over HTTP.
+    for (const e of ["session-start", "session-end", "file-updated", "skill-invoked", "context-catchup-written"]) {
+      expect(validationError({ event: e, actor: "agent:heavy", payload: {} }, { scope: "http" })).toBeNull();
+    }
+  });
 });
 
 describe("parseLog", () => {
