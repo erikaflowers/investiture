@@ -41,9 +41,32 @@ export function parseFrontmatter(markdown) {
   return { data, body };
 }
 
+export class FrontmatterError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "FrontmatterError";
+    this.code = "INVALID_INPUT";
+  }
+}
+
+// Flat front-matter values are single-line scalars. A newline or control
+// character cannot be represented safely (the parser is a line scanner that
+// stops at a bare `---`), so quoting is not enough — a value with a newline
+// could smuggle a `---` terminator or a forged `key: value` line into the
+// document. Refuse rather than escape. Callers validate at the HTTP layer
+// too (backlog.validationError); this is the last line of defense.
 function serializeValue(value) {
   if (typeof value === "boolean") return String(value);
   const str = String(value);
+
+  // eslint-disable-next-line no-control-regex
+  if (/[\x00-\x1f\x7f]/.test(str)) {
+    throw new FrontmatterError("front-matter value contains a control character or newline");
+  }
+  if (str.includes("---")) {
+    throw new FrontmatterError("front-matter value contains a '---' sequence");
+  }
+
   // Quote when the value could be misparsed on the way back in.
   if (
     str === "" ||

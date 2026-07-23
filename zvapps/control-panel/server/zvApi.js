@@ -5,7 +5,7 @@
 import fs from "fs";
 import path from "path";
 import { createGuard, DOCTRINE_FILES, OutOfBoundsError } from "../core/zv/allowlist.js";
-import { parseFrontmatter, serializeFrontmatter } from "../core/zv/frontmatter.js";
+import { parseFrontmatter, serializeFrontmatter, FrontmatterError } from "../core/zv/frontmatter.js";
 import * as backlog from "../core/zv/backlog.js";
 import * as prd from "../core/zv/prd.js";
 import * as telemetry from "../core/zv/telemetry.js";
@@ -319,6 +319,14 @@ export function zvApiPlugin() {
     if (!b.name || !String(b.name).trim()) {
       return sendErr(res, 400, "INVALID_INPUT", "name is required");
     }
+    // name and description land in PROJECT.md front-matter — same breakout
+    // surface as backlog title/owner (R1). serializeValue also refuses these,
+    // but reject here for a clean, specific 400.
+    // eslint-disable-next-line no-control-regex
+    const UNSAFE = /[\x00-\x1f\x7f]/;
+    if (UNSAFE.test(String(b.name)) || UNSAFE.test(String(b.description ?? ""))) {
+      return sendErr(res, 400, "INVALID_INPUT", "name and description must not contain newlines or control characters");
+    }
     const description = String(b.description ?? "").trim();
     const written = [];
 
@@ -469,6 +477,9 @@ export function zvApiPlugin() {
           if (err instanceof OutOfBoundsError) {
             console.error(`[zv-api] OUT_OF_BOUNDS rejected: ${method} ${req.url}`);
             return sendErr(res, 403, "OUT_OF_BOUNDS", err.message);
+          }
+          if (err instanceof FrontmatterError) {
+            return sendErr(res, 400, "INVALID_INPUT", err.message);
           }
           if (err.message === "Body is not valid JSON") {
             return sendErr(res, 400, "INVALID_INPUT", err.message);

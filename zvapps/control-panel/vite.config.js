@@ -60,7 +60,7 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       root: '.',
-      include: ['core/**/*.test.{js,jsx}', 'src/**/*.test.{js,jsx}'],
+      include: ['core/**/*.test.{js,jsx}', 'src/**/*.test.{js,jsx}', 'server/**/*.test.{js,jsx}'],
     }
   };
 });

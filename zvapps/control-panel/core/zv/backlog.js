@@ -55,6 +55,14 @@ export function serializeItem(fields, body) {
   return serializeFrontmatter(data, body ?? "", KEY_ORDER);
 }
 
+// Single-line free-text fields. A newline or control character here is the
+// front-matter breakout vector (a title of "x\n---\nstatus: done" would
+// terminate the front-matter early), so reject it at the HTTP layer before
+// it ever reaches the serializer. serializeValue refuses it too — this is
+// the outer of the two layers, and gives a clean 400 instead of a 500.
+// eslint-disable-next-line no-control-regex
+const UNSAFE_TEXT = /[\x00-\x1f\x7f]/;
+
 export function validationError(fields, { creating = false } = {}) {
   if (creating) {
     if (!fields.title || !String(fields.title).trim()) {
@@ -62,6 +70,11 @@ export function validationError(fields, { creating = false } = {}) {
     }
     if (!ACTOR_RE.test(fields["created-by"] ?? "")) {
       return 'created-by must be "human" or "agent:<name>"';
+    }
+  }
+  for (const key of ["title", "owner"]) {
+    if (fields[key] !== undefined && UNSAFE_TEXT.test(String(fields[key]))) {
+      return `${key} must not contain newlines or control characters`;
     }
   }
   if (fields.status !== undefined && !STATUSES.includes(fields.status)) {
