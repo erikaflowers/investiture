@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { execSync, spawnSync } = require('child_process');
+const { validateExtraction } = require('./update.js');
 
 const RESET = '\x1b[0m';
 const BOLD = '\x1b[1m';
@@ -53,13 +54,22 @@ function fetchTarball() {
     try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch {}
     process.exit(1);
   }
+  // R8: nothing in the network-fetched tarball may resolve outside the temp
+  // root before we copy it into the downstream project.
+  const escape = validateExtraction(tmpRoot, extracted);
+  if (escape) {
+    error(`refusing unsafe tarball: ${escape} resolves outside the temp root`);
+    try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch {}
+    process.exit(1);
+  }
   return { tmpRoot, source: extracted };
 }
 
 function cpR(src, dest) {
   const destDir = path.dirname(dest);
   if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
-  execSync(`cp -R "${src}" "${dest}"`, { stdio: 'pipe' });
+  // R8: fs.cpSync instead of execSync("cp -R ...") — no shell.
+  fs.cpSync(src, dest, { recursive: true });
 }
 
 function addPackageScripts(target) {

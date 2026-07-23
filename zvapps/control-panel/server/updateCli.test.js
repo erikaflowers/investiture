@@ -10,7 +10,7 @@ import path from "path";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
-const { runReplace, runMerge } = require("../../../cli/bin/update.js");
+const { runReplace, runMerge, validateExtraction } = require("../../../cli/bin/update.js");
 
 let source, target, logs;
 
@@ -110,5 +110,34 @@ describe("R5 — merge backs up a customized skill/preset before overwriting", (
     const skillDir = path.join(target, ".claude/skills/invest-audit");
     expect(fs.readdirSync(skillDir).filter((f) => f.endsWith(".bak"))).toHaveLength(0);
     expect(summary.backedUp).toBe(0);
+  });
+});
+
+describe("R8 — extracted-tarball path validation", () => {
+  let tmpRoot, outside;
+  beforeEach(() => {
+    tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "zv-tar-"));
+    outside = fs.mkdtempSync(path.join(os.tmpdir(), "zv-outside-"));
+  });
+  afterEach(() => {
+    fs.rmSync(tmpRoot, { recursive: true, force: true });
+    fs.rmSync(outside, { recursive: true, force: true });
+  });
+
+  it("passes a clean extracted tree (returns null)", () => {
+    const src = path.join(tmpRoot, "owner-repo-abc123");
+    write(src, "zvapps/control-panel/package.json", "{}");
+    write(src, ".claude/skills/x/SKILL.md", "ok");
+    expect(validateExtraction(tmpRoot, src)).toBeNull();
+  });
+
+  it("flags a symlinked entry that resolves outside the temp root (tar-slip)", () => {
+    const src = path.join(tmpRoot, "owner-repo-abc123");
+    fs.mkdirSync(src, { recursive: true });
+    fs.writeFileSync(path.join(outside, "secret"), "outside data");
+    // A malicious tarball entry: a symlink pointing outside the temp root.
+    fs.symlinkSync(outside, path.join(src, "escape"));
+    const offender = validateExtraction(tmpRoot, src);
+    expect(offender).toContain("escape");
   });
 });

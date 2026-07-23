@@ -64,6 +64,12 @@ function fetchTarball() {
     try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch {}
     process.exit(1);
   }
+  const escape = validateExtraction(tmpRoot, extracted);
+  if (escape) {
+    error(`refusing unsafe tarball: ${escape} resolves outside the temp root`);
+    try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch {}
+    process.exit(1);
+  }
   return { tmpRoot, source: extracted };
 }
 
@@ -84,11 +90,44 @@ function cpR(src, dest) {
   const destDir = path.dirname(dest);
   if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
   if (fs.statSync(src).isDirectory()) {
-    // Node 16+ supports fs.cpSync with recursive, but for portability use cp -R
-    execSync(`cp -R "${src}" "${dest}"`, { stdio: 'pipe' });
+    // R8: fs.cpSync (Node 16.7+) instead of execSync("cp -R ...") — no shell,
+    // so no shell-injection surface if a path ever becomes dynamic.
+    fs.cpSync(src, dest, { recursive: true });
   } else {
     fs.copyFileSync(src, dest);
   }
+}
+
+// R8: a path is safe only if its resolved real location stays within `root`.
+function isWithin(root, target) {
+  const realRoot = fs.realpathSync(root);
+  let real;
+  try { real = fs.realpathSync(target); } catch { real = path.resolve(target); }
+  return real === realRoot || real.startsWith(realRoot + path.sep);
+}
+
+// R8: after extracting a network-fetched tarball, verify nothing in it
+// resolves outside the temp root (tar-slip, or a symlinked entry pointing
+// outside) BEFORE any copy into the downstream project. Returns the first
+// offending path, or null if the tree is clean.
+function validateExtraction(tmpRoot, dir) {
+  const stack = [dir];
+  while (stack.length) {
+    const cur = stack.pop();
+    if (!isWithin(tmpRoot, cur)) return cur;
+    let entries;
+    try { entries = fs.readdirSync(cur, { withFileTypes: true }); } catch { continue; }
+    for (const e of entries) {
+      const full = path.join(cur, e.name);
+      const st = fs.lstatSync(full);
+      if (st.isSymbolicLink()) {
+        if (!isWithin(tmpRoot, full)) return full;
+      } else if (st.isDirectory()) {
+        stack.push(full);
+      }
+    }
+  }
+  return null;
 }
 
 function walkFiles(dir, base = dir, out = []) {
@@ -325,4 +364,4 @@ function run({ dryRun = false } = {}) {
   }
 }
 
-module.exports = { run, runReplace, runMerge, walkFiles, matchPattern };
+module.exports = { run, runReplace, runMerge, walkFiles, matchPattern, isWithin, validateExtraction };
