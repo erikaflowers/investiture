@@ -32,6 +32,7 @@ function header(text) { log(`${WHITE}${BOLD}  ${text}${RESET}`); blank(); }
 function replaced(p) { log(`  ${GREEN}~${RESET} replaced ${DIM}${p}${RESET}`); }
 function added(p) { log(`  ${GREEN}+${RESET} added ${DIM}${p}${RESET}`); }
 function preserved(p) { log(`  ${BLUE}·${RESET} preserved ${DIM}${p}${RESET}`); }
+function kept(p) { log(`  ${BLUE}·${RESET} ${YELLOW}kept (not in upstream, not deleted)${RESET} ${DIM}${p}${RESET}`); }
 function wouldReplace(p) { log(`  ${YELLOW}~${RESET} ${DIM}would replace ${p}${RESET}`); }
 function wouldAdd(p) { log(`  ${YELLOW}+${RESET} ${DIM}would add ${p}${RESET}`); }
 function error(msg) { log(`${CORAL}  Error: ${msg}${RESET}`); }
@@ -110,6 +111,15 @@ function matchPattern(filename, pattern) {
   return filename === pattern;
 }
 
+// Non-destructive replace (R4a). The old rmrf(dest)+cpR silently deleted any
+// file a downstream added inside a replace directory — runPreserve cannot
+// protect a file that lives inside a replace path. Instead, sync file-by-file:
+// overwrite every upstream-owned file, but KEEP (and report) any file present
+// in the downstream copy that upstream does not ship. Nothing is deleted
+// without being named. A consequence: upstream cannot force-delete a file from
+// existing installs via `replace` — deletions reach new installs/clones only.
+// That is the safe default; downstreams remove files deliberately, not by
+// surprise.
 function runReplace(manifest, source, target, dryRun, summary) {
   for (const relPath of manifest.replace) {
     const srcPath = path.join(source, relPath);
@@ -118,15 +128,35 @@ function runReplace(manifest, source, target, dryRun, summary) {
       log(`  ${DIM}(skip) upstream missing: ${relPath}${RESET}`);
       continue;
     }
-    if (dryRun) {
-      wouldReplace(relPath);
-      summary.wouldReplace++;
-    } else {
-      rmrf(destPath);
-      cpR(srcPath, destPath);
-      replaced(relPath);
-      summary.replaced++;
+
+    if (!fs.statSync(srcPath).isDirectory()) {
+      // Single-file replace.
+      if (dryRun) { wouldReplace(relPath); summary.wouldReplace++; }
+      else {
+        if (!fs.existsSync(path.dirname(destPath))) fs.mkdirSync(path.dirname(destPath), { recursive: true });
+        fs.copyFileSync(srcPath, destPath);
+        replaced(relPath); summary.replaced++;
+      }
+      continue;
     }
+
+    // Directory replace — sync, do not rmrf.
+    const srcFiles = new Set(walkFiles(srcPath));
+    const destFiles = walkFiles(destPath); // [] if dest is missing
+    const foreign = destFiles.filter((rel) => !srcFiles.has(rel));
+
+    if (dryRun) {
+      wouldReplace(relPath); summary.wouldReplace++;
+      for (const rel of foreign) { kept(path.join(relPath, rel)); summary.kept++; }
+      continue;
+    }
+    for (const rel of srcFiles) {
+      const d = path.join(destPath, rel);
+      if (!fs.existsSync(path.dirname(d))) fs.mkdirSync(path.dirname(d), { recursive: true });
+      fs.copyFileSync(path.join(srcPath, rel), d);
+    }
+    replaced(relPath); summary.replaced++;
+    for (const rel of foreign) { kept(path.join(relPath, rel)); summary.kept++; }
   }
 }
 
@@ -234,7 +264,7 @@ function run({ dryRun = false } = {}) {
     log(`${DIM}  Upstream version: ${manifest.version}${RESET}`);
     blank();
 
-    const summary = { replaced: 0, added: 0, preserved: 0, wouldReplace: 0, wouldAdd: 0 };
+    const summary = { replaced: 0, added: 0, preserved: 0, kept: 0, wouldReplace: 0, wouldAdd: 0 };
 
     header('Replace');
     runReplace(manifest, source, target, dryRun, summary);
@@ -261,10 +291,10 @@ function run({ dryRun = false } = {}) {
     }
 
     if (dryRun) {
-      log(`${BOLD}  Would:${RESET} ${summary.wouldReplace} replace, ${summary.wouldAdd} add, ${summary.preserved} preserve`);
+      log(`${BOLD}  Would:${RESET} ${summary.wouldReplace} replace, ${summary.wouldAdd} add, ${summary.preserved} preserve, ${summary.kept} keep`);
       log(`${DIM}  Run without --dry-run to apply.${RESET}`);
     } else {
-      log(`${BOLD}  Done:${RESET} ${summary.replaced} replaced, ${summary.added} added, ${summary.preserved} preserved`);
+      log(`${BOLD}  Done:${RESET} ${summary.replaced} replaced, ${summary.added} added, ${summary.preserved} preserved, ${summary.kept} kept`);
     }
     blank();
   } finally {
@@ -272,4 +302,4 @@ function run({ dryRun = false } = {}) {
   }
 }
 
-module.exports = { run };
+module.exports = { run, runReplace, runMerge, walkFiles, matchPattern };
