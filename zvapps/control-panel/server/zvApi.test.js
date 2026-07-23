@@ -132,6 +132,43 @@ describe("R2 — telemetry endpoint refuses recency self-certification", () => {
   });
 });
 
+describe("R6 — re-onboarding preserves unknown PROJECT.md keys", () => {
+  it("keeps an extra front-matter key a user/agent added", async () => {
+    await api.call("POST", "/onboarding", { name: "Alpha", description: "one" });
+    // Simulate a user adding a custom key to PROJECT.md by hand.
+    const projectPath = path.join(api.root, "zvapps", "PROJECT.md");
+    const withExtra = fs
+      .readFileSync(projectPath, "utf-8")
+      .replace(/^onboarded: true$/m, "onboarded: true\nteam: matilda\nrepo: git@example.com");
+    fs.writeFileSync(projectPath, withExtra);
+
+    // Re-onboard (rename). The managed keys change; the extras must survive.
+    const res = await api.call("POST", "/onboarding", { name: "Renamed", description: "two" });
+    expect(res.status).toBe(200);
+    const after = fs.readFileSync(projectPath, "utf-8");
+    expect(after).toContain("name: Renamed");
+    expect(after).toContain("team: matilda");
+    expect(after).toContain("repo: git@example.com");
+  });
+});
+
+describe("R7 — request body size limit", () => {
+  it("rejects an oversized doctrine write with 413 in the standard envelope", async () => {
+    // 2 MiB cap; send ~3 MiB of content.
+    const huge = "x".repeat(3 * 1024 * 1024);
+    const res = await api.call("PUT", "/doctrine/CLAUDE.md", { content: huge });
+    expect(res.status).toBe(413);
+    expect(res.json.error.code).toBe("PAYLOAD_TOO_LARGE");
+    // The oversized write never touched the file.
+    expect(fs.readFileSync(path.join(api.root, "CLAUDE.md"), "utf-8")).not.toContain("xxxxx");
+  });
+
+  it("still accepts a normal-sized write", async () => {
+    const res = await api.call("PUT", "/doctrine/CLAUDE.md", { content: "# normal\n" });
+    expect(res.status).toBe(200);
+  });
+});
+
 describe("Qin Finding 2 — onboarding idempotency (regression)", () => {
   it("seeds the PRD and an empty backlog on a fresh install (no seed card)", async () => {
     const backlogDir = path.join(api.root, "zvapps", "backlog");

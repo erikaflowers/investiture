@@ -12,6 +12,7 @@ import * as prd from "../core/zv/prd.js";
 import * as telemetry from "../core/zv/telemetry.js";
 
 const PROJECT_KEY_ORDER = ["name", "description", "onboarded", "onboarded-date"];
+const MAX_BODY_BYTES = 2 * 1024 * 1024; // 2 MiB — far above any doctrine file
 
 export function zvApiPlugin() {
   const repoRoot = path.resolve(process.cwd(), "../..");
@@ -86,13 +87,29 @@ export function zvApiPlugin() {
   const sendErr = (res, status, code, message) =>
     sendJson(res, status, { error: { code, message } });
 
+  // R7: cap request bodies. Doctrine/PRD writes accept arbitrary content, and
+  // readBody accumulated without bound — any POST/PUT could drive unbounded
+  // memory. 2 MiB is far above any legitimate markdown doctrine file. Over the
+  // cap rejects early with a PayloadTooLargeError → 413.
   function readBody(req) {
     return new Promise((resolve, reject) => {
       let body = "";
+      let size = 0;
+      let aborted = false;
       req.on("data", (c) => {
+        if (aborted) return;
+        size += c.length;
+        if (size > MAX_BODY_BYTES) {
+          aborted = true;
+          const err = new Error(`Request body exceeds ${MAX_BODY_BYTES} bytes`);
+          err.code = "PAYLOAD_TOO_LARGE";
+          reject(err);
+          return;
+        }
         body += c;
       });
       req.on("end", () => {
+        if (aborted) return;
         try {
           resolve(body ? JSON.parse(body) : {});
         } catch {
@@ -332,8 +349,11 @@ export function zvApiPlugin() {
     const written = [];
 
     // 1. PROJECT.md — update-or-create; onboarded-date is preserved on re-run.
+    // R6: spread the existing front-matter first so any extra key a user or
+    // agent added is preserved; only the four managed keys are overwritten.
     const { data: existing, body: projectBody } = readProject();
     const projectData = {
+      ...(existing ?? {}),
       name: String(b.name).trim(),
       description,
       onboarded: true,
@@ -479,6 +499,9 @@ export function zvApiPlugin() {
           }
           if (err instanceof FrontmatterError) {
             return sendErr(res, 400, "INVALID_INPUT", err.message);
+          }
+          if (err.code === "PAYLOAD_TOO_LARGE") {
+            return sendErr(res, 413, "PAYLOAD_TOO_LARGE", err.message);
           }
           if (err.message === "Body is not valid JSON") {
             return sendErr(res, 400, "INVALID_INPUT", err.message);

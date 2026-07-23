@@ -12,6 +12,8 @@ The telemetry event contract (§5) is **public API**: downstream consumers (Tell
   - **§4.5** — the prior claim that all symlink escapes fail was overstated. Corrected to describe the no-follow (`O_NOFOLLOW`) write as the actual symlink defense, with the residual threat model stated: this is defense in depth, not a perimeter against an attacker who already holds local write inside `zvapps/`.
   - **§5** — added the advisory-not-authoritative preamble: telemetry actors are self-reported, the endpoint is unauthenticated, recency informs but never certifies, and `audit-run` is refused over HTTP.
   - **§6.2** — zero state is now git-enforced (gitignored backlog + `.gitkeep`); there is no seed card.
+- **2026-07-23 (R-2 remediation):**
+  - **§4.1/§4.2** — request bodies are capped at 2 MiB; a new `413 PAYLOAD_TOO_LARGE` row added to the error table (R7). Onboarding now preserves unknown PROJECT.md front-matter keys on re-run (R6). The zero-state ruling was refined: the *shipped* `.gitignore` does NOT ignore the backlog or PRD (downstreams commit theirs); Investiture's own cards are excluded locally via `.git/info/exclude`, never in the tracked file.
 
 ---
 
@@ -102,6 +104,7 @@ This list is closed. `README.md`, `invest.md`, and everything else at root are *
 - **Port: 3067** (2.0 canonical; the v1.5 config's 3003 changes to 3067 in Milestone 2).
 - Namespace: everything in this contract lives under `/api/zv/`. The v1.5 endpoints (`/api/doctrine/*`, `/api/home/*`, `/api/vector/*`) remain during migration and are retired when Milestones 3–4 land.
 - All requests and responses are JSON, UTF-8. All timestamps are ISO 8601 UTC.
+- **Request bodies are capped at 2 MiB** (amended 2026-07-23, R-2). Over the cap → `413 PAYLOAD_TOO_LARGE`. This is far above any legitimate doctrine/PRD markdown; the cap exists to bound memory, not to constrain content.
 
 ### 4.2 Error shape
 
@@ -117,6 +120,7 @@ Every non-2xx response has this body:
 | 403 | `OUT_OF_BOUNDS` | Path allowlist rejection (§4.5) |
 | 404 | `NOT_FOUND` | Unknown id, file, or snapshot |
 | 405 | `METHOD_NOT_ALLOWED` | Wrong HTTP method |
+| 413 | `PAYLOAD_TOO_LARGE` | Request body exceeds the size cap (§4.1: 2 MiB) |
 | 500 | `IO_ERROR` | Filesystem failure |
 
 ### 4.3 Read endpoints
