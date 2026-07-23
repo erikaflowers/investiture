@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiGet } from "../../zv/api.js";
+import { categorizeBacklog } from "../../../core/zv/backlog.js";
 import { SystemLabel, ActorChip, EmptyState, Toast, useToast } from "../../zv/kit.jsx";
 
 // Kanban as a view, not a database (brief, Decision 2): columns render
 // from front-matter `status`; moving a card PUTs the file. Drag or the
 // per-card select — both write through /api/zv/backlog/:id.
+//
+// Partitioning (which card goes to which column, and which are invalid)
+// is categorizeBacklog in core — a pure, tested function. A card with an
+// off-enum status lands in the invalid tray, never vanishes (§1.3).
 
 const COLUMNS = ["proposed", "queued", "in-progress", "done", "parked"];
 
@@ -18,8 +23,12 @@ export default function BoardPage() {
   const load = useCallback(() => {
     apiGet("/api/zv/backlog")
       .then((d) => {
-        setItems(d.items.filter((it) => !it.invalid));
-        setInvalid(d.items.filter((it) => it.invalid));
+        const { invalid } = categorizeBacklog(d.items);
+        // Board columns still filter valid items by status; the tray holds
+        // both unparseable AND off-enum-status cards so none disappear.
+        const invalidPaths = new Set(invalid.map((it) => it.path));
+        setItems(d.items.filter((it) => !invalidPaths.has(it.path)));
+        setInvalid(invalid);
       })
       .catch((e) => setError(e.message));
   }, []);
@@ -132,13 +141,44 @@ export default function BoardPage() {
 
       {invalid.length > 0 && (
         <div style={{ marginTop: "24px" }}>
-          <SystemLabel>invalid items (unparseable front-matter)</SystemLabel>
-          {invalid.map((it) => (
-            <div key={it.path} className="cp-feed-row" style={{ border: "1px solid var(--border)", marginTop: "8px" }}>
-              <span className="cp-feed-detail">{it.path}</span>
-              <span className="cp-feed-ts">fix the file by hand — never hidden, never coerced</span>
-            </div>
-          ))}
+          <SystemLabel>invalid items — never hidden, never coerced (§1.3)</SystemLabel>
+          {invalid.map((it) => {
+            // An off-enum card has a valid id, so it can be repaired in place
+            // by writing a valid status. An unparseable card (no id) can only
+            // be fixed by hand-editing the file.
+            const repairable = !it.invalid && it.id;
+            return (
+              <div
+                key={it.path}
+                className="cp-feed-row"
+                style={{ border: "1px solid var(--border)", marginTop: "8px", gridTemplateColumns: "1fr auto auto" }}
+              >
+                <span className="cp-feed-detail">
+                  {it.title ? `${it.id} — ${it.title}` : it.path}
+                </span>
+                <span className="cp-feed-ts">{it.reason}</span>
+                {repairable ? (
+                  <select
+                    className="cp-select"
+                    defaultValue=""
+                    aria-label={`Repair ${it.id}`}
+                    onChange={(e) => e.target.value && moveCard(it.id, e.target.value)}
+                  >
+                    <option value="" disabled>
+                      set status…
+                    </option>
+                    {COLUMNS.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className="cp-feed-ts">fix the file by hand</span>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 

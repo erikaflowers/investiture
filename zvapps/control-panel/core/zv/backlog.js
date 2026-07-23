@@ -87,3 +87,23 @@ export function validationError(fields, { creating = false } = {}) {
 }
 
 export const IMMUTABLE_FIELDS = ["id", "created-by", "created-date"];
+
+// Partition backlog items for the board (ZV-CONTRACT.md §1.3): every item
+// lands somewhere. An item is "invalid" if its front-matter/id is
+// unparseable (already flagged by parseItem) OR its status is off-enum.
+// Off-enum cards must NOT be filtered into oblivion — before this, a card
+// with status: "wip" had a valid id, matched no column, and vanished.
+export function categorizeBacklog(items) {
+  const byStatus = Object.fromEntries(STATUSES.map((s) => [s, []]));
+  const invalid = [];
+  for (const it of items) {
+    if (it.invalid) {
+      invalid.push({ ...it, reason: "unparseable front-matter" });
+    } else if (STATUSES.includes(it.status)) {
+      byStatus[it.status].push(it);
+    } else {
+      invalid.push({ ...it, reason: `unknown status: ${it.status ?? "(none)"}` });
+    }
+  }
+  return { byStatus, invalid };
+}
